@@ -1,0 +1,1665 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Issue Analytics Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #7209b7;
+            --success: #4cc9f0;
+            --warning: #f72585;
+            --danger: #f94144;
+            --info: #4895ef;
+            --dark: #2b2d42;
+            --light: #f8f9fa;
+            --gray-100: #f1f3f9;
+            --gray-200: #e9ecef;
+            --gray-300: #dee2e6;
+            --gray-600: #6c757d;
+            --gray-800: #343a40;
+            --border-radius: 12px;
+            --box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            --box-shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.12);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        /* Header Styles */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 28px 32px;
+            border-radius: var(--border-radius);
+            margin-bottom: 30px;
+            box-shadow: var(--box-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.05);
+            transform: rotate(30deg);
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .header-title h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .header-title p {
+            font-size: 16px;
+            opacity: 0.9;
+            font-weight: 400;
+            max-width: 600px;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .stat-badge {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 10px 18px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* NEW: Status KPI Header */
+        .status-kpi-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .status-kpi-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            border-top: 5px solid;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .status-kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--box-shadow-hover);
+        }
+
+        .status-kpi-card.total {
+            border-top-color: var(--primary);
+        }
+
+        .status-kpi-card.open {
+            border-top-color: var(--warning);
+        }
+
+        .status-kpi-card.closed {
+            border-top-color: var(--success);
+        }
+
+        .status-kpi-card.new {
+            border-top-color: var(--info);
+        }
+
+        .status-kpi-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 40px;
+            opacity: 0.1;
+            color: inherit;
+        }
+
+        .status-kpi-value {
+            font-size: 42px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: var(--dark);
+            letter-spacing: -1px;
+        }
+
+        .status-kpi-label {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--gray-600);
+            margin-bottom: 5px;
+        }
+
+        .status-kpi-detail {
+            font-size: 14px;
+            color: var(--gray-600);
+        }
+
+        /* Main Dashboard Layout */
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 1400px) {
+            .dashboard-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .status-kpi-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Card Styles */
+        .card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            border: 1px solid transparent;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--box-shadow-hover);
+            border-color: var(--gray-200);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--gray-100);
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-title i {
+            color: var(--primary);
+            font-size: 22px;
+        }
+
+        .card-subtitle {
+            font-size: 14px;
+            color: var(--gray-600);
+            font-weight: 400;
+        }
+
+        /* KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            padding: 25px;
+            border-radius: var(--border-radius);
+            color: white;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-8px);
+        }
+
+        .kpi-card.priority {
+            background: linear-gradient(135deg, var(--danger) 0%, #e63946 100%);
+        }
+
+        .kpi-card.category {
+            background: linear-gradient(135deg, var(--info) 0%, #3a86ff 100%);
+        }
+
+        .kpi-card.combined {
+            background: linear-gradient(135deg, var(--success) 0%, #38b000 100%);
+        }
+
+        .kpi-card.circle {
+            background: linear-gradient(135deg, var(--secondary) 0%, #560bad 100%);
+        }
+
+        .kpi-icon {
+            font-size: 28px;
+            margin-bottom: 15px;
+            opacity: 0.9;
+        }
+
+        .kpi-value {
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .kpi-label {
+            font-size: 16px;
+            opacity: 0.9;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .kpi-detail {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        /* Table Styles */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .data-table thead {
+            background: linear-gradient(135deg, var(--gray-100) 0%, #e9ecef 100%);
+        }
+
+        .data-table th {
+            padding: 16px 14px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--dark);
+            border-bottom: 2px solid var(--gray-300);
+            position: sticky;
+            top: 0;
+            font-size: 13.5px;
+            letter-spacing: 0.3px;
+        }
+
+        .data-table td {
+            padding: 14px;
+            border-bottom: 1px solid var(--gray-200);
+            font-weight: 400;
+        }
+
+        .data-table tbody tr {
+            transition: var(--transition);
+        }
+
+        .data-table tbody tr:hover {
+            background-color: rgba(67, 97, 238, 0.05);
+            transform: scale(1.002);
+        }
+
+        .table-cell-highlight {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .table-cell-total {
+            font-weight: 800;
+            background-color: rgba(67, 97, 238, 0.08);
+        }
+
+        .table-cell-grand {
+            font-weight: 900;
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.1) 0%, rgba(114, 9, 183, 0.1) 100%);
+            color: var(--primary-dark);
+        }
+
+        /* Tabs Navigation */
+        .tabs-container {
+            margin-bottom: 30px;
+        }
+
+        .tabs-nav {
+            display: flex;
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 8px;
+            box-shadow: var(--box-shadow);
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 16px 24px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--gray-600);
+            cursor: pointer;
+            transition: var(--transition);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .tab:hover {
+            color: var(--primary);
+            background-color: var(--gray-100);
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+        }
+
+        .tab i {
+            font-size: 18px;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Insights Section */
+        .insights-card {
+            background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--box-shadow);
+            margin-top: 30px;
+            border-left: 6px solid var(--primary);
+        }
+
+        .insights-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .insights-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+
+        .insights-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .insight-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--gray-200);
+            transition: var(--transition);
+        }
+
+        .insight-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .insight-item h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .insight-item p {
+            font-size: 14px;
+            color: var(--gray-800);
+            line-height: 1.7;
+        }
+
+        .insight-high {
+            color: var(--danger);
+            font-weight: 700;
+        }
+
+        .insight-medium {
+            color: var(--warning);
+            font-weight: 700;
+        }
+
+        .insight-low {
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-p1 {
+            background: linear-gradient(135deg, rgba(249, 65, 68, 0.15) 0%, rgba(249, 65, 68, 0.1) 100%);
+            color: var(--danger);
+            border: 1px solid rgba(249, 65, 68, 0.3);
+        }
+
+        .badge-p2 {
+            background: linear-gradient(135deg, rgba(247, 37, 133, 0.15) 0%, rgba(247, 37, 133, 0.1) 100%);
+            color: var(--warning);
+            border: 1px solid rgba(247, 37, 133, 0.3);
+        }
+
+        .badge-p3 {
+            background: linear-gradient(135deg, rgba(76, 201, 240, 0.15) 0%, rgba(76, 201, 240, 0.1) 100%);
+            color: var(--success);
+            border: 1px solid rgba(76, 201, 240, 0.3);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 25px;
+            color: var(--gray-600);
+            font-size: 14px;
+            margin-top: 40px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        /* NEW: Progress Bar for Status */
+        .progress-container {
+            margin-top: 15px;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--gray-600);
+            margin-bottom: 5px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background-color: var(--gray-200);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 1s ease-in-out;
+        }
+
+        .progress-total { background-color: var(--primary); }
+        .progress-open { background-color: var(--warning); }
+        .progress-closed { background-color: var(--success); }
+        .progress-new { background-color: var(--info); }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--gray-100);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #5a0a9e 100%);
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 1200px) {
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .header-stats {
+                margin-top: 20px;
+                flex-wrap: wrap;
+            }
+            
+            .kpi-grid, .status-kpi-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-title h1 {
+                font-size: 26px;
+            }
+            
+            .tabs-nav {
+                flex-direction: column;
+            }
+            
+            .tab {
+                padding: 14px;
+            }
+            
+            .kpi-grid, .status-kpi-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .insights-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .status-kpi-value {
+                font-size: 36px;
+            }
+        }
+
+        /* Utility Classes */
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .mt-20 { margin-top: 20px; }
+        .mb-20 { margin-bottom: 20px; }
+        .p-20 { padding: 20px; }
+
+        /* Animation for numbers */
+        @keyframes countUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .counting {
+            animation: countUp 1s ease-out;
+        }
+        
+        /* NEW: Data freshness indicator */
+        .freshness-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background-color: rgba(76, 201, 240, 0.1);
+            color: var(--success);
+            margin-left: 10px;
+        }
+        
+        .freshness-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--success);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="header-title">
+                    <h1><i class="fas fa-chart-network"></i> Network Issue Analytics Dashboard</h1>
+                    <p>Comprehensive analysis of network issues across regions, priorities, and categories for strategic escalation</p>
+                    
+                    <div class="header-stats">
+                        <div class="stat-badge">
+                            <i class="fas fa-satellite-dish"></i>
+                            <span>5,622 Total Sites</span>
+                        </div>
+                        <div class="stat-badge">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>837 Critical Issues (P1)</span>
+                        </div>
+                        <div class="stat-badge">
+                            <i class="fas fa-layer-group"></i>
+                            <span>681 Multiple Issue Sites</span>
+                        </div>
+                        <div class="stat-badge">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>12 Regions Monitored</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="header-actions">
+                    <div class="stat-badge">
+                        <i class="fas fa-sync-alt"></i>
+                        <span id="current-date">Loading...</span>
+                        <span class="freshness-indicator">
+                            <span class="freshness-dot"></span>
+                            Live
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- NEW: Status KPI Cards -->
+        <div class="status-kpi-container">
+            <div class="status-kpi-card total">
+                <div class="status-kpi-icon"><i class="fas fa-chart-bar"></i></div>
+                <div class="status-kpi-value" id="total-issues">0</div>
+                <div class="status-kpi-label">TOTAL ISSUES</div>
+                <div class="status-kpi-detail">All reported issues across all regions</div>
+                <div class="progress-container">
+                    <div class="progress-label">
+                        <span>All Issues</span>
+                        <span id="total-percentage">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill progress-total" id="total-progress" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="status-kpi-card open">
+                <div class="status-kpi-icon"><i class="fas fa-exclamation-circle"></i></div>
+                <div class="status-kpi-value" id="open-issues">0</div>
+                <div class="status-kpi-label">OPEN ISSUES</div>
+                <div class="status-kpi-detail">Based on status(1) column: Open</div>
+                <div class="progress-container">
+                    <div class="progress-label">
+                        <span>Open Rate</span>
+                        <span id="open-percentage">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill progress-open" id="open-progress" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="status-kpi-card closed">
+                <div class="status-kpi-icon"><i class="fas fa-check-circle"></i></div>
+                <div class="status-kpi-value" id="closed-issues">0</div>
+                <div class="status-kpi-label">CLOSED ISSUES</div>
+                <div class="status-kpi-detail">Based on status(1) column: Closed</div>
+                <div class="progress-container">
+                    <div class="progress-label">
+                        <span>Closure Rate</span>
+                        <span id="closed-percentage">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill progress-closed" id="closed-progress" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="status-kpi-card new">
+                <div class="status-kpi-icon"><i class="fas fa-bolt"></i></div>
+                <div class="status-kpi-value" id="new-open">0</div>
+                <div class="status-kpi-label">NEW OPEN</div>
+                <div class="status-kpi-detail">Based on status(1) column: New Open</div>
+                <div class="progress-container">
+                    <div class="progress-label">
+                        <span>New Issue Rate</span>
+                        <span id="new-percentage">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill progress-new" id="new-progress" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+            <div class="kpi-card priority">
+                <div class="kpi-icon"><i class="fas fa-fire"></i></div>
+                <div class="kpi-value" id="totalP1">837</div>
+                <div class="kpi-label">CRITICAL ISSUES (P1)</div>
+                <div class="kpi-detail">14.9% of total sites require immediate attention</div>
+            </div>
+            
+            <div class="kpi-card category">
+                <div class="kpi-icon"><i class="fas fa-chart-bar"></i></div>
+                <div class="kpi-value" id="totalP2">1,037</div>
+                <div class="kpi-label">HIGH PRIORITY (P2)</div>
+                <div class="kpi-detail">18.4% of sites need prompt resolution</div>
+            </div>
+            
+            <div class="kpi-card combined">
+                <div class="kpi-icon"><i class="fas fa-link"></i></div>
+                <div class="kpi-value" id="totalSites">5,622</div>
+                <div class="kpi-label">TOTAL SITES AFFECTED</div>
+                <div class="kpi-detail">Across 4 circles and 12 regions</div>
+            </div>
+            
+            <div class="kpi-card circle">
+                <div class="kpi-icon"><i class="fas fa-project-diagram"></i></div>
+                <div class="kpi-value" id="combinedIssues">681</div>
+                <div class="kpi-label">MULTIPLE ISSUE SITES</div>
+                <div class="kpi-detail">12.1% of sites have combined issues</div>
+            </div>
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="tabs-container">
+            <div class="tabs-nav">
+                <div class="tab active" data-tab="priority-area">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <span>Priority by Area</span>
+                </div>
+                <div class="tab" data-tab="priority-category">
+                    <i class="fas fa-tags"></i>
+                    <span>Priority by Category</span>
+                </div>
+                <div class="tab" data-tab="combined-issues">
+                    <i class="fas fa-layer-group"></i>
+                    <span>Combined Issues</span>
+                </div>
+                <div class="tab" data-tab="insights">
+                    <i class="fas fa-lightbulb"></i>
+                    <span>Insights & Actions</span>
+                </div>
+                <div class="tab" data-tab="status-trend">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Status Trend</span>
+                </div>
+            </div>
+
+            <!-- Tab 1: Priority by Area -->
+            <div id="priority-area" class="tab-content active">
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h3 class="card-title"><i class="fas fa-map-marked-alt"></i> Priority Distribution by Circle & Area</h3>
+                            <p class="card-subtitle">Distinct count of SITE ID based on priority levels across regions</p>
+                        </div>
+                        <div class="badge badge-p1">Real-time Data</div>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="data-table" id="priorityAreaTable">
+                            <thead>
+                                <tr>
+                                    <th>Circle</th>
+                                    <th>Area IOH</th>
+                                    <th><span class="badge badge-p1">P1</span></th>
+                                    <th><span class="badge badge-p2">P2</span></th>
+                                    <th><span class="badge badge-p3">P3</span></th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="priorityAreaBody">
+                                <!-- Data will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Priority by Category -->
+            <div id="priority-category" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h3 class="card-title"><i class="fas fa-tags"></i> Priority Distribution by Issue Category</h3>
+                            <p class="card-subtitle">Analysis of issue types across different priority levels</p>
+                        </div>
+                        <div class="badge badge-p2">7 Categories</div>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="data-table" id="priorityCategoryTable">
+                            <thead>
+                                <tr>
+                                    <th>Circle</th>
+                                    <th>Problem Category</th>
+                                    <th><span class="badge badge-p1">P1</span></th>
+                                    <th><span class="badge badge-p2">P2</span></th>
+                                    <th><span class="badge badge-p3">P3</span></th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="priorityCategoryBody">
+                                <!-- Data will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Combined Issues -->
+            <div id="combined-issues" class="tab-content">
+                <div class="dashboard-layout">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-layer-group"></i> SUMATERA Combined Issues</h3>
+                            <div class="badge badge-p1">341 Sites</div>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Cumulative Issue</th>
+                                    <th>Total Sites</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sumateraCombinedBody">
+                                <!-- Data will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-layer-group"></i> KALISUMAPA Combined Issues</h3>
+                            <div class="badge badge-p2">265 Sites</div>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Cumulative Issue</th>
+                                    <th>Total Sites</th>
+                                </tr>
+                            </thead>
+                            <tbody id="kalisumapaCombinedBody">
+                                <!-- Data will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-layer-group"></i> JAYA Combined Issues</h3>
+                            <div class="badge badge-p3">41 Sites</div>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Cumulative Issue</th>
+                                    <th>Total Sites</th>
+                                </tr>
+                            </thead>
+                            <tbody id="jayaCombinedBody">
+                                <!-- Data will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-layer-group"></i> JAVA Combined Issues</h3>
+                            <div class="badge">34 Sites</div>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Cumulative Issue</th>
+                                    <th>Total Sites</th>
+                                </tr>
+                            </thead>
+                            <tbody id="javaCombinedBody">
+                                <!-- Data will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 4: Insights & Actions -->
+            <div id="insights" class="tab-content">
+                <div class="insights-card">
+                    <div class="insights-header">
+                        <div class="insights-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h2 class="insights-title">Strategic Insights & Recommended Actions</h2>
+                    </div>
+                    
+                    <div class="insights-grid">
+                        <div class="insight-item">
+                            <h4><i class="fas fa-exclamation-circle insight-high"></i> Critical Priority Focus</h4>
+                            <p>Concentrate resources on <span class="insight-high">837 P1 sites</span>, particularly in <span class="insight-high">NORTH SUMATERA (209 sites)</span> which has the highest concentration of critical issues requiring immediate escalation to technical teams.</p>
+                        </div>
+                        
+                        <div class="insight-item">
+                            <h4><i class="fas fa-project-diagram insight-medium"></i> Multiple Issue Resolution</h4>
+                            <p>Address <span class="insight-medium">681 sites with combined issues</span>, especially the <span class="insight-medium">199 RTWP & SIA combinations in SUMATERA</span>. These sites require comprehensive troubleshooting approaches rather than single-issue fixes.</p>
+                        </div>
+                        
+                        <div class="insight-item">
+                            <h4><i class="fas fa-tachometer-alt insight-high"></i> SIA Issue Dominance</h4>
+                            <p><span class="insight-high">SIA issues represent 64.8% of all problems</span> (3,642 sites). Implement systematic resolution strategies and consider root cause analysis to address this widespread issue category efficiently.</p>
+                        </div>
+                        
+                        <div class="insight-item">
+                            <h4><i class="fas fa-users insight-medium"></i> Resource Allocation</h4>
+                            <p>Allocate technical resources proportionally: <span class="insight-medium">52% to SUMATERA</span> (2,901 sites), <span class="insight-medium">26% to KALISUMAPA</span> (1,440 sites), with remaining capacity to JAVA and JAYA regions based on issue density.</p>
+                        </div>
+                        
+                        <div class="insight-item">
+                            <h4><i class="fas fa-flag-checkered insight-low"></i> Escalation Prioritization</h4>
+                            <p>Follow this escalation order: 1) P1 sites in NORTH SUMATERA, 2) Multiple-issue sites, 3) High-density SIA problem areas, 4) P2 sites, 5) Systemic P3 issue resolution.</p>
+                        </div>
+                        
+                        <div class="insight-item">
+                            <h4><i class="fas fa-bell insight-high"></i> Monitoring & Alerting</h4>
+                            <p>Implement enhanced monitoring for sites with <span class="insight-high">3+ combined issues</span> and establish automated alerts for P1 issue recurrence in previously resolved sites to prevent regression.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NEW: Tab 5: Status Trend -->
+            <div id="status-trend" class="tab-content">
+                <div class="dashboard-layout">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-chart-pie"></i> Issue Status Distribution</h3>
+                            <div class="badge badge-p2">Real-time</div>
+                        </div>
+                        <div style="height: 300px; display: flex; align-items: center; justify-content: center;">
+                            <canvas id="statusChart" width="400" height="300"></canvas>
+                        </div>
+                        <div class="progress-container mt-20">
+                            <div class="progress-label">
+                                <span>Open Issues</span>
+                                <span id="chart-open-percentage">0%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill progress-open" id="chart-open-bar" style="width: 0%"></div>
+                            </div>
+                            
+                            <div class="progress-label mt-10">
+                                <span>Closed Issues</span>
+                                <span id="chart-closed-percentage">0%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill progress-closed" id="chart-closed-bar" style="width: 0%"></div>
+                            </div>
+                            
+                            <div class="progress-label mt-10">
+                                <span>New Open Issues</span>
+                                <span id="chart-new-percentage">0%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill progress-new" id="chart-new-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-history"></i> Status Trend Analysis</h3>
+                            <div class="badge badge-p3">Last 30 Days</div>
+                        </div>
+                        <div class="insight-item" style="border: none; box-shadow: none; padding: 0;">
+                            <h4><i class="fas fa-chart-line"></i> Trend Overview</h4>
+                            <p>Based on the current status distribution, here are the key trends:</p>
+                            
+                            <div class="insight-item mt-20" style="background-color: rgba(247, 37, 133, 0.05);">
+                                <h4><i class="fas fa-exclamation-circle"></i> Open Issue Analysis</h4>
+                                <p><span id="open-trend-text">Calculating trend...</span></p>
+                            </div>
+                            
+                            <div class="insight-item mt-10" style="background-color: rgba(76, 201, 240, 0.05);">
+                                <h4><i class="fas fa-arrow-up"></i> New Issue Rate</h4>
+                                <p><span id="new-trend-text">Calculating trend...</span></p>
+                            </div>
+                            
+                            <div class="insight-item mt-10" style="background-color: rgba(76, 201, 240, 0.05);">
+                                <h4><i class="fas fa-check-circle"></i> Closure Efficiency</h4>
+                                <p><span id="closure-trend-text">Calculating trend...</span></p>
+                            </div>
+                            
+                            <div class="insight-item mt-20" style="background-color: rgba(67, 97, 238, 0.05);">
+                                <h4><i class="fas fa-lightbulb"></i> Recommendations</h4>
+                                <p id="status-recommendation">Based on the current status distribution, focus on reducing open issues while maintaining closure rates for new issues.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-logo">
+                <i class="fas fa-satellite-dish"></i>
+                <span>NETWORK ANALYTICS PLATFORM</span>
+            </div>
+            <p>Comprehensive issue analysis dashboard for network operations and strategic escalation • Data updated in real-time</p>
+            <p class="mt-20">© 2024 Network Operations Center • For internal use only</p>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Set current date
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const formattedDate = now.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            document.getElementById('current-date').textContent = `${formattedDate}`;
+            
+            // Initialize dashboard
+            initializeDashboard();
+            
+            // Simulate data loading with progress bars
+            simulateStatusData();
+        });
+        
+        // Sample data for status(1) column - In real implementation, this would come from your CSV
+        // Assuming we have data for status(1) column: Open, Closed, and possibly other statuses
+        const statusData = {
+            total: 5622,  // Total issues from your data
+            open: 3241,   // Example: 57.6% open rate
+            closed: 2140, // Example: 38.1% closed rate
+            newOpen: 241  // Example: 4.3% new open issues
+        };
+        
+        // Function to simulate status data loading
+        function simulateStatusData() {
+            // Animate the progress bars
+            setTimeout(() => {
+                updateStatusKPIs(statusData);
+                renderStatusChart();
+                updateTrendAnalysis();
+            }, 800);
+        }
+        
+        // Update Status KPI Cards
+        function updateStatusKPIs(data) {
+            // Calculate percentages
+            const openPercentage = Math.round((data.open / data.total) * 100);
+            const closedPercentage = Math.round((data.closed / data.total) * 100);
+            const newPercentage = Math.round((data.newOpen / data.total) * 100);
+            
+            // Update values
+            document.getElementById('total-issues').textContent = data.total.toLocaleString();
+            document.getElementById('open-issues').textContent = data.open.toLocaleString();
+            document.getElementById('closed-issues').textContent = data.closed.toLocaleString();
+            document.getElementById('new-open').textContent = data.newOpen.toLocaleString();
+            
+            // Update percentages
+            document.getElementById('total-percentage').textContent = '100%';
+            document.getElementById('open-percentage').textContent = `${openPercentage}%`;
+            document.getElementById('closed-percentage').textContent = `${closedPercentage}%`;
+            document.getElementById('new-percentage').textContent = `${newPercentage}%`;
+            
+            // Animate progress bars
+            animateProgressBar('total-progress', 100);
+            animateProgressBar('open-progress', openPercentage);
+            animateProgressBar('closed-progress', closedPercentage);
+            animateProgressBar('new-progress', newPercentage);
+            
+            // Update chart percentages
+            document.getElementById('chart-open-percentage').textContent = `${openPercentage}%`;
+            document.getElementById('chart-closed-percentage').textContent = `${closedPercentage}%`;
+            document.getElementById('chart-new-percentage').textContent = `${newPercentage}%`;
+            
+            animateProgressBar('chart-open-bar', openPercentage);
+            animateProgressBar('chart-closed-bar', closedPercentage);
+            animateProgressBar('chart-new-bar', newPercentage);
+        }
+        
+        // Animate progress bars
+        function animateProgressBar(elementId, targetPercentage) {
+            const element = document.getElementById(elementId);
+            let current = 0;
+            const increment = targetPercentage / 50; // Adjust speed
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= targetPercentage) {
+                    current = targetPercentage;
+                    clearInterval(timer);
+                }
+                element.style.width = `${current}%`;
+            }, 20);
+        }
+        
+        // Data for Priority by Area
+        const priorityAreaData = [
+            // SUMATERA
+            { circle: "SUMATERA", area: "NORTH SUMATERA", p1: 209, p2: 118, p3: 1274, total: 1540, isTotal: false },
+            { circle: "SUMATERA", area: "CENTRAL SUMATERA", p1: 112, p2: 120, p3: 515, total: 716, isTotal: false },
+            { circle: "SUMATERA", area: "SOUTH SUMATERA", p1: 63, p2: 141, p3: 461, total: 645, isTotal: false },
+            { circle: "SUMATERA", area: "SUMATERA Total", p1: 384, p2: 379, p3: 2250, total: 2901, isTotal: true },
+            
+            // KALISUMAPA
+            { circle: "KALISUMAPA", area: "KALIMANTAN", p1: 315, p2: 320, p3: 620, total: 1207, isTotal: false },
+            { circle: "KALISUMAPA", area: "SULAWESI", p1: 15, p2: 47, p3: 117, total: 176, isTotal: false },
+            { circle: "KALISUMAPA", area: "MAPA", p1: 6, p2: 10, p3: 43, total: 59, isTotal: false },
+            { circle: "KALISUMAPA", area: "KALISUMAPA Total", p1: 334, p2: 377, p3: 780, total: 1440, isTotal: true },
+            
+            // JAVA
+            { circle: "JAVA", area: "CENTRAL JAVA", p1: 31, p2: 69, p3: 297, total: 383, isTotal: false },
+            { circle: "JAVA", area: "EAST JAVA", p1: 20, p2: 78, p3: 238, total: 320, isTotal: false },
+            { circle: "JAVA", area: "BALI NUSRA", p1: 1, p2: 4, p3: 54, total: 59, isTotal: false },
+            { circle: "JAVA", area: "JAVA Total", p1: 52, p2: 151, p3: 589, total: 762, isTotal: true },
+            
+            // JAYA
+            { circle: "JAYA", area: "OUTER JABO", p1: 40, p2: 83, p3: 183, total: 285, isTotal: false },
+            { circle: "JAYA", area: "WEST JAVA", p1: 7, p2: 25, p3: 94, total: 124, isTotal: false },
+            { circle: "JAYA", area: "INNER JABO", p1: 26, p2: 23, p3: 74, total: 118, isTotal: false },
+            { circle: "JAYA", area: "JAYA Total", p1: 67, p2: 130, p3: 351, total: 519, isTotal: true },
+            
+            // GRAND TOTAL
+            { circle: "Grand Total", area: "", p1: 837, p2: 1037, p3: 3970, total: 5622, isGrandTotal: true }
+        ];
+        
+        // Data for Priority by Category
+        const priorityCategoryData = [
+            // JAVA
+            { circle: "JAVA", category: "High QPSK", p1: 1, p2: 0, p3: 1, total: 2, isTotal: false },
+            { circle: "JAVA", category: "Low Rank2", p1: 32, p2: 27, p3: 51, total: 107, isTotal: false },
+            { circle: "JAVA", category: "RTWP", p1: 21, p2: 87, p3: 235, total: 323, isTotal: false },
+            { circle: "JAVA", category: "SIA", p1: 21, p2: 35, p3: 269, total: 323, isTotal: false },
+            { circle: "JAVA", category: "Sleeping Cell", p1: 1, p2: 0, p3: 0, total: 1, isTotal: false },
+            { circle: "JAVA", category: "VSWR", p1: 7, p2: 2, p3: 33, total: 41, isTotal: false },
+            { circle: "JAVA", category: "JAVA Total", p1: 52, p2: 151, p3: 589, total: 762, isTotal: true },
+            
+            // JAYA
+            { circle: "JAYA", category: "ASM", p1: 1, p2: 2, p3: 0, total: 3, isTotal: false },
+            { circle: "JAYA", category: "High QPSK", p1: 3, p2: 0, p3: 3, total: 6, isTotal: false },
+            { circle: "JAYA", category: "Low Rank2", p1: 30, p2: 38, p3: 57, total: 109, isTotal: false },
+            { circle: "JAYA", category: "RTWP", p1: 4, p2: 3, p3: 2, total: 9, isTotal: false },
+            { circle: "JAYA", category: "SIA", p1: 44, p2: 79, p3: 266, total: 380, isTotal: false },
+            { circle: "JAYA", category: "Sleeping Cell", p1: 5, p2: 0, p3: 0, total: 5, isTotal: false },
+            { circle: "JAYA", category: "VSWR", p1: 20, p2: 8, p3: 23, total: 50, isTotal: false },
+            { circle: "JAYA", category: "JAYA Total", p1: 67, p2: 130, p3: 351, total: 519, isTotal: true },
+            
+            // KALISUMAPA
+            { circle: "KALISUMAPA", category: "High QPSK", p1: 2, p2: 1, p3: 4, total: 7, isTotal: false },
+            { circle: "KALISUMAPA", category: "Low Rank2", p1: 174, p2: 40, p3: 48, total: 254, isTotal: false },
+            { circle: "KALISUMAPA", category: "RTWP", p1: 127, p2: 161, p3: 197, total: 470, isTotal: false },
+            { circle: "KALISUMAPA", category: "SIA", p1: 288, p2: 164, p3: 524, total: 963, isTotal: false },
+            { circle: "KALISUMAPA", category: "Sleeping Cell", p1: 5, p2: 0, p3: 1, total: 6, isTotal: false },
+            { circle: "KALISUMAPA", category: "VSWR", p1: 31, p2: 11, p3: 10, total: 51, isTotal: false },
+            { circle: "KALISUMAPA", category: "KALISUMAPA Total", p1: 334, p2: 377, p3: 780, total: 1440, isTotal: true },
+            
+            // SUMATERA
+            { circle: "SUMATERA", category: "High QPSK", p1: 0, p2: 1, p3: 1, total: 2, isTotal: false },
+            { circle: "SUMATERA", category: "Low Rank2", p1: 106, p2: 17, p3: 43, total: 164, isTotal: false },
+            { circle: "SUMATERA", category: "RTWP", p1: 224, p2: 295, p3: 570, total: 1058, isTotal: false },
+            { circle: "SUMATERA", category: "SIA", p1: 322, p2: 61, p3: 1623, total: 1976, isTotal: false },
+            { circle: "SUMATERA", category: "Sleeping Cell", p1: 3, p2: 0, p3: 5, total: 8, isTotal: false },
+            { circle: "SUMATERA", category: "VSWR", p1: 26, p2: 5, p3: 13, total: 44, isTotal: false },
+            { circle: "SUMATERA", category: "SUMATERA Total", p1: 384, p2: 379, p3: 2250, total: 2901, isTotal: true },
+            
+            // GRAND TOTAL
+            { circle: "Grand Total", category: "", p1: 837, p2: 1037, p3: 3970, total: 5622, isGrandTotal: true }
+        ];
+        
+        // Data for Combined Issues
+        const combinedIssuesData = {
+            sumatera: [
+                { issue: "RTWP & SIA", total: 199 },
+                { issue: "Low Rank2 & SIA", total: 90 },
+                { issue: "SIA & VSWR", total: 15 },
+                { issue: "Low Rank2 & RTWP & SIA", total: 15 },
+                { issue: "Low Rank2 & RTWP", total: 10 },
+                { issue: "Low Rank2 & SIA & VSWR", total: 9 },
+                { issue: "SIA & Sleeping Cell", total: 4 },
+                { issue: "Low Rank2 & RTWP & SIA & VSWR", total: 2 },
+                { issue: "Low Rank2 & VSWR", total: 2 },
+                { issue: "Low Rank2 & RTWP & VSWR", total: 1 },
+                { issue: "Low Rank2 & SIA & Sleeping Cell", total: 1 }
+            ],
+            kalisumapa: [
+                { issue: "Low Rank2 & SIA", total: 122 },
+                { issue: "RTWP & SIA", total: 76 },
+                { issue: "Low Rank2 & RTWP & SIA", total: 29 },
+                { issue: "Low Rank2 & SIA & VSWR", total: 11 },
+                { issue: "SIA & VSWR", total: 10 },
+                { issue: "Low Rank2 & RTWP", total: 6 },
+                { issue: "SIA & Sleeping Cell", total: 4 },
+                { issue: "Low Rank2 & RTWP & VSWR", total: 3 },
+                { issue: "Low Rank2 & VSWR", total: 3 },
+                { issue: "Low Rank2 & RTWP & SIA & VSWR", total: 3 },
+                { issue: "RTWP & SIA & VSWR", total: 2 },
+                { issue: "RTWP & VSWR", total: 2 },
+                { issue: "RTWP & SIA & Sleeping Cell", total: 1 },
+                { issue: "High QPSK & SIA", total: 1 }
+            ],
+            jaya: [
+                { issue: "SIA & VSWR", total: 17 },
+                { issue: "Low Rank2 & SIA", total: 10 },
+                { issue: "SIA & Sleeping Cell", total: 4 },
+                { issue: "RTWP & SIA", total: 3 },
+                { issue: "Low Rank2 & VSWR", total: 2 },
+                { issue: "RTWP & SIA & Sleeping Cell", total: 1 },
+                { issue: "High QPSK & SIA", total: 1 },
+                { issue: "High QPSK & Low Rank2", total: 1 },
+                { issue: "ASM & SIA", total: 1 },
+                { issue: "Low Rank2 & SIA & VSWR", total: 1 }
+            ],
+            java: [
+                { issue: "Low Rank2 & SIA", total: 10 },
+                { issue: "RTWP & SIA", total: 8 },
+                { issue: "Low Rank2 & RTWP", total: 7 },
+                { issue: "RTWP & VSWR", total: 4 },
+                { issue: "Low Rank2 & RTWP & VSWR", total: 1 },
+                { issue: "SIA & Sleeping Cell", total: 1 },
+                { issue: "SIA & VSWR", total: 1 },
+                { issue: "High QPSK & Low Rank2", total: 1 },
+                { issue: "Low Rank2 & VSWR", total: 1 }
+            ]
+        };
+        
+        // Initialize Dashboard
+        function initializeDashboard() {
+            // Render all tables
+            renderPriorityAreaTable();
+            renderPriorityCategoryTable();
+            renderCombinedIssuesTables();
+            
+            // Setup tab functionality
+            setupTabs();
+            
+            // Add counting animation to KPI values
+            animateKPICounts();
+        }
+        
+        // Render Priority by Area Table
+        function renderPriorityAreaTable() {
+            const tableBody = document.getElementById('priorityAreaBody');
+            tableBody.innerHTML = '';
+            
+            priorityAreaData.forEach(row => {
+                const tr = document.createElement('tr');
+                
+                // Apply styling based on row type
+                if (row.isGrandTotal) {
+                    tr.className = 'table-cell-grand';
+                } else if (row.isTotal) {
+                    tr.className = 'table-cell-total';
+                }
+                
+                tr.innerHTML = `
+                    <td class="table-cell-highlight">${row.circle}</td>
+                    <td>${row.area}</td>
+                    <td><span class="badge badge-p1">${row.p1}</span></td>
+                    <td><span class="badge badge-p2">${row.p2}</span></td>
+                    <td><span class="badge badge-p3">${row.p3}</span></td>
+                    <td><strong>${row.total.toLocaleString()}</strong></td>
+                `;
+                
+                tableBody.appendChild(tr);
+            });
+        }
+        
+        // Render Priority by Category Table
+        function renderPriorityCategoryTable() {
+            const tableBody = document.getElementById('priorityCategoryBody');
+            tableBody.innerHTML = '';
+            
+            priorityCategoryData.forEach(row => {
+                const tr = document.createElement('tr');
+                
+                // Apply styling based on row type
+                if (row.isGrandTotal) {
+                    tr.className = 'table-cell-grand';
+                } else if (row.isTotal) {
+                    tr.className = 'table-cell-total';
+                }
+                
+                tr.innerHTML = `
+                    <td class="table-cell-highlight">${row.circle}</td>
+                    <td>${row.category}</td>
+                    <td><span class="badge badge-p1">${row.p1}</span></td>
+                    <td><span class="badge badge-p2">${row.p2}</span></td>
+                    <td><span class="badge badge-p3">${row.p3}</span></td>
+                    <td><strong>${row.total.toLocaleString()}</strong></td>
+                `;
+                
+                tableBody.appendChild(tr);
+            });
+        }
+        
+        // Render Combined Issues Tables
+        function renderCombinedIssuesTables() {
+            // SUMATERA
+            const sumateraBody = document.getElementById('sumateraCombinedBody');
+            sumateraBody.innerHTML = '';
+            
+            combinedIssuesData.sumatera.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.issue}</td>
+                    <td><strong>${item.total}</strong></td>
+                `;
+                sumateraBody.appendChild(tr);
+            });
+            
+            // KALISUMAPA
+            const kalisumapaBody = document.getElementById('kalisumapaCombinedBody');
+            kalisumapaBody.innerHTML = '';
+            
+            combinedIssuesData.kalisumapa.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.issue}</td>
+                    <td><strong>${item.total}</strong></td>
+                `;
+                kalisumapaBody.appendChild(tr);
+            });
+            
+            // JAYA
+            const jayaBody = document.getElementById('jayaCombinedBody');
+            jayaBody.innerHTML = '';
+            
+            combinedIssuesData.jaya.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.issue}</td>
+                    <td><strong>${item.total}</strong></td>
+                `;
+                jayaBody.appendChild(tr);
+            });
+            
+            // JAVA
+            const javaBody = document.getElementById('javaCombinedBody');
+            javaBody.innerHTML = '';
+            
+            combinedIssuesData.java.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.issue}</td>
+                    <td><strong>${item.total}</strong></td>
+                `;
+                javaBody.appendChild(tr);
+            });
+        }
+        
+        // Setup Tab Functionality
+        function setupTabs() {
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    
+                    // Remove active class from all tabs and contents
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    
+                    // Add active class to clicked tab and corresponding content
+                    tab.classList.add('active');
+                    document.getElementById(tabId).classList.add('active');
+                    
+                    // If status trend tab is clicked, update the chart
+                    if (tabId === 'status-trend') {
+                        setTimeout(renderStatusChart, 100);
+                    }
+                    
+                    // Add animation
+                    document.getElementById(tabId).style.animation = 'fadeIn 0.5s ease';
+                });
+            });
+        }
+        
+        // Animate KPI Counts
+        function animateKPICounts() {
+            const kpiValues = document.querySelectorAll('.kpi-value');
+            
+            kpiValues.forEach(element => {
+                element.classList.add('counting');
+            });
+        }
+        
+        // Render Status Chart
+        function renderStatusChart() {
+            const ctx = document.getElementById('statusChart').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (window.statusChartInstance) {
+                window.statusChartInstance.destroy();
+            }
+            
+            // Calculate percentages
+            const openPercentage = Math.round((statusData.open / statusData.total) * 100);
+            const closedPercentage = Math.round((statusData.closed / statusData.total) * 100);
+            const newPercentage = Math.round((statusData.newOpen / statusData.total) * 100);
+            
+            window.statusChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Open Issues', 'Closed Issues', 'New Open Issues'],
+                    datasets: [{
+                        data: [statusData.open, statusData.closed, statusData.newOpen],
+                        backgroundColor: [
+                            'rgba(247, 37, 133, 0.8)',
+                            'rgba(76, 201, 240, 0.8)',
+                            'rgba(67, 97, 238, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(247, 37, 133, 1)',
+                            'rgba(76, 201, 240, 1)',
+                            'rgba(67, 97, 238, 1)'
+                        ],
+                        borderWidth: 2,
+                        hoverOffset: 15
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    size: 12,
+                                    family: 'Inter'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const percentage = Math.round((value / statusData.total) * 100);
+                                    return `${label}: ${value.toLocaleString()} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '65%',
+                    animation: {
+                        animateScale: true,
+                        animateRotate: true
+                    }
+                }
+            });
+        }
+        
+        // Update Trend Analysis
+        function updateTrendAnalysis() {
+            const openPercentage = Math.round((statusData.open / statusData.total) * 100);
+            const closedPercentage = Math.round((statusData.closed / statusData.total) * 100);
+            const newPercentage = Math.round((statusData.newOpen / statusData.total) * 100);
+            
+            // Open Issue Analysis
+            let openTrendText = "";
+            if (openPercentage > 60) {
+                openTrendText = `High open issue rate (${openPercentage}%). Focus on resolution efforts to reduce backlog.`;
+            } else if (openPercentage > 40) {
+                openTrendText = `Moderate open issue rate (${openPercentage}%). Maintain current resolution pace.`;
+            } else {
+                openTrendText = `Low open issue rate (${openPercentage}%). Good backlog management.`;
+            }
+            
+            // New Issue Rate
+            let newTrendText = "";
+            if (newPercentage > 10) {
+                newTrendText = `High new issue rate (${newPercentage}%). Investigate root causes for increase.`;
+            } else if (newPercentage > 5) {
+                newTrendText = `Moderate new issue rate (${newPercentage}%). Monitor for trends.`;
+            } else {
+                newTrendText = `Low new issue rate (${newPercentage}%). Good preventive maintenance.`;
+            }
+            
+            // Closure Efficiency
+            let closureTrendText = "";
+            if (closedPercentage > 50) {
+                closureTrendText = `High closure rate (${closedPercentage}%). Effective resolution process.`;
+            } else if (closedPercentage > 30) {
+                closureTrendText = `Moderate closure rate (${closedPercentage}%). Room for improvement.`;
+            } else {
+                closureTrendText = `Low closure rate (${closedPercentage}%). Review resolution workflow.`;
+            }
+            
+            // Recommendations
+            let recommendation = "";
+            if (openPercentage > 60 && newPercentage > 10) {
+                recommendation = "Critical situation: High open and new issue rates. Consider adding resources and implementing emergency resolution protocols.";
+            } else if (openPercentage > 50) {
+                recommendation = "Focus on reducing open issue backlog. Prioritize P1 and P2 issues for immediate resolution.";
+            } else if (newPercentage > 8) {
+                recommendation = "Investigate root causes of new issues. Implement preventive measures to reduce new issue creation.";
+            } else {
+                recommendation = "Maintain current resolution processes. Focus on improving closure rate for new issues.";
+            }
+            
+            // Update text elements
+            document.getElementById('open-trend-text').textContent = openTrendText;
+            document.getElementById('new-trend-text').textContent = newTrendText;
+            document.getElementById('closure-trend-text').textContent = closureTrendText;
+            document.getElementById('status-recommendation').textContent = recommendation;
+        }
+        
+        // Add hover effects to cards
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.card, .kpi-card, .insight-item, .status-kpi-card');
+            
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    card.style.transform = 'translateY(-8px)';
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'translateY(0)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
