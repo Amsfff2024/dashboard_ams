@@ -4,27 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Network Issue Analytics Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #4361ee;
-            --primary-dark: #3a56d4;
-            --secondary: #7209b7;
-            --success: #4cc9f0;
-            --warning: #f72585;
-            --danger: #f94144;
-            --info: #4895ef;
-            --dark: #2b2d42;
-            --light: #f8f9fa;
-            --gray-100: #f1f3f9;
-            --gray-200: #e9ecef;
-            --gray-300: #dee2e6;
-            --gray-600: #6c757d;
-            --gray-800: #343a40;
-            --border-radius: 12px;
-            --box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-            --box-shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.12);
+            --font-plus-jakarta: 'Plus Jakarta Sans', sans-serif;
+            --font-inter: 'Inter', sans-serif;
+            --critical-red: #dc3545;
+            --warning-orange: #fd7e14;
+            --normal-green: #28a745;
+            --info-blue: #17a2b8;
+            --vip-gold: #ffc107;
+            --primary-blue: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --secondary-purple: #7209b7;
+            --success-teal: #4cc9f0;
+            --warning-pink: #f72585;
+            --danger-red: #f94144;
+            --info-light: #4895ef;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-600: #64748b;
+            --gray-800: #334155;
+            --border-radius: 16px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --box-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.15);
             --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
@@ -35,12 +45,13 @@
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            font-family: var(--font-inter);
+            background: #f8fafc;
             color: var(--dark);
             line-height: 1.6;
             padding: 20px;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
         .container {
@@ -48,19 +59,19 @@
             margin: 0 auto;
         }
 
-        /* Header Styles */
-        .header {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        /* EXECUTIVE HEADER */
+        .executive-header {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
             color: white;
-            padding: 28px 32px;
+            padding: 16px 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             border-radius: var(--border-radius);
             margin-bottom: 30px;
-            box-shadow: var(--box-shadow);
             position: relative;
             overflow: hidden;
         }
 
-        .header::before {
+        .executive-header::before {
             content: '';
             position: absolute;
             top: -50%;
@@ -80,39 +91,59 @@
             flex-wrap: wrap;
         }
 
-        .header-title h1 {
-            font-size: 32px;
+        .executive-header h1 {
+            font-family: var(--font-plus-jakarta);
             font-weight: 700;
-            margin-bottom: 8px;
+            font-size: 1.8rem !important;
+            margin: 0 0 8px 0;
             letter-spacing: -0.5px;
         }
 
-        .header-title p {
-            font-size: 16px;
-            opacity: 0.9;
+        .executive-header p {
+            font-family: var(--font-inter);
             font-weight: 400;
-            max-width: 600px;
-        }
-
-        .header-stats {
-            display: flex;
-            gap: 20px;
-            margin-top: 15px;
-        }
-
-        .stat-badge {
-            background: rgba(255, 255, 255, 0.15);
-            padding: 10px 18px;
-            border-radius: 50px;
             font-size: 14px;
-            font-weight: 500;
-            backdrop-filter: blur(10px);
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            opacity: 0.9;
+            max-width: 600px;
+            margin-bottom: 15px;
         }
 
-        /* NEW: Status KPI Header */
+        /* KPI CARD STYLES */
+        .kpi-card {
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            border: none;
+            overflow: hidden;
+            height: 100%;
+            background: white;
+            padding: 25px;
+            position: relative;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--box-shadow-hover);
+        }
+
+        .kpi-value {
+            font-family: var(--font-plus-jakarta);
+            font-weight: 800;
+            font-size: 42px;
+            color: #1e293b;
+            margin-bottom: 8px;
+            letter-spacing: -1px;
+        }
+
+        .card-title {
+            font-family: var(--font-plus-jakarta);
+            font-weight: 600;
+            font-size: 16px;
+            color: #4b5563;
+            margin-bottom: 5px;
+        }
+
+        /* STATUS KPI CONTAINER */
         .status-kpi-container {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -137,19 +168,19 @@
         }
 
         .status-kpi-card.total {
-            border-top-color: var(--primary);
+            border-top-color: var(--primary-blue);
         }
 
         .status-kpi-card.open {
-            border-top-color: var(--warning);
+            border-top-color: var(--warning-orange);
         }
 
         .status-kpi-card.closed {
-            border-top-color: var(--success);
+            border-top-color: var(--normal-green);
         }
 
         .status-kpi-card.new {
-            border-top-color: var(--info);
+            border-top-color: var(--info-blue);
         }
 
         .status-kpi-icon {
@@ -161,15 +192,8 @@
             color: inherit;
         }
 
-        .status-kpi-value {
-            font-size: 42px;
-            font-weight: 800;
-            margin-bottom: 8px;
-            color: var(--dark);
-            letter-spacing: -1px;
-        }
-
         .status-kpi-label {
+            font-family: var(--font-plus-jakarta);
             font-size: 16px;
             font-weight: 600;
             color: var(--gray-600);
@@ -177,11 +201,20 @@
         }
 
         .status-kpi-detail {
+            font-family: var(--font-inter);
             font-size: 14px;
             color: var(--gray-600);
         }
 
-        /* Main Dashboard Layout */
+        /* KPI GRID */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        /* MAIN DASHBOARD LAYOUT */
         .dashboard-layout {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -199,7 +232,7 @@
             }
         }
 
-        /* Card Styles */
+        /* CARD STYLES */
         .card {
             background: white;
             border-radius: var(--border-radius);
@@ -224,7 +257,8 @@
             border-bottom: 2px solid var(--gray-100);
         }
 
-        .card-title {
+        .card-title-main {
+            font-family: var(--font-plus-jakarta);
             font-size: 20px;
             font-weight: 700;
             color: var(--dark);
@@ -233,90 +267,41 @@
             gap: 12px;
         }
 
-        .card-title i {
-            color: var(--primary);
+        .card-title-main i {
+            color: var(--primary-blue);
             font-size: 22px;
         }
 
         .card-subtitle {
+            font-family: var(--font-inter);
             font-size: 14px;
             color: var(--gray-600);
             font-weight: 400;
         }
 
-        /* KPI Cards */
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .kpi-card {
-            padding: 25px;
-            border-radius: var(--border-radius);
-            color: white;
-            position: relative;
-            overflow: hidden;
-            transition: var(--transition);
-        }
-
-        .kpi-card::before {
-            content: '';
-            position: absolute;
+        /* TABLE STYLES */
+        .table thead th {
+            font-family: var(--font-plus-jakarta);
+            font-weight: 600;
+            font-size: 12px;
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: #fff;
+            position: sticky;
             top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.3);
+            z-index: 10;
+            border: none;
+            padding: 16px 14px;
         }
 
-        .kpi-card:hover {
-            transform: translateY(-8px);
+        .table tbody td {
+            font-family: var(--font-inter);
+            font-weight: 400;
+            font-size: 11px;
+            padding: 14px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
         }
 
-        .kpi-card.priority {
-            background: linear-gradient(135deg, var(--danger) 0%, #e63946 100%);
-        }
-
-        .kpi-card.category {
-            background: linear-gradient(135deg, var(--info) 0%, #3a86ff 100%);
-        }
-
-        .kpi-card.combined {
-            background: linear-gradient(135deg, var(--success) 0%, #38b000 100%);
-        }
-
-        .kpi-card.circle {
-            background: linear-gradient(135deg, var(--secondary) 0%, #560bad 100%);
-        }
-
-        .kpi-icon {
-            font-size: 28px;
-            margin-bottom: 15px;
-            opacity: 0.9;
-        }
-
-        .kpi-value {
-            font-size: 36px;
-            font-weight: 800;
-            margin-bottom: 8px;
-            letter-spacing: -0.5px;
-        }
-
-        .kpi-label {
-            font-size: 16px;
-            opacity: 0.9;
-            font-weight: 500;
-            margin-bottom: 5px;
-        }
-
-        .kpi-detail {
-            font-size: 14px;
-            opacity: 0.8;
-        }
-
-        /* Table Styles */
         .data-table {
             width: 100%;
             border-collapse: collapse;
@@ -356,21 +341,24 @@
 
         .table-cell-highlight {
             font-weight: 700;
-            color: var(--primary);
+            color: var(--primary-blue);
+            font-family: var(--font-plus-jakarta);
         }
 
         .table-cell-total {
             font-weight: 800;
             background-color: rgba(67, 97, 238, 0.08);
+            font-family: var(--font-plus-jakarta);
         }
 
         .table-cell-grand {
             font-weight: 900;
             background: linear-gradient(135deg, rgba(67, 97, 238, 0.1) 0%, rgba(114, 9, 183, 0.1) 100%);
             color: var(--primary-dark);
+            font-family: var(--font-plus-jakarta);
         }
 
-        /* Tabs Navigation */
+        /* TABS NAVIGATION */
         .tabs-container {
             margin-bottom: 30px;
         }
@@ -398,15 +386,16 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
+            font-family: var(--font-plus-jakarta);
         }
 
         .tab:hover {
-            color: var(--primary);
+            color: var(--primary-blue);
             background-color: var(--gray-100);
         }
 
         .tab.active {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-purple) 100%);
             color: white;
             box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
         }
@@ -429,14 +418,14 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Insights Section */
+        /* INSIGHTS SECTION */
         .insights-card {
             background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
             border-radius: var(--border-radius);
             padding: 30px;
             box-shadow: var(--box-shadow);
             margin-top: 30px;
-            border-left: 6px solid var(--primary);
+            border-left: 6px solid var(--primary-blue);
         }
 
         .insights-header {
@@ -449,7 +438,7 @@
         .insights-icon {
             width: 50px;
             height: 50px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-purple) 100%);
             border-radius: 12px;
             display: flex;
             align-items: center;
@@ -459,6 +448,7 @@
         }
 
         .insights-title {
+            font-family: var(--font-plus-jakarta);
             font-size: 22px;
             font-weight: 700;
             color: var(--dark);
@@ -485,6 +475,7 @@
         }
 
         .insight-item h4 {
+            font-family: var(--font-plus-jakarta);
             font-size: 16px;
             font-weight: 600;
             margin-bottom: 12px;
@@ -495,56 +486,49 @@
         }
 
         .insight-item p {
+            font-family: var(--font-inter);
             font-size: 14px;
             color: var(--gray-800);
             line-height: 1.7;
         }
 
-        .insight-high {
-            color: var(--danger);
-            font-weight: 700;
-        }
-
-        .insight-medium {
-            color: var(--warning);
-            font-weight: 700;
-        }
-
-        .insight-low {
-            color: var(--success);
-            font-weight: 700;
-        }
-
-        /* Badges */
+        /* BADGES */
         .badge {
-            display: inline-block;
-            padding: 6px 14px;
-            border-radius: 50px;
-            font-size: 12px;
+            font-family: var(--font-plus-jakarta);
             font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            display: inline-block;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
         .badge-p1 {
-            background: linear-gradient(135deg, rgba(249, 65, 68, 0.15) 0%, rgba(249, 65, 68, 0.1) 100%);
-            color: var(--danger);
-            border: 1px solid rgba(249, 65, 68, 0.3);
+            background: linear-gradient(135deg, var(--critical-red), #c82333);
+            color: white;
+            border: none;
         }
 
         .badge-p2 {
-            background: linear-gradient(135deg, rgba(247, 37, 133, 0.15) 0%, rgba(247, 37, 133, 0.1) 100%);
-            color: var(--warning);
-            border: 1px solid rgba(247, 37, 133, 0.3);
+            background: linear-gradient(135deg, var(--warning-orange), #e8590c);
+            color: white;
+            border: none;
         }
 
         .badge-p3 {
-            background: linear-gradient(135deg, rgba(76, 201, 240, 0.15) 0%, rgba(76, 201, 240, 0.1) 100%);
-            color: var(--success);
-            border: 1px solid rgba(76, 201, 240, 0.3);
+            background: linear-gradient(135deg, var(--info-blue), #138496);
+            color: white;
+            border: none;
         }
 
-        /* Footer */
+        .badge-real-time {
+            background: linear-gradient(135deg, var(--normal-green), #1e7e34);
+            color: white;
+            border: none;
+        }
+
+        /* FOOTER */
         .footer {
             text-align: center;
             padding: 25px;
@@ -554,6 +538,7 @@
             background: white;
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
+            font-family: var(--font-inter);
         }
 
         .footer-logo {
@@ -563,10 +548,11 @@
             gap: 10px;
             margin-bottom: 15px;
             font-weight: 600;
-            color: var(--primary);
+            color: var(--primary-blue);
+            font-family: var(--font-plus-jakarta);
         }
 
-        /* NEW: Progress Bar for Status */
+        /* PROGRESS BAR */
         .progress-container {
             margin-top: 15px;
         }
@@ -577,6 +563,7 @@
             font-size: 12px;
             color: var(--gray-600);
             margin-bottom: 5px;
+            font-family: var(--font-inter);
         }
 
         .progress-bar {
@@ -592,41 +579,50 @@
             transition: width 1s ease-in-out;
         }
 
-        .progress-total { background-color: var(--primary); }
-        .progress-open { background-color: var(--warning); }
-        .progress-closed { background-color: var(--success); }
-        .progress-new { background-color: var(--info); }
+        .progress-total { background-color: var(--primary-blue); }
+        .progress-open { background-color: var(--warning-orange); }
+        .progress-closed { background-color: var(--normal-green); }
+        .progress-new { background-color: var(--info-blue); }
 
-        /* Scrollbar Styling */
+        /* STATS BADGE */
+        .stat-badge {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 10px 18px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-inter);
+        }
+
+        /* SCROLLBAR */
         ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
         }
 
         ::-webkit-scrollbar-track {
-            background: var(--gray-100);
-            border-radius: 10px;
+            background: #f1f5f9;
+            border-radius: 3px;
         }
 
         ::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            border-radius: 10px;
+            background: #cbd5e1;
+            border-radius: 3px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(135deg, var(--primary-dark) 0%, #5a0a9e 100%);
+            background: #94a3b8;
         }
 
-        /* Responsive Adjustments */
+        /* RESPONSIVE */
         @media (max-width: 1200px) {
             .header-content {
                 flex-direction: column;
                 align-items: flex-start;
-            }
-            
-            .header-stats {
-                margin-top: 20px;
-                flex-wrap: wrap;
             }
             
             .kpi-grid, .status-kpi-container {
@@ -635,8 +631,13 @@
         }
 
         @media (max-width: 768px) {
-            .header-title h1 {
-                font-size: 26px;
+            .executive-header {
+                padding: 12px 16px;
+                text-align: center;
+            }
+            
+            .executive-header h1 {
+                font-size: 1.2rem !important;
             }
             
             .tabs-nav {
@@ -659,19 +660,23 @@
                 grid-template-columns: 1fr;
             }
             
+            .kpi-value {
+                font-size: 1.5rem;
+            }
+            
             .status-kpi-value {
                 font-size: 36px;
             }
         }
 
-        /* Utility Classes */
+        /* UTILITY CLASSES */
         .text-center { text-align: center; }
         .text-right { text-align: right; }
         .mt-20 { margin-top: 20px; }
         .mb-20 { margin-bottom: 20px; }
         .p-20 { padding: 20px; }
 
-        /* Animation for numbers */
+        /* ANIMATION */
         @keyframes countUp {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -681,7 +686,7 @@
             animation: countUp 1s ease-out;
         }
         
-        /* NEW: Data freshness indicator */
+        /* FRESHNESS INDICATOR */
         .freshness-indicator {
             display: inline-flex;
             align-items: center;
@@ -690,15 +695,16 @@
             padding: 4px 10px;
             border-radius: 20px;
             background-color: rgba(76, 201, 240, 0.1);
-            color: var(--success);
+            color: var(--normal-green);
             margin-left: 10px;
+            font-family: var(--font-inter);
         }
         
         .freshness-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background-color: var(--success);
+            background-color: var(--normal-green);
             animation: pulse 2s infinite;
         }
         
@@ -707,12 +713,49 @@
             50% { opacity: 0.5; }
             100% { opacity: 1; }
         }
+
+        /* COLORED KPI CARDS */
+        .kpi-card.priority {
+            background: linear-gradient(135deg, var(--danger-red) 0%, #e63946 100%);
+            color: white;
+        }
+
+        .kpi-card.category {
+            background: linear-gradient(135deg, var(--info-light) 0%, #3a86ff 100%);
+            color: white;
+        }
+
+        .kpi-card.combined {
+            background: linear-gradient(135deg, var(--success-teal) 0%, #38b000 100%);
+            color: white;
+        }
+
+        .kpi-card.circle {
+            background: linear-gradient(135deg, var(--secondary-purple) 0%, #560bad 100%);
+            color: white;
+        }
+
+        .kpi-card .kpi-value,
+        .kpi-card .kpi-label,
+        .kpi-card .kpi-detail {
+            color: white;
+        }
+
+        .kpi-card .kpi-icon {
+            color: white;
+            opacity: 0.9;
+        }
+
+        /* TABLE RESPONSIVE */
+        .table-responsive {
+            overflow-x: auto;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <!-- Header -->
-        <header class="header">
+        <header class="executive-header">
             <div class="header-content">
                 <div class="header-title">
                     <h1><i class="fas fa-chart-network"></i> Network Issue Analytics Dashboard</h1>
@@ -751,11 +794,11 @@
             </div>
         </header>
 
-        <!-- NEW: Status KPI Cards -->
+        <!-- Status KPI Cards -->
         <div class="status-kpi-container">
             <div class="status-kpi-card total">
                 <div class="status-kpi-icon"><i class="fas fa-chart-bar"></i></div>
-                <div class="status-kpi-value" id="total-issues">0</div>
+                <div class="kpi-value" id="total-issues">0</div>
                 <div class="status-kpi-label">TOTAL ISSUES</div>
                 <div class="status-kpi-detail">All reported issues across all regions</div>
                 <div class="progress-container">
@@ -771,7 +814,7 @@
             
             <div class="status-kpi-card open">
                 <div class="status-kpi-icon"><i class="fas fa-exclamation-circle"></i></div>
-                <div class="status-kpi-value" id="open-issues">0</div>
+                <div class="kpi-value" id="open-issues">0</div>
                 <div class="status-kpi-label">OPEN ISSUES</div>
                 <div class="status-kpi-detail">Based on status(1) column: Open</div>
                 <div class="progress-container">
@@ -787,7 +830,7 @@
             
             <div class="status-kpi-card closed">
                 <div class="status-kpi-icon"><i class="fas fa-check-circle"></i></div>
-                <div class="status-kpi-value" id="closed-issues">0</div>
+                <div class="kpi-value" id="closed-issues">0</div>
                 <div class="status-kpi-label">CLOSED ISSUES</div>
                 <div class="status-kpi-detail">Based on status(1) column: Closed</div>
                 <div class="progress-container">
@@ -803,7 +846,7 @@
             
             <div class="status-kpi-card new">
                 <div class="status-kpi-icon"><i class="fas fa-bolt"></i></div>
-                <div class="status-kpi-value" id="new-open">0</div>
+                <div class="kpi-value" id="new-open">0</div>
                 <div class="status-kpi-label">NEW OPEN</div>
                 <div class="status-kpi-detail">Based on status(1) column: New Open</div>
                 <div class="progress-container">
@@ -879,10 +922,10 @@
                 <div class="card">
                     <div class="card-header">
                         <div>
-                            <h3 class="card-title"><i class="fas fa-map-marked-alt"></i> Priority Distribution by Circle & Area</h3>
+                            <h3 class="card-title-main"><i class="fas fa-map-marked-alt"></i> Priority Distribution by Circle & Area</h3>
                             <p class="card-subtitle">Distinct count of SITE ID based on priority levels across regions</p>
                         </div>
-                        <div class="badge badge-p1">Real-time Data</div>
+                        <div class="badge badge-real-time">Real-time Data</div>
                     </div>
                     
                     <div class="table-responsive">
@@ -910,7 +953,7 @@
                 <div class="card">
                     <div class="card-header">
                         <div>
-                            <h3 class="card-title"><i class="fas fa-tags"></i> Priority Distribution by Issue Category</h3>
+                            <h3 class="card-title-main"><i class="fas fa-tags"></i> Priority Distribution by Issue Category</h3>
                             <p class="card-subtitle">Analysis of issue types across different priority levels</p>
                         </div>
                         <div class="badge badge-p2">7 Categories</div>
@@ -941,7 +984,7 @@
                 <div class="dashboard-layout">
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title"><i class="fas fa-layer-group"></i> SUMATERA Combined Issues</h3>
+                            <h3 class="card-title-main"><i class="fas fa-layer-group"></i> SUMATERA Combined Issues</h3>
                             <div class="badge badge-p1">341 Sites</div>
                         </div>
                         <table class="data-table">
@@ -959,7 +1002,7 @@
                     
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title"><i class="fas fa-layer-group"></i> KALISUMAPA Combined Issues</h3>
+                            <h3 class="card-title-main"><i class="fas fa-layer-group"></i> KALISUMAPA Combined Issues</h3>
                             <div class="badge badge-p2">265 Sites</div>
                         </div>
                         <table class="data-table">
@@ -977,7 +1020,7 @@
                     
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title"><i class="fas fa-layer-group"></i> JAYA Combined Issues</h3>
+                            <h3 class="card-title-main"><i class="fas fa-layer-group"></i> JAYA Combined Issues</h3>
                             <div class="badge badge-p3">41 Sites</div>
                         </div>
                         <table class="data-table">
@@ -995,8 +1038,8 @@
                     
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title"><i class="fas fa-layer-group"></i> JAVA Combined Issues</h3>
-                            <div class="badge">34 Sites</div>
+                            <h3 class="card-title-main"><i class="fas fa-layer-group"></i> JAVA Combined Issues</h3>
+                            <div class="badge badge-p3">34 Sites</div>
                         </div>
                         <table class="data-table">
                             <thead>
@@ -1025,44 +1068,44 @@
                     
                     <div class="insights-grid">
                         <div class="insight-item">
-                            <h4><i class="fas fa-exclamation-circle insight-high"></i> Critical Priority Focus</h4>
-                            <p>Concentrate resources on <span class="insight-high">837 P1 sites</span>, particularly in <span class="insight-high">NORTH SUMATERA (209 sites)</span> which has the highest concentration of critical issues requiring immediate escalation to technical teams.</p>
+                            <h4><i class="fas fa-exclamation-circle" style="color: var(--critical-red);"></i> Critical Priority Focus</h4>
+                            <p>Concentrate resources on <span style="color: var(--critical-red); font-weight: 700;">837 P1 sites</span>, particularly in <span style="color: var(--critical-red); font-weight: 700;">NORTH SUMATERA (209 sites)</span> which has the highest concentration of critical issues requiring immediate escalation to technical teams.</p>
                         </div>
                         
                         <div class="insight-item">
-                            <h4><i class="fas fa-project-diagram insight-medium"></i> Multiple Issue Resolution</h4>
-                            <p>Address <span class="insight-medium">681 sites with combined issues</span>, especially the <span class="insight-medium">199 RTWP & SIA combinations in SUMATERA</span>. These sites require comprehensive troubleshooting approaches rather than single-issue fixes.</p>
+                            <h4><i class="fas fa-project-diagram" style="color: var(--warning-orange);"></i> Multiple Issue Resolution</h4>
+                            <p>Address <span style="color: var(--warning-orange); font-weight: 700;">681 sites with combined issues</span>, especially the <span style="color: var(--warning-orange); font-weight: 700;">199 RTWP & SIA combinations in SUMATERA</span>. These sites require comprehensive troubleshooting approaches rather than single-issue fixes.</p>
                         </div>
                         
                         <div class="insight-item">
-                            <h4><i class="fas fa-tachometer-alt insight-high"></i> SIA Issue Dominance</h4>
-                            <p><span class="insight-high">SIA issues represent 64.8% of all problems</span> (3,642 sites). Implement systematic resolution strategies and consider root cause analysis to address this widespread issue category efficiently.</p>
+                            <h4><i class="fas fa-tachometer-alt" style="color: var(--critical-red);"></i> SIA Issue Dominance</h4>
+                            <p><span style="color: var(--critical-red); font-weight: 700;">SIA issues represent 64.8% of all problems</span> (3,642 sites). Implement systematic resolution strategies and consider root cause analysis to address this widespread issue category efficiently.</p>
                         </div>
                         
                         <div class="insight-item">
-                            <h4><i class="fas fa-users insight-medium"></i> Resource Allocation</h4>
-                            <p>Allocate technical resources proportionally: <span class="insight-medium">52% to SUMATERA</span> (2,901 sites), <span class="insight-medium">26% to KALISUMAPA</span> (1,440 sites), with remaining capacity to JAVA and JAYA regions based on issue density.</p>
+                            <h4><i class="fas fa-users" style="color: var(--warning-orange);"></i> Resource Allocation</h4>
+                            <p>Allocate technical resources proportionally: <span style="color: var(--warning-orange); font-weight: 700;">52% to SUMATERA</span> (2,901 sites), <span style="color: var(--warning-orange); font-weight: 700;">26% to KALISUMAPA</span> (1,440 sites), with remaining capacity to JAVA and JAYA regions based on issue density.</p>
                         </div>
                         
                         <div class="insight-item">
-                            <h4><i class="fas fa-flag-checkered insight-low"></i> Escalation Prioritization</h4>
+                            <h4><i class="fas fa-flag-checkered" style="color: var(--normal-green);"></i> Escalation Prioritization</h4>
                             <p>Follow this escalation order: 1) P1 sites in NORTH SUMATERA, 2) Multiple-issue sites, 3) High-density SIA problem areas, 4) P2 sites, 5) Systemic P3 issue resolution.</p>
                         </div>
                         
                         <div class="insight-item">
-                            <h4><i class="fas fa-bell insight-high"></i> Monitoring & Alerting</h4>
-                            <p>Implement enhanced monitoring for sites with <span class="insight-high">3+ combined issues</span> and establish automated alerts for P1 issue recurrence in previously resolved sites to prevent regression.</p>
+                            <h4><i class="fas fa-bell" style="color: var(--critical-red);"></i> Monitoring & Alerting</h4>
+                            <p>Implement enhanced monitoring for sites with <span style="color: var(--critical-red); font-weight: 700;">3+ combined issues</span> and establish automated alerts for P1 issue recurrence in previously resolved sites to prevent regression.</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- NEW: Tab 5: Status Trend -->
+            <!-- Tab 5: Status Trend -->
             <div id="status-trend" class="tab-content">
                 <div class="dashboard-layout">
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title"><i class="fas fa-chart-pie"></i> Issue Status Distribution</h3>
+                            <h3 class="card-title-main"><i class="fas fa-chart-pie"></i> Issue Status Distribution</h3>
                             <div class="badge badge-p2">Real-time</div>
                         </div>
                         <div style="height: 300px; display: flex; align-items: center; justify-content: center;">
@@ -1097,7 +1140,7 @@
                     
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title"><i class="fas fa-history"></i> Status Trend Analysis</h3>
+                            <h3 class="card-title-main"><i class="fas fa-history"></i> Status Trend Analysis</h3>
                             <div class="badge badge-p3">Last 30 Days</div>
                         </div>
                         <div class="insight-item" style="border: none; box-shadow: none; padding: 0;">
@@ -1163,7 +1206,6 @@
         });
         
         // Sample data for status(1) column - In real implementation, this would come from your CSV
-        // Assuming we have data for status(1) column: Open, Closed, and possibly other statuses
         const statusData = {
             total: 5622,  // Total issues from your data
             open: 3241,   // Example: 57.6% open rate
@@ -1544,14 +1586,14 @@
                     datasets: [{
                         data: [statusData.open, statusData.closed, statusData.newOpen],
                         backgroundColor: [
-                            'rgba(247, 37, 133, 0.8)',
-                            'rgba(76, 201, 240, 0.8)',
-                            'rgba(67, 97, 238, 0.8)'
+                            'rgba(253, 126, 20, 0.8)',    // Warning orange for Open
+                            'rgba(40, 167, 69, 0.8)',     // Normal green for Closed
+                            'rgba(23, 162, 184, 0.8)'     // Info blue for New
                         ],
                         borderColor: [
-                            'rgba(247, 37, 133, 1)',
-                            'rgba(76, 201, 240, 1)',
-                            'rgba(67, 97, 238, 1)'
+                            'rgba(253, 126, 20, 1)',
+                            'rgba(40, 167, 69, 1)',
+                            'rgba(23, 162, 184, 1)'
                         ],
                         borderWidth: 2,
                         hoverOffset: 15
