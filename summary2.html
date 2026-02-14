@@ -1,0 +1,1992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Issue Tracking Dashboard</title>
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- PapaParse untuk parsing CSV -->
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --font-plus-jakarta: 'Plus Jakarta Sans', sans-serif;
+            --font-inter: 'Inter', sans-serif;
+            --critical-red: #dc3545;
+            --warning-orange: #fd7e14;
+            --normal-green: #28a745;
+            --info-blue: #17a2b8;
+            --vip-gold: #ffc107;
+        }
+        
+        body {
+            background: #f8fafc;
+            font-family: var(--font-inter);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* HEADER */
+        .executive-header {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            color: white;
+            padding: 16px 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .executive-header h1 {
+            font-family: var(--font-plus-jakarta);
+            font-weight: 700;
+            font-size: 1.5rem !important;
+            margin: 0;
+        }
+        
+        .executive-header p {
+            font-family: var(--font-inter);
+            font-weight: 400;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        /* KPI CARDS */
+        .kpi-card {
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,.08);
+            transition: all 0.3s ease;
+            border: none;
+            overflow: hidden;
+            height: 100%;
+        }
+        
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,.15);
+        }
+        
+        .kpi-value {
+            font-family: var(--font-plus-jakarta);
+            font-weight: 800;
+            font-size: 1.75rem;
+            color: #1e293b;
+        }
+        
+        .card-title {
+            font-family: var(--font-plus-jakarta);
+            font-weight: 600;
+            font-size: 14px;
+            color: #4b5563;
+        }
+        
+        /* FILTER CARDS */
+        .filter-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            border: none;
+        }
+        
+        /* BUTTONS */
+        .btn {
+            font-family: var(--font-plus-jakarta);
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            border: none;
+            border-radius: 10px;
+            padding: 10px;
+        }
+        
+        .btn-outline-success {
+            border-radius: 10px;
+            padding: 10px 20px;
+        }
+        
+        /* TABLE STYLING */
+        .table thead th {
+            font-family: var(--font-plus-jakarta);
+            font-weight: 600;
+            font-size: 12px;
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: #fff;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border: none;
+            padding: 8px 6px;
+        }
+        
+        .table tbody td {
+            font-family: var(--font-inter);
+            font-weight: 400;
+            font-size: 11px;
+            padding: 6px 4px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+        
+        /* BADGES */
+        .badge {
+            font-family: var(--font-plus-jakarta);
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+        }
+        
+        .badge-priority-P1 {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            border: none;
+        }
+        
+        .badge-priority-P2 {
+            background: linear-gradient(135deg, #fd7e14, #e8590c);
+            color: white;
+            border: none;
+        }
+        
+        .badge-status-Open {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+        }
+        
+        .badge-status-Closed {
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+            color: white;
+        }
+        
+        /* AGING BADGES */
+        .badge-aging-high {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+        }
+        
+        .badge-aging-medium {
+            background: linear-gradient(135deg, #fd7e14, #e8590c);
+            color: white;
+        }
+        
+        .badge-aging-low {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            color: white;
+        }
+        
+        /* CHARTS CONTAINER */
+        .chart-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            padding: 1rem;
+            height: 100%;
+        }
+        
+        /* MAIN TABLE CONTAINER */
+        .main-table-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            border: none;
+            overflow: hidden;
+            flex: 1;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+            display: none; /* Hidden by default */
+        }
+        
+        .main-table-wrapper {
+            overflow: auto;
+            flex: 1;
+        }
+        
+        /* SITE ID CELL */
+        .site-id-cell {
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
+            font-weight: 600;
+            color: #1e40af;
+            font-size: 11px;
+        }
+        
+        /* LOADING */
+        #loadingSpinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 60px;
+            font-size: 18px;
+            color: #64748b;
+            font-family: var(--font-inter);
+        }
+        
+        /* SEARCH HIGHLIGHT */
+        .search-highlight {
+            background-color: #fff3cd;
+            font-weight: 600;
+        }
+        
+        /* PROGRESS BARS */
+        .progress {
+            height: 6px;
+            border-radius: 4px;
+        }
+        
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .executive-header {
+                padding: 12px 16px;
+                text-align: center;
+            }
+            
+            .executive-header h1 {
+                font-size: 1.2rem !important;
+            }
+            
+            .kpi-value {
+                font-size: 1.5rem;
+            }
+        }
+        
+        /* CUSTOM SCROLLBAR */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        /* FORM CONTROLS */
+        .form-control, .form-select {
+            font-family: var(--font-inter);
+            font-size: 12px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        /* INFO BADGES */
+        .info-badge {
+            font-family: var(--font-inter);
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            background: #e2e8f0;
+            color: #475569;
+        }
+        
+        /* TRUNCATE TEXT */
+        .text-truncate-cell {
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        /* AGING INDICATOR */
+        .aging-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        
+        .aging-critical { background-color: #dc3545; }
+        .aging-warning { background-color: #fd7e14; }
+        .aging-normal { background-color: #28a745; }
+        
+        /* TOOLTIP */
+        .tooltip-cell {
+            cursor: help;
+            border-bottom: 1px dotted #666;
+        }
+        
+        /* SUMMARY SECTIONS */
+        .summary-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .summary-section h6 {
+            color: #1e293b;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        /* HIDDEN DETAILS */
+        .hidden-details {
+            display: none;
+        }
+        
+        /* SEARCH RESULT INFO */
+        .search-result-info {
+            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #3b82f6;
+        }
+        
+        /* STATS BADGE */
+        .stats-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        
+        .stats-badge-primary { background: #dbeafe; color: #1d4ed8; }
+        .stats-badge-success { background: #dcfce7; color: #166534; }
+        .stats-badge-warning { background: #fef3c7; color: #92400e; }
+        .stats-badge-danger { background: #fee2e2; color: #991b1b; }
+        
+        /* VENDOR LOGO */
+        .vendor-logo {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        
+        .vendor-nokia { background: #142c8e; color: white; }
+        .vendor-huawei { background: #d4001a; color: white; }
+        .vendor-other { background: #6b7280; color: white; }
+        
+        /* CHART TITLE */
+        .chart-title {
+            font-family: var(--font-plus-jakarta);
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 16px;
+            color: #1e293b;
+        }
+        
+        .chart-title i {
+            margin-right: 8px;
+            color: #3b82f6;
+        }
+        
+        /* DASHBOARD TITLE */
+        .dashboard-title {
+            font-family: var(--font-plus-jakarta);
+            font-weight: 700;
+            font-size: 24px;
+            color: #1e293b;
+            margin-bottom: 20px;
+            padding-left: 12px;
+            border-left: 4px solid #3b82f6;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="executive-header">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="mb-1"><i class="fas fa-tasks me-2"></i>Issue Tracking Dashboard</h1>
+                    <p class="small mb-0 opacity-75">Network Issues Monitoring & Management</p>
+                </div>
+                <div class="text-end">
+                    <div class="small mb-1"><i class="fas fa-clock me-1"></i> <span id="currentTime">Loading...</span></div>
+                    <span class="badge bg-danger" id="dashboardStatus">
+                        <i class="fas fa-circle me-1"></i> Loading Data...
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container-fluid py-4">
+        <!-- Dashboard Title -->
+        <div class="dashboard-title">
+            <i class="fas fa-chart-line me-2"></i>Dashboard Overview
+        </div>
+        
+        <!-- KPI Summary Row -->
+        <div class="row mb-4">
+            <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+                <div class="card kpi-card p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">TOTAL ISSUES</h6>
+                            <div class="kpi-value text-primary" id="kpiTotalIssues">0</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-tasks fa-2x text-primary opacity-50"></i>
+                        </div>
+                    </div>
+                    <div class="small text-muted mt-2">All reported issues</div>
+                </div>
+            </div>
+            <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+                <div class="card kpi-card p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">OPEN ISSUES</h6>
+                            <div class="kpi-value text-danger" id="kpiOpenIssues">0</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-exclamation-circle fa-2x text-danger opacity-50"></i>
+                        </div>
+                    </div>
+                    <div class="small text-muted mt-2">Issues pending resolution</div>
+                </div>
+            </div>
+            <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+                <div class="card kpi-card p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">CLOSED ISSUES</h6>
+                            <div class="kpi-value text-success" id="kpiClosedIssues">0</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-check-circle fa-2x text-success opacity-50"></i>
+                        </div>
+                    </div>
+                    <div class="small text-muted mt-2">Resolved issues</div>
+                </div>
+            </div>
+            <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+                <div class="card kpi-card p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">HIGH PRIORITY</h6>
+                            <div class="kpi-value text-warning" id="kpiHighPriority">0</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-flag fa-2x text-warning opacity-50"></i>
+                        </div>
+                    </div>
+                    <div class="small text-muted mt-2">P1 Priority issues</div>
+                </div>
+            </div>
+            <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+                <div class="card kpi-card p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">AGING > 1 MONTH</h6>
+                            <div class="kpi-value text-info" id="kpiAgingIssues">0</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-calendar-times fa-2x text-info opacity-50"></i>
+                        </div>
+                    </div>
+                    <div class="small text-muted mt-2">Issues older than 30 days</div>
+                </div>
+            </div>
+            <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+                <div class="card kpi-card p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">AVG AGING</h6>
+                            <div class="kpi-value text-secondary" id="kpiAvgAging">0</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-clock fa-2x text-secondary opacity-50"></i>
+                        </div>
+                    </div>
+                    <div class="small text-muted mt-2">Average age in days</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter and Search Row (Card Title removed from here) -->
+        <div class="row mb-4">
+            <div class="col-lg-12">
+                <div class="card filter-card">
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-id-badge"></i></span>
+                                    <input type="text" class="form-control" id="searchSiteId" placeholder="Search Site ID" onkeyup="applyFilters()">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-exclamation-circle"></i></span>
+                                    <select class="form-select" id="filterStatus" onchange="applyFilters()">
+                                        <option value="">All Status</option>
+                                        <option value="Open">Open</option>
+                                        <option value="Closed">Closed</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-flag"></i></span>
+                                    <select class="form-select" id="filterPriority" onchange="applyFilters()">
+                                        <option value="">All Priority</option>
+                                        <option value="P1">P1</option>
+                                        <option value="P2">P2</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                                    <select class="form-select" id="filterCircle" onchange="applyFilters()">
+                                        <option value="">All Circle</option>
+                                        <!-- Options will be populated dynamically -->
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-chart-bar"></i></span>
+                                    <select class="form-select" id="filterCategory" onchange="applyFilters()">
+                                        <option value="">All Categories</option>
+                                        <!-- Options will be populated dynamically -->
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <button class="btn btn-outline-secondary w-100" onclick="clearFilters()">
+                                    <i class="fas fa-eraser me-1"></i> Clear All Filters
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="search-result-info" id="searchResultInfo" style="display: none;">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1" id="searchResultTitle">Search Results</h6>
+                                            <small class="text-muted" id="searchResultText"></small>
+                                        </div>
+                                        <div>
+                                            <button class="btn btn-primary btn-sm" onclick="showDetailedTable()">
+                                                <i class="fas fa-table me-1"></i> Show Details
+                                            </button>
+                                            <button class="btn btn-outline-success btn-sm ms-2" onclick="exportToCSV()">
+                                                <i class="fas fa-download me-1"></i> Export
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row mb-4">
+            <div class="col-lg-4 mb-4">
+                <div class="chart-container">
+                    <h6 class="chart-title"><i class="fas fa-chart-pie"></i>Status Distribution</h6>
+                    <div style="height: 250px; position: relative;">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-4">
+                <div class="chart-container">
+                    <h6 class="chart-title"><i class="fas fa-chart-bar"></i>Priority Distribution</h6>
+                    <div style="height: 250px; position: relative;">
+                        <canvas id="priorityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-4">
+                <div class="chart-container">
+                    <h6 class="chart-title"><i class="fas fa-chart-line"></i>Top Problem Categories</h6>
+                    <div style="height: 250px; position: relative;">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Charts -->
+        <div class="row mb-4">
+            <div class="col-lg-6 mb-4">
+                <div class="chart-container">
+                    <h6 class="chart-title"><i class="fas fa-map"></i>Issues by Circle</h6>
+                    <div style="height: 250px; position: relative;">
+                        <canvas id="circleChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 mb-4">
+                <div class="chart-container">
+                    <h6 class="chart-title"><i class="fas fa-industry"></i>Issues by Vendor</h6>
+                    <div style="height: 250px; position: relative;">
+                        <canvas id="vendorChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Tables -->
+        <div class="row mb-4">
+            <!-- Top Sites with Issues -->
+            <div class="col-lg-4 mb-4">
+                <div class="chart-container">
+                    <h6 class="chart-title"><i class="fas fa-building"></i>Top Sites with Issues</h6>
+                    <div class="table-responsive" style="max-height: 300px;">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Site ID</th>
+                                    <th class="text-end">Issues</th>
+                                    <th class="text-end">Open</th>
+                                    <th class="text-end">P1</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topSitesBody">
+                                <tr><td colspan="4" class="text-center py-3">Loading data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Aging Analysis -->
+            <div class="col-lg-4 mb-4">
+                <div class="chart-container">
+                    <h6 class="chart-title"><i class="fas fa-calendar-alt"></i>Aging Analysis</h6>
+                    <div class="table-responsive" style="max-height: 300px;">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Site ID</th>
+                                    <th>Issue</th>
+                                    <th class="text-end">Aging</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="agingIssuesBody">
+                                <tr><td colspan="4" class="text-center py-3">Loading data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Vendor Performance -->
+            <div class="col-lg-4 mb-4">
+                <div class="chart-container">
+                    <h6 class="chart-title"><i class="fas fa-industry"></i>Vendor Performance</h6>
+                    <div class="table-responsive" style="max-height: 300px;">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Vendor</th>
+                                    <th class="text-end">Issues</th>
+                                    <th class="text-end">Open</th>
+                                    <th class="text-end">Avg Aging</th>
+                                </tr>
+                            </thead>
+                            <tbody id="vendorPerformanceBody">
+                                <tr><td colspan="4" class="text-center py-3">Loading data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Circle Summary -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="chart-container">
+                    <h6 class="chart-title"><i class="fas fa-map-marked-alt"></i>Circle Performance Summary</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Circle</th>
+                                    <th class="text-end">Total Issues</th>
+                                    <th class="text-end">Open Issues</th>
+                                    <th class="text-end">P1 Issues</th>
+                                    <th class="text-end">Avg Aging</th>
+                                    <th class="text-end">Unique Sites</th>
+                                    <th class="text-end">Closed Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody id="circleSummaryBody">
+                                <tr><td colspan="7" class="text-center py-3">Loading data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Issues Table (Hidden by default) -->
+        <div class="row">
+            <div class="col-12">
+                <div class="main-table-container" id="detailedTableContainer">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0" style="font-family: var(--font-plus-jakarta); font-weight: 700;">
+                            <i class="fas fa-table me-2"></i>Detailed Issues
+                        </h6>
+                        <div>
+                            <span class="info-badge me-2" id="tableCountBadge">Showing 0 issues</span>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="hideDetailedTable()">
+                                <i class="fas fa-times me-1"></i> Hide
+                            </button>
+                            <button class="btn btn-outline-success btn-sm ms-2" onclick="exportToCSV()">
+                                <i class="fas fa-download me-1"></i> Export
+                            </button>
+                        </div>
+                    </div>
+                    <div class="main-table-wrapper">
+                        <div class="table-responsive" id="issuesTableContainer">
+                            <table class="table table-striped table-hover table-sm">
+                                <thead>
+                                    <tr>
+                                        <th class="cursor-pointer" onclick="sortTable('siteId')">
+                                            Site ID <i class="fas fa-sort ms-1"></i>
+                                        </th>
+                                        <th class="cursor-pointer" onclick="sortTable('problemCategory')">
+                                            Problem <i class="fas fa-sort ms-1"></i>
+                                        </th>
+                                        <th class="cursor-pointer" onclick="sortTable('priority')">
+                                            Priority <i class="fas fa-sort ms-1"></i>
+                                        </th>
+                                        <th class="cursor-pointer" onclick="sortTable('status')">
+                                            Status <i class="fas fa-sort ms-1"></i>
+                                        </th>
+                                        <th class="cursor-pointer" onclick="sortTable('aging')">
+                                            Aging <i class="fas fa-sort ms-1"></i>
+                                        </th>
+                                        <th class="cursor-pointer" onclick="sortTable('pic')">
+                                            PIC <i class="fas fa-sort ms-1"></i>
+                                        </th>
+                                        <th class="cursor-pointer" onclick="sortTable('rootCause')">
+                                            Root Cause <i class="fas fa-sort ms-1"></i>
+                                        </th>
+                                        <th class="cursor-pointer" onclick="sortTable('action')">
+                                            Action <i class="fas fa-sort ms-1"></i>
+                                        </th>
+                                        <th>Circle</th>
+                                        <th>Vendor</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="detailedIssuesTableBody">
+                                    <!-- Data akan diisi oleh JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="text-center small text-muted">
+                    <p class="mb-1" style="font-family: var(--font-inter);">
+                        <i class="fas fa-database me-1"></i> Data Source: Google Sheets | 
+                        <i class="fas fa-clock me-1 ms-3"></i> Last Updated: <span id="lastUpdatedTime">-</span> |
+                        <i class="fas fa-info-circle me-1 ms-3"></i> Total Records: <span id="totalRecords">0</span>
+                    </p>
+                    <p class="mb-0" style="font-family: var(--font-inter);">
+                        <button class="btn btn-link btn-sm text-decoration-none" onclick="fetchCSVData()">
+                            <i class="fas fa-redo me-1"></i> Refresh Data
+                        </button>
+                        <button class="btn btn-link btn-sm text-decoration-none" onclick="toggleAutoRefresh()" id="autoRefreshToggle">
+                            <i class="fas fa-sync me-1"></i> Auto-Refresh: <span id="autoRefreshStatus">ON</span>
+                        </button>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // ==================== KONFIGURASI ====================
+        const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSchfOZU-jK0FoiBjpyWsAezO2MdnPkJUh5bKRbs1sAI6DpJ0DocsMNBL_89QMjnnho1X9x_bKwEqjD/pub?gid=0&single=true&output=csv";
+
+        // ==================== VARIABEL GLOBAL ====================
+        let allIssueData = [];
+        let filteredIssueData = [];
+        let currentSort = { column: 'aging', direction: 'desc' };
+        let statusChart, priorityChart, categoryChart, circleChart, vendorChart;
+        let autoRefreshInterval = null;
+        let isAutoRefresh = true;
+        const AUTO_REFRESH_INTERVAL = 30000; // 30 detik
+
+        // ==================== FUNGSI INISIALISASI ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Dashboard initializing...');
+            updateCurrentTime();
+            setInterval(updateCurrentTime, 1000);
+            
+            // Setup auto-refresh
+            setupAutoRefresh();
+            
+            // Load data
+            fetchCSVData();
+        });
+
+        // ==================== FUNGSI DATA ====================
+        function fetchCSVData() {
+            console.log('Fetching CSV data from:', CSV_URL);
+            showLoading(true);
+            updateDashboardStatus('loading', 'Fetching data...');
+            
+            Papa.parse(CSV_URL, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    console.log('CSV parsing complete. Rows:', results.data.length);
+                    console.log('CSV headers:', results.meta.fields);
+                    
+                    if (results.data && results.data.length > 0) {
+                        processIssueData(results.data);
+                        debugData();
+                        updateDashboardStatus('success', 'Data loaded successfully');
+                    } else {
+                        console.warn('No data found in CSV');
+                        showError('No data found in the CSV file.');
+                        updateDashboardStatus('error', 'No data found');
+                    }
+                    showLoading(false);
+                    updateLastUpdatedTime();
+                    
+                    // Hide search result info initially
+                    document.getElementById('searchResultInfo').style.display = 'none';
+                    document.getElementById('detailedTableContainer').style.display = 'none';
+                },
+                error: function(error) {
+                    console.error('Error fetching CSV:', error);
+                    showError('Failed to load data from CSV. Please check the URL or internet connection.');
+                    updateDashboardStatus('error', 'Failed to load data');
+                    showLoading(false);
+                }
+            });
+        }
+
+        function processIssueData(rawData) {
+            allIssueData = [];
+            const circles = new Set();
+            const problemCategories = new Set();
+            const vendors = new Set();
+            
+            rawData.forEach(row => {
+                try {
+                    // Extract relevant data - including Status(1) column
+                    const siteId = row['SITE ID'] || row['siteId'] || row['Site ID'] || '';
+                    const problemCategory = row['Problem Category'] || row['problemCategory'] || 'Unknown';
+                    const priority = row['Priority'] || row['priority'] || 'P2';
+                    const status = row['Status(1)'] || row['Status'] || row['status'] || 'Open';
+                    const aging = parseInt(row['Aging']) || parseInt(row['aging']) || 0;
+                    const pic = row['PIC'] || row['pic'] || '';
+                    const rootCause = row['Root Cause Category'] || row['rootCause'] || '';
+                    const action = row['Action Performed'] || row['action'] || '';
+                    const circle = row['Circle'] || row['circle'] || '';
+                    const vendor = row['Vendor'] || row['vendor'] || '';
+                    const additionalInfo = row['Additional Info'] || '';
+                    const openDate = row['Open Date'] || '';
+                    const closedDate = row['Closed Date'] || '';
+                    const countOfIssue = parseInt(row['Count of Issue']) || 1;
+                    const dataTraffic = parseFloat(row['IOH Data Traffic']) || 0;
+                    const city = row['City'] || '';
+                    const area = row['Area IOH'] || '';
+                    
+                    if (!siteId) return;
+                    
+                    // Clean and normalize data
+                    const cleanStatus = String(status).trim();
+                    const cleanPriority = String(priority).trim().toUpperCase();
+                    const cleanCircle = String(circle).trim();
+                    const cleanVendor = String(vendor).trim();
+                    const cleanCategory = String(problemCategory).trim();
+                    
+                    // Add to sets for filters
+                    if (cleanCircle) circles.add(cleanCircle);
+                    if (cleanCategory) problemCategories.add(cleanCategory);
+                    if (cleanVendor) vendors.add(cleanVendor);
+                    
+                    const processedRow = {
+                        raw: row,
+                        siteId: siteId,
+                        problemCategory: cleanCategory,
+                        priority: cleanPriority === 'P1' ? 'P1' : 'P2',
+                        status: cleanStatus === 'Closed' ? 'Closed' : 'Open',
+                        aging: aging,
+                        pic: pic,
+                        rootCause: rootCause,
+                        action: action,
+                        circle: cleanCircle,
+                        vendor: cleanVendor,
+                        additionalInfo: additionalInfo,
+                        openDate: openDate,
+                        closedDate: closedDate,
+                        countOfIssue: countOfIssue,
+                        dataTraffic: dataTraffic,
+                        city: city,
+                        area: area,
+                        isHighAging: aging > 30,
+                        isCritical: aging > 60
+                    };
+                    
+                    allIssueData.push(processedRow);
+                } catch (error) {
+                    console.warn('Error processing row:', row, error);
+                }
+            });
+            
+            console.log(`Processed ${allIssueData.length} issue records`);
+            
+            // Update filter options
+            updateFilterOptions('filterCircle', Array.from(circles));
+            updateFilterOptions('filterCategory', Array.from(problemCategories));
+            
+            applyFilters();
+        }
+
+        function updateFilterOptions(selectId, options) {
+            const filterSelect = document.getElementById(selectId);
+            if (!filterSelect) return;
+            
+            filterSelect.innerHTML = '<option value="">All</option>';
+            
+            Array.from(options).sort().forEach(option => {
+                if (option && option.trim()) {
+                    const opt = document.createElement('option');
+                    opt.value = option;
+                    opt.textContent = option;
+                    filterSelect.appendChild(opt);
+                }
+            });
+        }
+
+        function debugData() {
+            console.log('=== DEBUG DATA ===');
+            console.log('Total records:', allIssueData.length);
+            if (allIssueData.length > 0) {
+                console.log('Sample records (first 3):', allIssueData.slice(0, 3));
+                console.log('All statuses:', [...new Set(allIssueData.map(d => d.status))]);
+                console.log('All priorities:', [...new Set(allIssueData.map(d => d.priority))]);
+                console.log('All problem categories:', [...new Set(allIssueData.map(d => d.problemCategory))]);
+                console.log('All circles:', [...new Set(allIssueData.map(d => d.circle))]);
+                console.log('All vendors:', [...new Set(allIssueData.map(d => d.vendor))]);
+                console.log('Aging range:', Math.min(...allIssueData.map(d => d.aging)), '-', Math.max(...allIssueData.map(d => d.aging)));
+            }
+            console.log('=== END DEBUG ===');
+        }
+
+        // ==================== FUNGSI FILTER & PENCARIAN ====================
+        function applyFilters() {
+            const searchSiteId = document.getElementById('searchSiteId').value.toLowerCase().trim();
+            const filterStatus = document.getElementById('filterStatus').value;
+            const filterPriority = document.getElementById('filterPriority').value;
+            const filterCircle = document.getElementById('filterCircle').value;
+            const filterCategory = document.getElementById('filterCategory').value;
+            
+            filteredIssueData = allIssueData.filter(issue => {
+                const siteIdMatch = !searchSiteId || 
+                    issue.siteId.toLowerCase().includes(searchSiteId);
+                
+                const statusMatch = !filterStatus || 
+                    issue.status === filterStatus;
+                
+                const priorityMatch = !filterPriority || 
+                    issue.priority === filterPriority;
+                
+                const circleMatch = !filterCircle || 
+                    issue.circle === filterCircle;
+                
+                const categoryMatch = !filterCategory || 
+                    issue.problemCategory === filterCategory;
+                
+                return siteIdMatch && statusMatch && priorityMatch && circleMatch && categoryMatch;
+            });
+            
+            updateSummaryKPIs();
+            updateCharts();
+            updateSummaryTables();
+            updateSearchResultInfo();
+        }
+
+        function updateSearchResultInfo() {
+            const searchResultInfo = document.getElementById('searchResultInfo');
+            const searchResultText = document.getElementById('searchResultText');
+            const searchResultTitle = document.getElementById('searchResultTitle');
+            
+            const searchSiteId = document.getElementById('searchSiteId').value;
+            const filterStatus = document.getElementById('filterStatus').value;
+            const filterPriority = document.getElementById('filterPriority').value;
+            const filterCircle = document.getElementById('filterCircle').value;
+            const filterCategory = document.getElementById('filterCategory').value;
+            
+            // Build search description
+            let searchDescription = [];
+            if (searchSiteId) searchDescription.push(`Site ID: "${searchSiteId}"`);
+            if (filterStatus) searchDescription.push(`Status: ${filterStatus}`);
+            if (filterPriority) searchDescription.push(`Priority: ${filterPriority}`);
+            if (filterCircle) searchDescription.push(`Circle: ${filterCircle}`);
+            if (filterCategory) searchDescription.push(`Category: ${filterCategory}`);
+            
+            if (searchDescription.length > 0) {
+                searchResultTitle.textContent = `Search Results (${filteredIssueData.length} issues found)`;
+                searchResultText.textContent = `Filters applied: ${searchDescription.join(', ')}`;
+                searchResultInfo.style.display = 'block';
+                
+                // Hide detailed table if showing
+                document.getElementById('detailedTableContainer').style.display = 'none';
+            } else {
+                searchResultInfo.style.display = 'none';
+            }
+        }
+
+        function clearFilters() {
+            document.getElementById('searchSiteId').value = '';
+            document.getElementById('filterStatus').value = '';
+            document.getElementById('filterPriority').value = '';
+            document.getElementById('filterCircle').value = '';
+            document.getElementById('filterCategory').value = '';
+            
+            applyFilters();
+        }
+
+        function showDetailedTable() {
+            document.getElementById('detailedTableContainer').style.display = 'flex';
+            updateDetailedIssuesTable();
+            
+            // Scroll to the table
+            document.getElementById('detailedTableContainer').scrollIntoView({ 
+                behavior: 'smooth' 
+            });
+        }
+
+        function hideDetailedTable() {
+            document.getElementById('detailedTableContainer').style.display = 'none';
+        }
+
+        // ==================== FUNGSI UPDATE UI ====================
+        function updateSummaryKPIs() {
+            const totalIssues = allIssueData.length;
+            const openIssues = allIssueData.filter(issue => issue.status === 'Open').length;
+            const closedIssues = allIssueData.filter(issue => issue.status === 'Closed').length;
+            const highPriorityIssues = allIssueData.filter(issue => issue.priority === 'P1').length;
+            const agingIssues = allIssueData.filter(issue => issue.aging > 30).length;
+            
+            // Calculate average aging for open issues
+            const openAgingIssues = allIssueData.filter(issue => issue.status === 'Open');
+            const avgAging = openAgingIssues.length > 0 
+                ? Math.round(openAgingIssues.reduce((sum, issue) => sum + issue.aging, 0) / openAgingIssues.length)
+                : 0;
+            
+            document.getElementById('kpiTotalIssues').textContent = totalIssues.toLocaleString();
+            document.getElementById('kpiOpenIssues').textContent = openIssues.toLocaleString();
+            document.getElementById('kpiClosedIssues').textContent = closedIssues.toLocaleString();
+            document.getElementById('kpiHighPriority').textContent = highPriorityIssues.toLocaleString();
+            document.getElementById('kpiAgingIssues').textContent = agingIssues.toLocaleString();
+            document.getElementById('kpiAvgAging').textContent = avgAging + ' days';
+            
+            // Update search results text
+            document.getElementById('totalRecords').textContent = allIssueData.length;
+        }
+
+        function updateCharts() {
+            // Update Status Chart with data labels
+            const statusCounts = {
+                'Open': filteredIssueData.filter(issue => issue.status === 'Open').length,
+                'Closed': filteredIssueData.filter(issue => issue.status === 'Closed').length
+            };
+            
+            if (statusChart) statusChart.destroy();
+            const statusCtx = document.getElementById('statusChart');
+            if (statusCtx) {
+                statusChart = new Chart(statusCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Open', 'Closed'],
+                        datasets: [{
+                            data: [statusCounts.Open, statusCounts.Closed],
+                            backgroundColor: ['#dc3545', '#28a745'],
+                            borderWidth: 1,
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    font: {
+                                        family: 'Inter',
+                                        size: 11
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.raw || 0;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        return `${label}: ${value} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // Add data labels using custom plugin
+                addDataLabels(statusChart);
+            }
+            
+            // Update Priority Chart with data labels
+            const priorityCounts = {
+                'P1': filteredIssueData.filter(issue => issue.priority === 'P1').length,
+                'P2': filteredIssueData.filter(issue => issue.priority === 'P2').length
+            };
+            
+            if (priorityChart) priorityChart.destroy();
+            const priorityCtx = document.getElementById('priorityChart');
+            if (priorityCtx) {
+                priorityChart = new Chart(priorityCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['P1 (High)', 'P2 (Normal)'],
+                        datasets: [{
+                            label: 'Issues',
+                            data: [priorityCounts.P1, priorityCounts.P2],
+                            backgroundColor: ['#fd7e14', '#6c757d'],
+                            borderWidth: 0,
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.raw || 0;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        return `Count: ${value} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    display: true
+                                },
+                                ticks: {
+                                    font: {
+                                        family: 'Inter',
+                                        size: 10
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    font: {
+                                        family: 'Inter',
+                                        size: 11
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // Add data labels
+                addDataLabels(priorityChart);
+            }
+            
+            // Update Category Chart with different colors per category
+            const categoryCounts = {};
+            filteredIssueData.forEach(issue => {
+                const category = issue.problemCategory || 'Unknown';
+                categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+            });
+            
+            const sortedCategories = Object.entries(categoryCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5);
+            
+            // Generate different colors for each category
+            const categoryColors = [
+                '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', 
+                '#ec4899', '#14b8a6', '#f97316', '#6b7280', '#6366f1'
+            ];
+            
+            if (categoryChart) categoryChart.destroy();
+            const categoryCtx = document.getElementById('categoryChart');
+            if (categoryCtx) {
+                if (sortedCategories.length === 1) {
+                    categoryChart = new Chart(categoryCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: [sortedCategories[0][0]],
+                            datasets: [{
+                                data: [sortedCategories[0][1]],
+                                backgroundColor: [categoryColors[0]],
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        font: {
+                                            family: 'Inter',
+                                            size: 11
+                                        }
+                                    }
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const label = context.label || '';
+                                            const value = context.raw || 0;
+                                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                            return `${label}: ${value} (${percentage}%)`;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    
+                    addDataLabels(categoryChart);
+                } else if (sortedCategories.length > 0) {
+                    categoryChart = new Chart(categoryCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: sortedCategories.map(item => item[0]),
+                            datasets: [{
+                                label: 'Count',
+                                data: sortedCategories.map(item => item[1]),
+                                backgroundColor: sortedCategories.map((_, index) => categoryColors[index % categoryColors.length]),
+                                borderWidth: 0,
+                                borderRadius: 4
+                            }]
+                        },
+                        options: {
+                            indexAxis: 'y',
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const value = context.raw || 0;
+                                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                            return `Count: ${value} (${percentage}%)`;
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    beginAtZero: true,
+                                    grid: {
+                                        display: true
+                                    },
+                                    ticks: {
+                                        font: {
+                                            family: 'Inter',
+                                            size: 10
+                                        }
+                                    }
+                                },
+                                y: {
+                                    grid: {
+                                        display: false
+                                    },
+                                    ticks: {
+                                        font: {
+                                            family: 'Inter',
+                                            size: 10
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    
+                    addDataLabels(categoryChart);
+                } else {
+                    categoryCtx.parentElement.innerHTML = '<div class="text-center py-5 text-muted">No category data available</div>';
+                }
+            }
+            
+            // Update Circle Chart
+            const circleCounts = {};
+            filteredIssueData.forEach(issue => {
+                const circle = issue.circle || 'Unknown';
+                circleCounts[circle] = (circleCounts[circle] || 0) + 1;
+            });
+            
+            const sortedCircles = Object.entries(circleCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5);
+            
+            if (circleChart) circleChart.destroy();
+            const circleCtx = document.getElementById('circleChart');
+            if (circleCtx) {
+                circleChart = new Chart(circleCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: sortedCircles.map(item => item[0]),
+                        datasets: [{
+                            data: sortedCircles.map(item => item[1]),
+                            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    font: {
+                                        family: 'Inter',
+                                        size: 10
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.raw || 0;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        return `${label}: ${value} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                addDataLabels(circleChart);
+            }
+            
+            // Update Vendor Chart
+            const vendorCounts = {};
+            filteredIssueData.forEach(issue => {
+                const vendor = issue.vendor || 'Unknown';
+                vendorCounts[vendor] = (vendorCounts[vendor] || 0) + 1;
+            });
+            
+            const sortedVendors = Object.entries(vendorCounts)
+                .sort((a, b) => b[1] - a[1]);
+            
+            if (vendorChart) vendorChart.destroy();
+            const vendorCtx = document.getElementById('vendorChart');
+            if (vendorCtx) {
+                vendorChart = new Chart(vendorCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: sortedVendors.map(item => item[0]),
+                        datasets: [{
+                            label: 'Issues',
+                            data: sortedVendors.map(item => item[1]),
+                            backgroundColor: sortedVendors.map(item => 
+                                item[0].toLowerCase().includes('nokia') ? '#142c8e' :
+                                item[0].toLowerCase().includes('huawei') ? '#d4001a' :
+                                '#6b7280'
+                            ),
+                            borderWidth: 0,
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.raw || 0;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        return `Count: ${value} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    display: true
+                                },
+                                ticks: {
+                                    font: {
+                                        family: 'Inter',
+                                        size: 10
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    font: {
+                                        family: 'Inter',
+                                        size: 10
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                addDataLabels(vendorChart);
+            }
+        }
+
+        // Custom function to add data labels to charts
+        function addDataLabels(chart) {
+            // This is a simple implementation - for more advanced labels, you might want to use a plugin
+            // But since we're not using external plugins, we'll rely on tooltips
+            // The data values are already shown on hover via tooltips
+            // For bar charts, we could also add text on bars using canvas API, but that's complex
+        }
+
+        function updateSummaryTables() {
+            updateTopSitesTable();
+            updateAgingIssuesTable();
+            updateVendorPerformanceTable();
+            updateCircleSummaryTable();
+        }
+
+        function updateTopSitesTable() {
+            const tbody = document.getElementById('topSitesBody');
+            
+            if (filteredIssueData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-3">No issues found</td></tr>';
+                return;
+            }
+            
+            // Group by site ID
+            const siteStats = {};
+            filteredIssueData.forEach(issue => {
+                if (!siteStats[issue.siteId]) {
+                    siteStats[issue.siteId] = {
+                        siteId: issue.siteId,
+                        total: 0,
+                        open: 0,
+                        p1: 0
+                    };
+                }
+                
+                siteStats[issue.siteId].total++;
+                if (issue.status === 'Open') siteStats[issue.siteId].open++;
+                if (issue.priority === 'P1') siteStats[issue.siteId].p1++;
+            });
+            
+            // Convert to array and sort by total issues
+            const sortedSites = Object.values(siteStats)
+                .sort((a, b) => b.total - a.total)
+                .slice(0, 10);
+            
+            tbody.innerHTML = '';
+            
+            if (sortedSites.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-3">No site data available</td></tr>';
+                return;
+            }
+            
+            sortedSites.forEach(site => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="site-id-cell">${site.siteId}</td>
+                    <td class="text-end fw-semibold">${site.total}</td>
+                    <td class="text-end">${site.open}</td>
+                    <td class="text-end">${site.p1}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateAgingIssuesTable() {
+            const tbody = document.getElementById('agingIssuesBody');
+            
+            if (filteredIssueData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-3">No issues found</td></tr>';
+                return;
+            }
+            
+            // Filter open issues and sort by aging (descending)
+            const agingIssues = filteredIssueData
+                .filter(issue => issue.status === 'Open')
+                .sort((a, b) => b.aging - a.aging)
+                .slice(0, 10);
+            
+            tbody.innerHTML = '';
+            
+            if (agingIssues.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-3">No open issues with aging data</td></tr>';
+                return;
+            }
+            
+            agingIssues.forEach(issue => {
+                const agingBadgeClass = issue.aging > 60 ? 'badge-aging-high' : 
+                                       issue.aging > 30 ? 'badge-aging-medium' : 'badge-aging-low';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="site-id-cell">${issue.siteId}</td>
+                    <td class="text-truncate-cell" title="${issue.problemCategory}">${issue.problemCategory}</td>
+                    <td class="text-end">
+                        <span class="badge ${agingBadgeClass}">${issue.aging} days</span>
+                    </td>
+                    <td><span class="badge badge-status-Open">${issue.status}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateVendorPerformanceTable() {
+            const tbody = document.getElementById('vendorPerformanceBody');
+            
+            if (filteredIssueData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-3">No issues found</td></tr>';
+                return;
+            }
+            
+            // Group by vendor
+            const vendorStats = {};
+            filteredIssueData.forEach(issue => {
+                const vendor = issue.vendor || 'Unknown';
+                if (!vendorStats[vendor]) {
+                    vendorStats[vendor] = {
+                        vendor: vendor,
+                        total: 0,
+                        open: 0,
+                        totalAging: 0,
+                        count: 0
+                    };
+                }
+                
+                vendorStats[vendor].total++;
+                if (issue.status === 'Open') vendorStats[vendor].open++;
+                if (issue.status === 'Open') {
+                    vendorStats[vendor].totalAging += issue.aging;
+                    vendorStats[vendor].count++;
+                }
+            });
+            
+            // Calculate averages and convert to array
+            const vendorArray = Object.values(vendorStats).map(vendor => ({
+                ...vendor,
+                avgAging: vendor.count > 0 ? Math.round(vendor.totalAging / vendor.count) : 0
+            })).sort((a, b) => b.total - a.total);
+            
+            tbody.innerHTML = '';
+            
+            vendorArray.forEach(vendor => {
+                const vendorLogoClass = vendor.vendor.toLowerCase().includes('nokia') ? 'vendor-nokia' :
+                                      vendor.vendor.toLowerCase().includes('huawei') ? 'vendor-huawei' : 'vendor-other';
+                const vendorInitial = vendor.vendor.charAt(0).toUpperCase();
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <span class="vendor-logo ${vendorLogoClass}">${vendorInitial}</span>
+                        ${vendor.vendor}
+                    </td>
+                    <td class="text-end fw-semibold">${vendor.total}</td>
+                    <td class="text-end">${vendor.open}</td>
+                    <td class="text-end">${vendor.avgAging}d</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateCircleSummaryTable() {
+            const tbody = document.getElementById('circleSummaryBody');
+            
+            if (filteredIssueData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-3">No issues found</td></tr>';
+                return;
+            }
+            
+            // Group by circle
+            const circleStats = {};
+            filteredIssueData.forEach(issue => {
+                const circle = issue.circle || 'Unknown';
+                if (!circleStats[circle]) {
+                    circleStats[circle] = {
+                        circle: circle,
+                        total: 0,
+                        open: 0,
+                        p1: 0,
+                        totalAging: 0,
+                        openCount: 0,
+                        sites: new Set()
+                    };
+                }
+                
+                circleStats[circle].total++;
+                if (issue.status === 'Open') {
+                    circleStats[circle].open++;
+                    circleStats[circle].totalAging += issue.aging;
+                    circleStats[circle].openCount++;
+                }
+                if (issue.priority === 'P1') circleStats[circle].p1++;
+                circleStats[circle].sites.add(issue.siteId);
+            });
+            
+            // Calculate metrics and convert to array
+            const circleArray = Object.values(circleStats).map(circle => ({
+                ...circle,
+                avgAging: circle.openCount > 0 ? Math.round(circle.totalAging / circle.openCount) : 0,
+                uniqueSites: circle.sites.size,
+                closedRate: circle.total > 0 ? Math.round(((circle.total - circle.open) / circle.total) * 100) : 0
+            })).sort((a, b) => b.total - a.total);
+            
+            tbody.innerHTML = '';
+            
+            circleArray.forEach(circle => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${circle.circle}</strong></td>
+                    <td class="text-end">${circle.total}</td>
+                    <td class="text-end">
+                        ${circle.open}
+                        <span class="stats-badge ${circle.open > 0 ? 'stats-badge-danger' : 'stats-badge-success'}">
+                            ${Math.round((circle.open / circle.total) * 100)}%
+                        </span>
+                    </td>
+                    <td class="text-end">
+                        ${circle.p1}
+                        <span class="stats-badge ${circle.p1 > 0 ? 'stats-badge-warning' : 'stats-badge-success'}">
+                            ${Math.round((circle.p1 / circle.total) * 100)}%
+                        </span>
+                    </td>
+                    <td class="text-end">
+                        ${circle.avgAging}d
+                        <span class="stats-badge ${circle.avgAging > 30 ? 'stats-badge-danger' : circle.avgAging > 15 ? 'stats-badge-warning' : 'stats-badge-success'}">
+                            ${circle.avgAging > 30 ? 'High' : circle.avgAging > 15 ? 'Medium' : 'Low'}
+                        </span>
+                    </td>
+                    <td class="text-end">${circle.uniqueSites}</td>
+                    <td class="text-end">
+                        ${circle.closedRate}%
+                        <span class="stats-badge ${circle.closedRate > 80 ? 'stats-badge-success' : circle.closedRate > 50 ? 'stats-badge-warning' : 'stats-badge-danger'}">
+                            ${circle.closedRate > 80 ? 'Good' : circle.closedRate > 50 ? 'Fair' : 'Poor'}
+                        </span>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateDetailedIssuesTable() {
+            const tbody = document.getElementById('detailedIssuesTableBody');
+            const countBadge = document.getElementById('tableCountBadge');
+            
+            if (filteredIssueData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="10" class="text-center py-5">
+                            <i class="fas fa-search fa-2x text-muted mb-3"></i><br>
+                            No issues found matching your criteria
+                        </td>
+                    </tr>
+                `;
+                countBadge.textContent = 'Showing 0 issues';
+                return;
+            }
+            
+            let sortedData = [...filteredIssueData];
+            
+            // Apply sorting
+            sortedData.sort((a, b) => {
+                const aVal = a[currentSort.column];
+                const bVal = b[currentSort.column];
+                
+                if (currentSort.column === 'aging') {
+                    return currentSort.direction === 'asc' ? aVal - bVal : bVal - aVal;
+                }
+                
+                if (typeof aVal === 'string' && typeof bVal === 'string') {
+                    return currentSort.direction === 'asc'
+                        ? aVal.localeCompare(bVal)
+                        : bVal.localeCompare(aVal);
+                }
+                
+                return 0;
+            });
+            
+            tbody.innerHTML = '';
+            
+            sortedData.forEach(issue => {
+                const agingBadgeClass = issue.aging > 60 ? 'badge-aging-high' : 
+                                       issue.aging > 30 ? 'badge-aging-medium' : 'badge-aging-low';
+                
+                // Determine aging indicator
+                let agingIndicator = '';
+                if (issue.aging > 60) {
+                    agingIndicator = '<span class="aging-indicator aging-critical" title="Critical: >60 days"></span>';
+                } else if (issue.aging > 30) {
+                    agingIndicator = '<span class="aging-indicator aging-warning" title="Warning: 30-60 days"></span>';
+                } else {
+                    agingIndicator = '<span class="aging-indicator aging-normal" title="Normal: ≤30 days"></span>';
+                }
+                
+                // Truncate long text
+                const truncatedAction = issue.action && issue.action.length > 50 ? 
+                    issue.action.substring(0, 47) + '...' : (issue.action || '');
+                
+                const truncatedRootCause = issue.rootCause && issue.rootCause.length > 40 ? 
+                    issue.rootCause.substring(0, 37) + '...' : (issue.rootCause || '');
+                
+                // Vendor logo
+                const vendorLogoClass = issue.vendor.toLowerCase().includes('nokia') ? 'vendor-nokia' :
+                                      issue.vendor.toLowerCase().includes('huawei') ? 'vendor-huawei' : 'vendor-other';
+                const vendorInitial = issue.vendor ? issue.vendor.charAt(0).toUpperCase() : '?';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="site-id-cell">${issue.siteId}</td>
+                    <td title="${issue.problemCategory}">${issue.problemCategory}</td>
+                    <td><span class="badge badge-priority-${issue.priority}">${issue.priority}</span></td>
+                    <td><span class="badge badge-status-${issue.status}">${issue.status}</span></td>
+                    <td>
+                        ${agingIndicator}
+                        <span class="badge ${agingBadgeClass}">${issue.aging}d</span>
+                    </td>
+                    <td>${issue.pic || ''}</td>
+                    <td class="text-truncate-cell tooltip-cell" title="${issue.rootCause}">${truncatedRootCause}</td>
+                    <td class="text-truncate-cell tooltip-cell" title="${issue.action}">${truncatedAction}</td>
+                    <td>${issue.circle || ''}</td>
+                    <td>
+                        <span class="vendor-logo ${vendorLogoClass}">${vendorInitial}</span>
+                        ${issue.vendor || ''}
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            countBadge.textContent = `Showing ${filteredIssueData.length} issues`;
+        }
+
+        function sortTable(column) {
+            if (currentSort.column === column) {
+                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.column = column;
+                currentSort.direction = 'desc';
+            }
+            
+            updateDetailedIssuesTable();
+        }
+
+        // ==================== FUNGSI UTILITAS ====================
+        function exportToCSV() {
+            if (filteredIssueData.length === 0) {
+                alert('No data to export!');
+                return;
+            }
+            
+            const headers = ['SITE ID', 'Problem Category', 'Priority', 'Status', 'Aging', 'PIC', 
+                           'Root Cause Category', 'Action Performed', 'Circle', 'Vendor', 'Open Date', 'Closed Date'];
+            
+            const csvData = [
+                headers.join(','),
+                ...filteredIssueData.map(issue => [
+                    issue.siteId,
+                    `"${(issue.problemCategory || '').replace(/"/g, '""')}"`,
+                    issue.priority,
+                    issue.status,
+                    issue.aging,
+                    `"${(issue.pic || '').replace(/"/g, '""')}"`,
+                    `"${(issue.rootCause || '').replace(/"/g, '""')}"`,
+                    `"${(issue.action || '').replace(/"/g, '""')}"`,
+                    issue.circle || '',
+                    issue.vendor || '',
+                    issue.openDate || '',
+                    issue.closedDate || ''
+                ].join(','))
+            ].join('\n');
+            
+            const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `issues_dashboard_${new Date().toISOString().slice(0,10)}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert(`Exported ${filteredIssueData.length} issues to CSV`);
+        }
+
+        function updateCurrentTime() {
+            const now = new Date();
+            const options = { 
+                weekday: 'short', 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric',
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit',
+                hour12: false
+            };
+            document.getElementById('currentTime').textContent = 
+                now.toLocaleDateString('en-GB', options).replace(',', '');
+        }
+
+        function updateLastUpdatedTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-GB', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            });
+            document.getElementById('lastUpdatedTime').textContent = timeString;
+        }
+
+        function updateDashboardStatus(status, message) {
+            const badge = document.getElementById('dashboardStatus');
+            
+            switch(status) {
+                case 'loading':
+                    badge.className = 'badge bg-warning';
+                    badge.innerHTML = '<i class="fas fa-sync fa-spin me-1"></i> ' + message;
+                    break;
+                case 'success':
+                    badge.className = 'badge bg-success';
+                    badge.innerHTML = '<i class="fas fa-check-circle me-1"></i> ' + message;
+                    break;
+                case 'error':
+                    badge.className = 'badge bg-danger';
+                    badge.innerHTML = '<i class="fas fa-exclamation-circle me-1"></i> ' + message;
+                    break;
+            }
+        }
+
+        function showLoading(show) {
+            const loadingDiv = document.getElementById('loadingSpinner');
+            if (loadingDiv) {
+                loadingDiv.style.display = show ? 'flex' : 'none';
+            }
+        }
+
+        function setupAutoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+            }
+            
+            autoRefreshInterval = setInterval(() => {
+                if (isAutoRefresh) {
+                    console.log('Auto-refreshing data...');
+                    fetchCSVData();
+                }
+            }, AUTO_REFRESH_INTERVAL);
+        }
+
+        function toggleAutoRefresh() {
+            isAutoRefresh = !isAutoRefresh;
+            const toggleButton = document.getElementById('autoRefreshToggle');
+            const statusSpan = document.getElementById('autoRefreshStatus');
+            
+            if (isAutoRefresh) {
+                setupAutoRefresh();
+                statusSpan.textContent = 'ON';
+                toggleButton.classList.remove('btn-outline-danger');
+                toggleButton.classList.add('btn-outline-success');
+                console.log('Auto-refresh enabled');
+            } else {
+                if (autoRefreshInterval) {
+                    clearInterval(autoRefreshInterval);
+                    autoRefreshInterval = null;
+                }
+                statusSpan.textContent = 'OFF';
+                toggleButton.classList.remove('btn-outline-success');
+                toggleButton.classList.add('btn-outline-danger');
+                console.log('Auto-refresh disabled');
+            }
+        }
+
+        // ==================== TROUBLESHOOTING FUNCTIONS ====================
+        function testCSVConnection() {
+            console.log('Testing CSV connection...');
+            fetch(CSV_URL)
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    return response.text();
+                })
+                .then(data => {
+                    console.log('First 500 chars of response:', data.substring(0, 500));
+                    alert('CSV connection successful! Check console for details.');
+                })
+                .catch(error => {
+                    console.error('CSV connection failed:', error);
+                    alert('CSV connection failed. Check console for error details.');
+                });
+        }
+    </script>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
