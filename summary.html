@@ -16,7 +16,7 @@
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Chart.js Data Labels Plugin (tetap di-include tapi tidak digunakan untuk pie chart) -->
+    <!-- Chart.js Data Labels Plugin -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.min.js"></script>
 
     <style>
@@ -1158,7 +1158,6 @@
                                     }
                                 }
                             },
-                            // DATALABELS DIHAPUS
                             tooltip: {
                                 callbacks: {
                                     label: function(context) {
@@ -1175,7 +1174,7 @@
                 });
             }
             
-            // Update Priority Chart - label di ujung bar
+            // Update Priority Chart - dengan skala axis yang disesuaikan dan warna label hitam
             const priorityCounts = {
                 'P1': filteredIssueData.filter(issue => issue.priority === 'P1').length,
                 'P2': filteredIssueData.filter(issue => issue.priority === 'P2').length
@@ -1184,6 +1183,9 @@
             if (priorityChart) priorityChart.destroy();
             const priorityCtx = document.getElementById('priorityChart');
             if (priorityCtx) {
+                const maxValue = Math.max(priorityCounts.P1, priorityCounts.P2);
+                const yAxisMax = Math.ceil(maxValue * 1.2); // Memberi ruang 20% di atas nilai tertinggi
+                
                 priorityChart = new Chart(priorityCtx, {
                     type: 'bar',
                     data: {
@@ -1203,10 +1205,10 @@
                             legend: { display: false },
                             datalabels: {
                                 display: true,
-                                color: '#1e293b',
+                                color: '#000000', // Hitam pekat
                                 font: {
                                     family: 'Inter',
-                                    weight: '600',
+                                    weight: 'bold',
                                     size: 12
                                 },
                                 formatter: (value) => {
@@ -1230,6 +1232,7 @@
                         scales: {
                             y: {
                                 beginAtZero: true,
+                                max: yAxisMax, // Menyesuaikan max axis
                                 grid: {
                                     display: true
                                 },
@@ -1237,7 +1240,8 @@
                                     font: {
                                         family: 'Inter',
                                         size: 10
-                                    }
+                                    },
+                                    stepSize: Math.ceil(maxValue / 5) // Membuat step yang proporsional
                                 }
                             },
                             x: {
@@ -1256,7 +1260,7 @@
                 });
             }
             
-            // Update Category Chart - label di ujung bar (horizontal bar)
+            // Update Category Chart - dengan warna label hitam
             const categoryCounts = {};
             filteredIssueData.forEach(issue => {
                 const category = issue.problemCategory || 'Unknown';
@@ -1303,7 +1307,7 @@
                                 },
                                 datalabels: {
                                     display: true,
-                                    color: 'white',
+                                    color: '#000000', // Hitam pekat
                                     font: {
                                         family: 'Inter',
                                         weight: 'bold',
@@ -1353,10 +1357,10 @@
                                 legend: { display: false },
                                 datalabels: {
                                     display: true,
-                                    color: '#1e293b',
+                                    color: '#000000', // Hitam pekat
                                     font: {
                                         family: 'Inter',
-                                        weight: '600',
+                                        weight: 'bold',
                                         size: 11
                                     },
                                     formatter: (value) => {
@@ -1446,7 +1450,6 @@
                                     }
                                 }
                             },
-                            // DATALABELS DIHAPUS
                             tooltip: {
                                 callbacks: {
                                     label: function(context) {
@@ -1463,7 +1466,7 @@
                 });
             }
             
-            // Update Vendor Chart - label di ujung bar
+            // Update Vendor Chart - dengan warna label hitam
             const vendorCounts = {};
             filteredIssueData.forEach(issue => {
                 const vendor = issue.vendor || 'Unknown';
@@ -1499,10 +1502,10 @@
                             legend: { display: false },
                             datalabels: {
                                 display: true,
-                                color: '#1e293b',
+                                color: '#000000', // Hitam pekat
                                 font: {
                                     family: 'Inter',
-                                    weight: '600',
+                                    weight: 'bold',
                                     size: 11
                                 },
                                 formatter: (value) => {
