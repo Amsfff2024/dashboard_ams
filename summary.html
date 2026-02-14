@@ -16,7 +16,7 @@
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Chart.js Data Labels Plugin -->
+    <!-- Chart.js Data Labels Plugin (tetap di-include tapi tidak digunakan untuk pie chart) -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.min.js"></script>
 
     <style>
@@ -381,11 +381,11 @@
         .vendor-huawei { background: #d4001a; color: white; }
         .vendor-other { background: #6b7280; color: white; }
         
-        /* CHART TITLE - Diperkecil ukuran fontnya */
+        /* CHART TITLE */
         .chart-title {
             font-family: var(--font-plus-jakarta);
             font-weight: 600;
-            font-size: 14px !important; /* Dipaksa 14px */
+            font-size: 14px !important;
             margin-bottom: 16px;
             color: #1e293b;
         }
@@ -604,7 +604,7 @@
             </div>
         </div>
 
-        <!-- Charts Row - Semua chart title sudah diperkecil fontnya -->
+        <!-- Charts Row -->
         <div class="row mb-4">
             <div class="col-lg-4 mb-4">
                 <div class="chart-container">
@@ -632,7 +632,7 @@
             </div>
         </div>
 
-        <!-- Additional Charts - Issues by Circle title sudah diperkecil -->
+        <!-- Additional Charts -->
         <div class="row mb-4">
             <div class="col-lg-6 mb-4">
                 <div class="chart-container">
@@ -652,7 +652,7 @@
             </div>
         </div>
 
-        <!-- Summary Tables - Semua title table juga diperkecil -->
+        <!-- Summary Tables -->
         <div class="row mb-4">
             <!-- Top Sites with Issues -->
             <div class="col-lg-4 mb-4">
@@ -1124,7 +1124,7 @@
         }
 
         function updateCharts() {
-            // Update Status Chart - dengan label di dalam (menampilkan value dan percentage) - FONT LEBIH KECIL
+            // Update Status Chart - TANPA DATA LABEL
             const statusCounts = {
                 'Open': filteredIssueData.filter(issue => issue.status === 'Open').length,
                 'Closed': filteredIssueData.filter(issue => issue.status === 'Closed').length
@@ -1155,46 +1155,10 @@
                                     font: {
                                         family: 'Inter',
                                         size: 10
-                                    },
-                                    // Menampilkan nilai di legend juga
-                                    generateLabels: function(chart) {
-                                        const data = chart.data;
-                                        if (data.labels.length && data.datasets.length) {
-                                            const dataset = data.datasets[0];
-                                            return data.labels.map((label, i) => {
-                                                const value = dataset.data[i];
-                                                const total = dataset.data.reduce((a, b) => a + b, 0);
-                                                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                                return {
-                                                    text: `${label}: ${value} (${percentage}%)`,
-                                                    fillStyle: dataset.backgroundColor[i],
-                                                    hidden: false,
-                                                    index: i
-                                                };
-                                            });
-                                        }
-                                        return [];
                                     }
                                 }
                             },
-                            datalabels: {
-                                display: true,
-                                color: 'white',
-                                font: {
-                                    family: 'Inter',
-                                    weight: 'bold',
-                                    size: 11
-                                },
-                                formatter: (value, context) => {
-                                    const total = context.dataset.data.reduce((acc, val) => acc + val, 0);
-                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                    return `${value} (${percentage}%)`;
-                                },
-                                anchor: 'center',
-                                align: 'center',
-                                offset: 0,
-                                clamp: true
-                            },
+                            // DATALABELS DIHAPUS
                             tooltip: {
                                 callbacks: {
                                     label: function(context) {
@@ -1445,7 +1409,7 @@
                 }
             }
             
-            // Update Circle Chart - dengan label di dalam (menampilkan value dan percentage) - FONT LEBIH KECIL
+            // Update Circle Chart - TANPA DATA LABEL
             const circleCounts = {};
             filteredIssueData.forEach(issue => {
                 const circle = issue.circle || 'Unknown';
@@ -1479,63 +1443,10 @@
                                     font: {
                                         family: 'Inter',
                                         size: 9
-                                    },
-                                    generateLabels: function(chart) {
-                                        const data = chart.data;
-                                        if (data.labels.length && data.datasets.length) {
-                                            const dataset = data.datasets[0];
-                                            return data.labels.map((label, i) => {
-                                                const value = dataset.data[i];
-                                                const total = dataset.data.reduce((a, b) => a + b, 0);
-                                                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                                return {
-                                                    text: `${label}: ${value} (${percentage}%)`,
-                                                    fillStyle: dataset.backgroundColor[i],
-                                                    hidden: false,
-                                                    index: i
-                                                };
-                                            });
-                                        }
-                                        return [];
                                     }
                                 }
                             },
-                            datalabels: {
-                                display: true,
-                                color: 'white',
-                                font: {
-                                    family: 'Inter',
-                                    weight: 'bold',
-                                    size: (context) => {
-                                        const value = context.dataset.data[context.dataIndex];
-                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                        const percentage = (value / total) * 100;
-                                        
-                                        if (percentage < 10) return 9;
-                                        if (percentage < 20) return 10;
-                                        return 11;
-                                    }
-                                },
-                                formatter: (value, context) => {
-                                    const total = context.dataset.data.reduce((acc, val) => acc + val, 0);
-                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                    
-                                    if (percentage < 8) {
-                                        return `${percentage}%`;
-                                    }
-                                    return `${value} (${percentage}%)`;
-                                },
-                                anchor: 'center',
-                                align: 'center',
-                                offset: 0,
-                                clamp: true,
-                                padding: {
-                                    top: 2,
-                                    bottom: 2,
-                                    left: 2,
-                                    right: 2
-                                }
-                            },
+                            // DATALABELS DIHAPUS
                             tooltip: {
                                 callbacks: {
                                     label: function(context) {
