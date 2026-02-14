@@ -16,6 +16,8 @@
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js Data Labels Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.min.js"></script>
 
     <style>
         :root {
@@ -378,6 +380,31 @@
         .vendor-nokia { background: #142c8e; color: white; }
         .vendor-huawei { background: #d4001a; color: white; }
         .vendor-other { background: #6b7280; color: white; }
+        
+        /* CHART TITLE */
+        .chart-title {
+            font-family: var(--font-plus-jakarta);
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 16px;
+            color: #1e293b;
+        }
+        
+        .chart-title i {
+            margin-right: 8px;
+            color: #3b82f6;
+        }
+        
+        /* DASHBOARD TITLE */
+        .dashboard-title {
+            font-family: var(--font-plus-jakarta);
+            font-weight: 700;
+            font-size: 24px;
+            color: #1e293b;
+            margin-bottom: 20px;
+            padding-left: 12px;
+            border-left: 4px solid #3b82f6;
+        }
     </style>
 </head>
 <body>
@@ -401,17 +428,109 @@
 
     <!-- Main Container -->
     <div class="container-fluid py-4">
-        <!-- Search and Filter Row -->
+        <!-- Dashboard Title -->
+        <div class="dashboard-title">
+            <i class="fas fa-chart-line me-2"></i>Dashboard Overview
+        </div>
+        
+        <!-- KPI Summary Row -->
+        <div class="row mb-4">
+            <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+                <div class="card kpi-card p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">TOTAL ISSUES</h6>
+                            <div class="kpi-value text-primary" id="kpiTotalIssues">0</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-tasks fa-2x text-primary opacity-50"></i>
+                        </div>
+                    </div>
+                    <div class="small text-muted mt-2">All reported issues</div>
+                </div>
+            </div>
+            <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+                <div class="card kpi-card p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">OPEN ISSUES</h6>
+                            <div class="kpi-value text-danger" id="kpiOpenIssues">0</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-exclamation-circle fa-2x text-danger opacity-50"></i>
+                        </div>
+                    </div>
+                    <div class="small text-muted mt-2">Issues pending resolution</div>
+                </div>
+            </div>
+            <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+                <div class="card kpi-card p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">CLOSED ISSUES</h6>
+                            <div class="kpi-value text-success" id="kpiClosedIssues">0</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-check-circle fa-2x text-success opacity-50"></i>
+                        </div>
+                    </div>
+                    <div class="small text-muted mt-2">Resolved issues</div>
+                </div>
+            </div>
+            <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+                <div class="card kpi-card p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">HIGH PRIORITY</h6>
+                            <div class="kpi-value text-warning" id="kpiHighPriority">0</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-flag fa-2x text-warning opacity-50"></i>
+                        </div>
+                    </div>
+                    <div class="small text-muted mt-2">P1 Priority issues</div>
+                </div>
+            </div>
+            <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+                <div class="card kpi-card p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">AGING > 1 MONTH</h6>
+                            <div class="kpi-value text-info" id="kpiAgingIssues">0</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-calendar-times fa-2x text-info opacity-50"></i>
+                        </div>
+                    </div>
+                    <div class="small text-muted mt-2">Issues older than 30 days</div>
+                </div>
+            </div>
+            <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+                <div class="card kpi-card p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">AVG AGING</h6>
+                            <div class="kpi-value text-secondary" id="kpiAvgAging">0</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-clock fa-2x text-secondary opacity-50"></i>
+                        </div>
+                    </div>
+                    <div class="small text-muted mt-2">Average age in days</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter and Search Row (Card Title removed from here) -->
         <div class="row mb-4">
             <div class="col-lg-12">
                 <div class="card filter-card">
                     <div class="card-body">
-                        <h6 class="card-title mb-3"><i class="fas fa-filter me-2"></i>Filters & Search</h6>
                         <div class="row g-3">
                             <div class="col-md-3">
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-id-badge"></i></span>
-                                    <input type="text" class="form-control" id="searchSiteId" placeholder="Site ID" onkeyup="applyFilters()">
+                                    <input type="text" class="form-control" id="searchSiteId" placeholder="Search Site ID" onkeyup="applyFilters()">
                                 </div>
                             </div>
                             <div class="col-md-3">
@@ -485,176 +604,28 @@
             </div>
         </div>
 
-        <!-- KPI Summary Row -->
-        <div class="row mb-4">
-            <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
-                <div class="card kpi-card p-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title">TOTAL ISSUES</h6>
-                            <div class="kpi-value text-primary" id="kpiTotalIssues">0</div>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-tasks fa-2x text-primary opacity-50"></i>
-                        </div>
-                    </div>
-                    <div class="small text-muted mt-2">All reported issues</div>
-                </div>
-            </div>
-            <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
-                <div class="card kpi-card p-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title">OPEN ISSUES</h6>
-                            <div class="kpi-value text-danger" id="kpiOpenIssues">0</div>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-exclamation-circle fa-2x text-danger opacity-50"></i>
-                        </div>
-                    </div>
-                    <div class="small text-muted mt-2">Issues pending resolution</div>
-                </div>
-            </div>
-            <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
-                <div class="card kpi-card p-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title">HIGH PRIORITY</h6>
-                            <div class="kpi-value text-warning" id="kpiHighPriority">0</div>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-flag fa-2x text-warning opacity-50"></i>
-                        </div>
-                    </div>
-                    <div class="small text-muted mt-2">P1 Priority issues</div>
-                </div>
-            </div>
-            <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
-                <div class="card kpi-card p-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title">AGING > 1 MONTH</h6>
-                            <div class="kpi-value text-info" id="kpiAgingIssues">0</div>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-calendar-times fa-2x text-info opacity-50"></i>
-                        </div>
-                    </div>
-                    <div class="small text-muted mt-2">Issues older than 30 days</div>
-                </div>
-            </div>
-            <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
-                <div class="card kpi-card p-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title">AVG AGING</h6>
-                            <div class="kpi-value text-secondary" id="kpiAvgAging">0</div>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-clock fa-2x text-secondary opacity-50"></i>
-                        </div>
-                    </div>
-                    <div class="small text-muted mt-2">Average age in days</div>
-                </div>
-            </div>
-            <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
-                <div class="card kpi-card p-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title">UNIQUE SITES</h6>
-                            <div class="kpi-value text-success" id="kpiUniqueSites">0</div>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-map-marker-alt fa-2x text-success opacity-50"></i>
-                        </div>
-                    </div>
-                    <div class="small text-muted mt-2">Sites with issues</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Additional Summary KPIs -->
-        <div class="row mb-4">
-            <div class="col-xl-3 col-lg-6 mb-3">
-                <div class="card kpi-card p-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title">TOTAL SITES</h6>
-                            <div class="kpi-value text-primary" id="kpiTotalSites">0</div>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-building fa-2x text-primary opacity-50"></i>
-                        </div>
-                    </div>
-                    <div class="small text-muted mt-2">Unique site locations</div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-lg-6 mb-3">
-                <div class="card kpi-card p-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title">CRITICAL AGING</h6>
-                            <div class="kpi-value text-danger" id="kpiCriticalAging">0</div>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-fire fa-2x text-danger opacity-50"></i>
-                        </div>
-                    </div>
-                    <div class="small text-muted mt-2">Issues > 60 days</div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-lg-6 mb-3">
-                <div class="card kpi-card p-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title">AVG DATA TRAFFIC</h6>
-                            <div class="kpi-value text-info" id="kpiAvgTraffic">0</div>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-chart-line fa-2x text-info opacity-50"></i>
-                        </div>
-                    </div>
-                    <div class="small text-muted mt-2">Average IOH traffic</div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-lg-6 mb-3">
-                <div class="card kpi-card p-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title">ISSUES PER SITE</h6>
-                            <div class="kpi-value text-warning" id="kpiIssuesPerSite">0</div>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-calculator fa-2x text-warning opacity-50"></i>
-                        </div>
-                    </div>
-                    <div class="small text-muted mt-2">Average issues per site</div>
-                </div>
-            </div>
-        </div>
-
         <!-- Charts Row -->
         <div class="row mb-4">
             <div class="col-lg-4 mb-4">
                 <div class="chart-container">
-                    <h6 class="mb-3"><i class="fas fa-chart-pie me-2"></i>Status Distribution</h6>
-                    <div style="height: 250px;">
+                    <h6 class="chart-title"><i class="fas fa-chart-pie"></i>Status Distribution</h6>
+                    <div style="height: 250px; position: relative;">
                         <canvas id="statusChart"></canvas>
                     </div>
                 </div>
             </div>
             <div class="col-lg-4 mb-4">
                 <div class="chart-container">
-                    <h6 class="mb-3"><i class="fas fa-chart-bar me-2"></i>Priority Distribution</h6>
-                    <div style="height: 250px;">
+                    <h6 class="chart-title"><i class="fas fa-chart-bar"></i>Priority Distribution</h6>
+                    <div style="height: 250px; position: relative;">
                         <canvas id="priorityChart"></canvas>
                     </div>
                 </div>
             </div>
             <div class="col-lg-4 mb-4">
                 <div class="chart-container">
-                    <h6 class="mb-3"><i class="fas fa-chart-line me-2"></i>Top Problem Categories</h6>
-                    <div style="height: 250px;">
+                    <h6 class="chart-title"><i class="fas fa-chart-line"></i>Top Problem Categories</h6>
+                    <div style="height: 250px; position: relative;">
                         <canvas id="categoryChart"></canvas>
                     </div>
                 </div>
@@ -665,16 +636,16 @@
         <div class="row mb-4">
             <div class="col-lg-6 mb-4">
                 <div class="chart-container">
-                    <h6 class="mb-3"><i class="fas fa-map me-2"></i>Issues by Circle</h6>
-                    <div style="height: 250px;">
+                    <h6 class="chart-title"><i class="fas fa-map"></i>Issues by Circle</h6>
+                    <div style="height: 250px; position: relative;">
                         <canvas id="circleChart"></canvas>
                     </div>
                 </div>
             </div>
             <div class="col-lg-6 mb-4">
                 <div class="chart-container">
-                    <h6 class="mb-3"><i class="fas fa-industry me-2"></i>Issues by Vendor</h6>
-                    <div style="height: 250px;">
+                    <h6 class="chart-title"><i class="fas fa-industry"></i>Issues by Vendor</h6>
+                    <div style="height: 250px; position: relative;">
                         <canvas id="vendorChart"></canvas>
                     </div>
                 </div>
@@ -686,7 +657,7 @@
             <!-- Top Sites with Issues -->
             <div class="col-lg-4 mb-4">
                 <div class="chart-container">
-                    <h6 class="mb-3"><i class="fas fa-building me-2"></i>Top Sites with Issues</h6>
+                    <h6 class="chart-title"><i class="fas fa-building"></i>Top Sites with Issues</h6>
                     <div class="table-responsive" style="max-height: 300px;">
                         <table class="table table-sm table-hover">
                             <thead>
@@ -708,7 +679,7 @@
             <!-- Aging Analysis -->
             <div class="col-lg-4 mb-4">
                 <div class="chart-container">
-                    <h6 class="mb-3"><i class="fas fa-calendar-alt me-2"></i>Aging Analysis</h6>
+                    <h6 class="chart-title"><i class="fas fa-calendar-alt"></i>Aging Analysis</h6>
                     <div class="table-responsive" style="max-height: 300px;">
                         <table class="table table-sm table-hover">
                             <thead>
@@ -730,7 +701,7 @@
             <!-- Vendor Performance -->
             <div class="col-lg-4 mb-4">
                 <div class="chart-container">
-                    <h6 class="mb-3"><i class="fas fa-industry me-2"></i>Vendor Performance</h6>
+                    <h6 class="chart-title"><i class="fas fa-industry"></i>Vendor Performance</h6>
                     <div class="table-responsive" style="max-height: 300px;">
                         <table class="table table-sm table-hover">
                             <thead>
@@ -754,7 +725,7 @@
         <div class="row mb-4">
             <div class="col-12">
                 <div class="chart-container">
-                    <h6 class="mb-3"><i class="fas fa-map-marked-alt me-2"></i>Circle Performance Summary</h6>
+                    <h6 class="chart-title"><i class="fas fa-map-marked-alt"></i>Circle Performance Summary</h6>
                     <div class="table-responsive">
                         <table class="table table-sm table-hover">
                             <thead>
@@ -862,6 +833,33 @@
 
     <!-- JavaScript -->
     <script>
+        // Register the plugin
+        Chart.register(ChartDataLabels);
+        
+        // Set default options for all charts
+        Chart.defaults.plugins.datalabels = {
+            display: true,
+            color: '#1e293b',
+            font: {
+                family: 'Inter',
+                weight: '600',
+                size: 11
+            },
+            formatter: (value, context) => {
+                // For pie/doughnut charts, show value and percentage
+                if (context.chart.config.type === 'doughnut' || context.chart.config.type === 'pie') {
+                    const total = context.dataset.data.reduce((acc, val) => acc + val, 0);
+                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                    return `${value} (${percentage}%)`;
+                }
+                // For bar charts, just show the value
+                return value;
+            },
+            anchor: 'end',
+            align: 'top',
+            offset: 4
+        };
+
         // ==================== KONFIGURASI ====================
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSchfOZU-jK0FoiBjpyWsAezO2MdnPkJUh5bKRbs1sAI6DpJ0DocsMNBL_89QMjnnho1X9x_bKwEqjD/pub?gid=0&single=true&output=csv";
 
@@ -934,11 +932,11 @@
             
             rawData.forEach(row => {
                 try {
-                    // Extract relevant data
+                    // Extract relevant data - including Status(1) column
                     const siteId = row['SITE ID'] || row['siteId'] || row['Site ID'] || '';
                     const problemCategory = row['Problem Category'] || row['problemCategory'] || 'Unknown';
                     const priority = row['Priority'] || row['priority'] || 'P2';
-                    const status = row['Status'] || row['status'] || row['Status(1)'] || 'Open';
+                    const status = row['Status(1)'] || row['Status'] || row['status'] || 'Open';
                     const aging = parseInt(row['Aging']) || parseInt(row['aging']) || 0;
                     const pic = row['PIC'] || row['pic'] || '';
                     const rootCause = row['Root Cause Category'] || row['rootCause'] || '';
@@ -1128,9 +1126,9 @@
         function updateSummaryKPIs() {
             const totalIssues = allIssueData.length;
             const openIssues = allIssueData.filter(issue => issue.status === 'Open').length;
+            const closedIssues = allIssueData.filter(issue => issue.status === 'Closed').length;
             const highPriorityIssues = allIssueData.filter(issue => issue.priority === 'P1').length;
             const agingIssues = allIssueData.filter(issue => issue.aging > 30).length;
-            const criticalAgingIssues = allIssueData.filter(issue => issue.aging > 60).length;
             
             // Calculate average aging for open issues
             const openAgingIssues = allIssueData.filter(issue => issue.status === 'Open');
@@ -1138,35 +1136,19 @@
                 ? Math.round(openAgingIssues.reduce((sum, issue) => sum + issue.aging, 0) / openAgingIssues.length)
                 : 0;
             
-            // Count unique sites
-            const uniqueSites = new Set(allIssueData.map(issue => issue.siteId)).size;
-            
-            // Calculate average data traffic
-            const issuesWithTraffic = allIssueData.filter(issue => issue.dataTraffic > 0);
-            const avgTraffic = issuesWithTraffic.length > 0 
-                ? (issuesWithTraffic.reduce((sum, issue) => sum + issue.dataTraffic, 0) / issuesWithTraffic.length).toFixed(2)
-                : 0;
-            
-            // Calculate average issues per site
-            const issuesPerSite = uniqueSites > 0 ? (totalIssues / uniqueSites).toFixed(1) : 0;
-            
             document.getElementById('kpiTotalIssues').textContent = totalIssues.toLocaleString();
             document.getElementById('kpiOpenIssues').textContent = openIssues.toLocaleString();
+            document.getElementById('kpiClosedIssues').textContent = closedIssues.toLocaleString();
             document.getElementById('kpiHighPriority').textContent = highPriorityIssues.toLocaleString();
             document.getElementById('kpiAgingIssues').textContent = agingIssues.toLocaleString();
             document.getElementById('kpiAvgAging').textContent = avgAging + ' days';
-            document.getElementById('kpiUniqueSites').textContent = uniqueSites.toLocaleString();
-            document.getElementById('kpiTotalSites').textContent = uniqueSites.toLocaleString();
-            document.getElementById('kpiCriticalAging').textContent = criticalAgingIssues.toLocaleString();
-            document.getElementById('kpiAvgTraffic').textContent = avgTraffic;
-            document.getElementById('kpiIssuesPerSite').textContent = issuesPerSite;
             
             // Update search results text
             document.getElementById('totalRecords').textContent = allIssueData.length;
         }
 
         function updateCharts() {
-            // Update Status Chart
+            // Update Status Chart with data labels
             const statusCounts = {
                 'Open': filteredIssueData.filter(issue => issue.status === 'Open').length,
                 'Closed': filteredIssueData.filter(issue => issue.status === 'Closed').length
@@ -1198,13 +1180,24 @@
                                         size: 11
                                     }
                                 }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.raw || 0;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        return `${label}: ${value} (${percentage}%)`;
+                                    }
+                                }
                             }
                         }
                     }
                 });
             }
             
-            // Update Priority Chart
+            // Update Priority Chart with data labels
             const priorityCounts = {
                 'P1': filteredIssueData.filter(issue => issue.priority === 'P1').length,
                 'P2': filteredIssueData.filter(issue => issue.priority === 'P2').length
@@ -1229,7 +1222,17 @@
                         responsive: true,
                         maintainAspectRatio: false,
                         plugins: {
-                            legend: { display: false }
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.raw || 0;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        return `Count: ${value} (${percentage}%)`;
+                                    }
+                                }
+                            }
                         },
                         scales: {
                             y: {
@@ -1260,7 +1263,7 @@
                 });
             }
             
-            // Update Category Chart
+            // Update Category Chart with different colors per category
             const categoryCounts = {};
             filteredIssueData.forEach(issue => {
                 const category = issue.problemCategory || 'Unknown';
@@ -1270,6 +1273,12 @@
             const sortedCategories = Object.entries(categoryCounts)
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, 5);
+            
+            // Generate different colors for each category
+            const categoryColors = [
+                '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', 
+                '#ec4899', '#14b8a6', '#f97316', '#6b7280', '#6366f1'
+            ];
             
             if (categoryChart) categoryChart.destroy();
             const categoryCtx = document.getElementById('categoryChart');
@@ -1281,7 +1290,7 @@
                             labels: [sortedCategories[0][0]],
                             datasets: [{
                                 data: [sortedCategories[0][1]],
-                                backgroundColor: ['#3b82f6'],
+                                backgroundColor: [categoryColors[0]],
                                 borderWidth: 1
                             }]
                         },
@@ -1297,6 +1306,17 @@
                                             size: 11
                                         }
                                     }
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const label = context.label || '';
+                                            const value = context.raw || 0;
+                                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                            return `${label}: ${value} (${percentage}%)`;
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -1309,7 +1329,7 @@
                             datasets: [{
                                 label: 'Count',
                                 data: sortedCategories.map(item => item[1]),
-                                backgroundColor: '#3b82f6',
+                                backgroundColor: sortedCategories.map((_, index) => categoryColors[index % categoryColors.length]),
                                 borderWidth: 0,
                                 borderRadius: 4
                             }]
@@ -1319,7 +1339,17 @@
                             responsive: true,
                             maintainAspectRatio: false,
                             plugins: {
-                                legend: { display: false }
+                                legend: { display: false },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const value = context.raw || 0;
+                                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                            return `Count: ${value} (${percentage}%)`;
+                                        }
+                                    }
+                                }
                             },
                             scales: {
                                 x: {
@@ -1389,6 +1419,17 @@
                                         size: 10
                                     }
                                 }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.raw || 0;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        return `${label}: ${value} (${percentage}%)`;
+                                    }
+                                }
                             }
                         }
                     }
@@ -1428,7 +1469,17 @@
                         responsive: true,
                         maintainAspectRatio: false,
                         plugins: {
-                            legend: { display: false }
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.raw || 0;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        return `Count: ${value} (${percentage}%)`;
+                                    }
+                                }
+                            }
                         },
                         scales: {
                             y: {
