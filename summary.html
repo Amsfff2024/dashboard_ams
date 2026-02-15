@@ -435,6 +435,7 @@
         
         <!-- KPI Summary Row -->
         <div class="row mb-4">
+            <!-- TOTAL ISSUES -->
             <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
                 <div class="card kpi-card p-3">
                     <div class="d-flex justify-content-between align-items-center">
@@ -449,6 +450,22 @@
                     <div class="small text-muted mt-2">All reported issues</div>
                 </div>
             </div>
+            <!-- UNIQUE SITES (NEW CARD - REPLACES AVG AGING) -->
+            <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+                <div class="card kpi-card p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">UNIQUE SITES</h6>
+                            <div class="kpi-value text-secondary" id="kpiUniqueSites">0</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-map-marker-alt fa-2x text-secondary opacity-50"></i>
+                        </div>
+                    </div>
+                    <div class="small text-muted mt-2">Distinct site locations</div>
+                </div>
+            </div>
+            <!-- OPEN ISSUES -->
             <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
                 <div class="card kpi-card p-3">
                     <div class="d-flex justify-content-between align-items-center">
@@ -463,6 +480,7 @@
                     <div class="small text-muted mt-2">Issues pending resolution</div>
                 </div>
             </div>
+            <!-- CLOSED ISSUES -->
             <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
                 <div class="card kpi-card p-3">
                     <div class="d-flex justify-content-between align-items-center">
@@ -477,6 +495,7 @@
                     <div class="small text-muted mt-2">Resolved issues</div>
                 </div>
             </div>
+            <!-- HIGH PRIORITY -->
             <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
                 <div class="card kpi-card p-3">
                     <div class="d-flex justify-content-between align-items-center">
@@ -491,6 +510,7 @@
                     <div class="small text-muted mt-2">P1 Priority issues</div>
                 </div>
             </div>
+            <!-- AGING > 1 MONTH -->
             <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
                 <div class="card kpi-card p-3">
                     <div class="d-flex justify-content-between align-items-center">
@@ -503,20 +523,6 @@
                         </div>
                     </div>
                     <div class="small text-muted mt-2">Issues older than 30 days</div>
-                </div>
-            </div>
-            <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
-                <div class="card kpi-card p-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title">AVG AGING</h6>
-                            <div class="kpi-value text-secondary" id="kpiAvgAging">0</div>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-clock fa-2x text-secondary opacity-50"></i>
-                        </div>
-                    </div>
-                    <div class="small text-muted mt-2">Average age in days</div>
                 </div>
             </div>
         </div>
@@ -1138,30 +1144,28 @@
         // ==================== FUNGSI UPDATE UI ====================
         function updateSummaryKPIs() {
             const totalIssues = allIssueData.length;
+            
+            // Calculate unique sites
+            const uniqueSites = new Set(allIssueData.map(issue => issue.siteId)).size;
+            
             const openIssues = allIssueData.filter(issue => issue.status === 'Open').length;
             const closedIssues = allIssueData.filter(issue => issue.status === 'Closed').length;
             const highPriorityIssues = allIssueData.filter(issue => issue.priority === 'P1').length;
             const agingIssues = allIssueData.filter(issue => issue.aging > 30).length;
             
-            // Calculate average aging for open issues
-            const openAgingIssues = allIssueData.filter(issue => issue.status === 'Open');
-            const avgAging = openAgingIssues.length > 0 
-                ? Math.round(openAgingIssues.reduce((sum, issue) => sum + issue.aging, 0) / openAgingIssues.length)
-                : 0;
-            
             document.getElementById('kpiTotalIssues').textContent = totalIssues.toLocaleString();
+            document.getElementById('kpiUniqueSites').textContent = uniqueSites.toLocaleString(); // New KPI
             document.getElementById('kpiOpenIssues').textContent = openIssues.toLocaleString();
             document.getElementById('kpiClosedIssues').textContent = closedIssues.toLocaleString();
             document.getElementById('kpiHighPriority').textContent = highPriorityIssues.toLocaleString();
             document.getElementById('kpiAgingIssues').textContent = agingIssues.toLocaleString();
-            document.getElementById('kpiAvgAging').textContent = avgAging + ' days';
             
             // Update search results text
             document.getElementById('totalRecords').textContent = allIssueData.length;
         }
 
         function updateCharts() {
-            // Update Status Chart - TANPA DATA LABEL
+            // Update Status Chart - DENGAN DATA LABEL WARNA PUTIH
             const statusCounts = {
                 'Open': filteredIssueData.filter(issue => issue.status === 'Open').length,
                 'Closed': filteredIssueData.filter(issue => issue.status === 'Closed').length
@@ -1194,6 +1198,23 @@
                                         size: 10
                                     }
                                 }
+                            },
+                            datalabels: {
+                                display: true,
+                                color: '#ffffff', // WARNA FONT PUTIH
+                                font: {
+                                    family: 'Inter',
+                                    weight: 'bold',
+                                    size: 12
+                                },
+                                formatter: (value, context) => {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return `${percentage}%`; // Menampilkan persentase
+                                },
+                                anchor: 'center',
+                                align: 'center',
+                                offset: 0
                             },
                             tooltip: {
                                 callbacks: {
