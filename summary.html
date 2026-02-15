@@ -1449,7 +1449,7 @@
                 }
             }
             
-            // Update Circle Chart - TANPA DATA LABEL
+            // Update Circle Chart - DENGAN DATA LABEL WARNA PUTIH
             const circleCounts = {};
             filteredIssueData.forEach(issue => {
                 const circle = issue.circle || 'Unknown';
@@ -1484,7 +1484,7 @@
                                         family: 'Inter',
                                         size: 9
                                     },
-                                    // Menampilkan nilai dan persentase di legend
+                                    // Menampilkan nilai dan persentase di legend (WARNA TETAP HITAM)
                                     generateLabels: function(chart) {
                                         const data = chart.data;
                                         if (data.labels.length && data.datasets.length) {
@@ -1504,6 +1504,23 @@
                                         return [];
                                     }
                                 }
+                            },
+                            datalabels: {
+                                display: true,
+                                color: '#ffffff', // WARNA FONT PUTIH
+                                font: {
+                                    family: 'Inter',
+                                    weight: 'bold',
+                                    size: 11
+                                },
+                                formatter: (value, context) => {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return `${percentage}%`; // Menampilkan persentase saja agar tidak terlalu penuh
+                                },
+                                anchor: 'center',
+                                align: 'center',
+                                offset: 0
                             },
                             tooltip: {
                                 callbacks: {
@@ -1610,7 +1627,7 @@
                 });
             }
             
-            // Update PIC Chart - TANPA DATA LABEL (hanya legend)
+            // Update PIC Chart - DENGAN DATA LABEL WARNA PUTIH DAN ANTAR TABRAKAN
             const picCounts = {};
             filteredIssueData.forEach(issue => {
                 const pic = issue.pic || 'Unassigned';
@@ -1637,6 +1654,12 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        layout: {
+                            padding: {
+                                top: 20,
+                                bottom: 20
+                            }
+                        },
                         plugins: {
                             legend: {
                                 position: 'right',
@@ -1645,7 +1668,7 @@
                                         family: 'Inter',
                                         size: 9
                                     },
-                                    // Menampilkan nilai dan persentase di legend
+                                    // Menampilkan nilai dan persentase di legend (WARNA TETAP HITAM)
                                     generateLabels: function(chart) {
                                         const data = chart.data;
                                         if (data.labels.length && data.datasets.length) {
@@ -1666,7 +1689,37 @@
                                     }
                                 }
                             },
-                            // DATALABELS TIDAK DIGUNAKAN
+                            datalabels: {
+                                display: true,
+                                color: '#ffffff', // WARNA FONT PUTIH
+                                font: {
+                                    family: 'Inter',
+                                    weight: 'bold',
+                                    size: 11
+                                },
+                                formatter: (value, context) => {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return `${percentage}%`; // Menampilkan persentase
+                                },
+                                // Pengaturan untuk menghindari tabrakan label
+                                anchor: function(context) {
+                                    // Mengatur anchor berdasarkan posisi segmen
+                                    const index = context.dataIndex;
+                                    // Alternatif anchor untuk menghindari tumpukan
+                                    const anchors = ['end', 'center', 'start', 'center', 'end'];
+                                    return anchors[index % anchors.length] || 'center';
+                                },
+                                align: function(context) {
+                                    // Mengatur align berdasarkan posisi segmen
+                                    const index = context.dataIndex;
+                                    const aligns = ['start', 'center', 'end', 'center', 'start'];
+                                    return aligns[index % aligns.length] || 'center';
+                                },
+                                offset: 8, // Memberi jarak dari pusat
+                                clamp: true, // Memastikan label tetap di dalam canvas
+                                overlap: false // Mencegah label saling tumpuk
+                            },
                             tooltip: {
                                 callbacks: {
                                     label: function(context) {
