@@ -27,7 +27,7 @@
             --warning-orange: #fd7e14;
             --normal-green: #28a745;
             --info-blue: #17a2b8;
-            --vswr-purple: #8b5cf6;
+            --vip-gold: #ffc107;
         }
         
         body {
@@ -39,7 +39,7 @@
         
         /* HEADER */
         .executive-header {
-            background: linear-gradient(135deg, #6b21a8, #8b5cf6);
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
             color: white;
             padding: 16px 24px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
@@ -61,7 +61,7 @@
         
         /* FILTER INDICATOR */
         .filter-indicator {
-            background: linear-gradient(135deg, #8b5cf6, #6b21a8);
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
             color: white;
             border-radius: 8px;
             padding: 8px 16px;
@@ -82,7 +82,6 @@
             border: none;
             overflow: hidden;
             height: 100%;
-            border-left: 4px solid #8b5cf6;
         }
         
         .kpi-card:hover {
@@ -120,14 +119,10 @@
         }
         
         .btn-primary {
-            background: linear-gradient(135deg, #8b5cf6, #6b21a8);
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
             border: none;
             border-radius: 10px;
             padding: 10px;
-        }
-        
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #7c3aed, #5b21b6);
         }
         
         .btn-outline-success {
@@ -189,12 +184,6 @@
             color: white;
         }
         
-        /* VSWR BADGE */
-        .badge-vswr {
-            background: linear-gradient(135deg, #8b5cf6, #6b21a8);
-            color: white;
-        }
-        
         /* AGING BADGES */
         .badge-aging-high {
             background: linear-gradient(135deg, #dc3545, #c82333);
@@ -231,6 +220,7 @@
             height: 600px;
             display: flex;
             flex-direction: column;
+            display: none; /* Hidden by default */
         }
         
         .main-table-wrapper {
@@ -242,7 +232,7 @@
         .site-id-cell {
             font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
             font-weight: 600;
-            color: #6b21a8;
+            color: #1e40af;
             font-size: 11px;
         }
         
@@ -362,13 +352,18 @@
             margin-bottom: 1rem;
         }
         
-        /* VSWR STATS */
-        .vswr-stats {
-            background: linear-gradient(135deg, #f5f3ff, #ede9fe);
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 20px;
-            border-left: 4px solid #8b5cf6;
+        /* HIDDEN DETAILS */
+        .hidden-details {
+            display: none;
+        }
+        
+        /* SEARCH RESULT INFO */
+        .search-result-info {
+            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #3b82f6;
         }
         
         /* STATS BADGE */
@@ -412,7 +407,7 @@
         
         .chart-title i {
             margin-right: 8px;
-            color: #8b5cf6;
+            color: #3b82f6;
         }
         
         /* DASHBOARD TITLE */
@@ -423,13 +418,7 @@
             color: #1e293b;
             margin-bottom: 20px;
             padding-left: 12px;
-            border-left: 4px solid #8b5cf6;
-        }
-        
-        /* VSWR TITLE */
-        .vswr-title {
-            color: #8b5cf6;
-            font-weight: 800;
+            border-left: 4px solid #3b82f6;
         }
     </style>
 </head>
@@ -439,7 +428,7 @@
         <div class="container-fluid">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h1 class="mb-1"><i class="fas fa-chart-line me-2"></i>VSWR Issue Dashboard</h1>
+                    <h1 class="mb-1"><i class="fas fa-tasks me-2"></i>VSWR Issue Dashboard</h1>
                     <p class="small mb-0 opacity-75">Real-time Monitoring for VSWR Problems</p>
                 </div>
                 <div class="text-end">
@@ -462,11 +451,12 @@
         
         <!-- Dashboard Title -->
         <div class="dashboard-title">
-            <i class="fas fa-chart-line me-2 vswr-title"></i>VSWR Issues Overview
+            <i class="fas fa-chart-line me-2"></i>VSWR Issues Overview
         </div>
         
-        <!-- KPI Summary Row -->
+        <!-- KPI Summary Row (dengan UNIQUE SITES menggantikan AVG AGING) -->
         <div class="row mb-4">
+            <!-- TOTAL VSWR -->
             <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
                 <div class="card kpi-card p-3">
                     <div class="d-flex justify-content-between align-items-center">
@@ -475,12 +465,28 @@
                             <div class="kpi-value text-primary" id="kpiTotalIssues">0</div>
                         </div>
                         <div class="align-self-center">
-                            <i class="fas fa-chart-line fa-2x text-primary opacity-50"></i>
+                            <i class="fas fa-tasks fa-2x text-primary opacity-50"></i>
                         </div>
                     </div>
-                    <div class="small text-muted mt-2">Total VSWR issues</div>
+                    <div class="small text-muted mt-2">All VSWR issues</div>
                 </div>
             </div>
+            <!-- UNIQUE SITES (NEW CARD) -->
+            <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+                <div class="card kpi-card p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">UNIQUE SITES</h6>
+                            <div class="kpi-value text-secondary" id="kpiUniqueSites">0</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-map-marker-alt fa-2x text-secondary opacity-50"></i>
+                        </div>
+                    </div>
+                    <div class="small text-muted mt-2">Distinct site locations</div>
+                </div>
+            </div>
+            <!-- OPEN VSWR -->
             <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
                 <div class="card kpi-card p-3">
                     <div class="d-flex justify-content-between align-items-center">
@@ -495,6 +501,7 @@
                     <div class="small text-muted mt-2">VSWR issues pending</div>
                 </div>
             </div>
+            <!-- CLOSED VSWR -->
             <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
                 <div class="card kpi-card p-3">
                     <div class="d-flex justify-content-between align-items-center">
@@ -509,6 +516,7 @@
                     <div class="small text-muted mt-2">Resolved VSWR issues</div>
                 </div>
             </div>
+            <!-- HIGH PRIORITY -->
             <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
                 <div class="card kpi-card p-3">
                     <div class="d-flex justify-content-between align-items-center">
@@ -523,6 +531,7 @@
                     <div class="small text-muted mt-2">P1 VSWR issues</div>
                 </div>
             </div>
+            <!-- AGING > 1 MONTH -->
             <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
                 <div class="card kpi-card p-3">
                     <div class="d-flex justify-content-between align-items-center">
@@ -537,23 +546,9 @@
                     <div class="small text-muted mt-2">VSWR >30 days old</div>
                 </div>
             </div>
-            <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
-                <div class="card kpi-card p-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title">AVG AGING</h6>
-                            <div class="kpi-value text-secondary" id="kpiAvgAging">0</div>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-clock fa-2x text-secondary opacity-50"></i>
-                        </div>
-                    </div>
-                    <div class="small text-muted mt-2">Average age (days)</div>
-                </div>
-            </div>
         </div>
 
-        <!-- Filter and Search Row (Simplified for VSWR) -->
+        <!-- Filter and Search Row -->
         <div class="row mb-4">
             <div class="col-lg-12">
                 <div class="card filter-card">
@@ -598,18 +593,18 @@
                         <div class="row mt-3">
                             <div class="col-md-3">
                                 <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                    <select class="form-select" id="filterPIC" onchange="applyFilters()">
-                                        <option value="">All PIC</option>
-                                        <!-- Options will be populated dynamically -->
+                                    <span class="input-group-text"><i class="fas fa-chart-bar"></i></span>
+                                    <select class="form-select" id="filterCategory" onchange="applyFilters()">
+                                        <option value="">All Categories</option>
+                                        <!-- Options will be populated dynamically (will only show VSWR) -->
                                     </select>
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-industry"></i></span>
-                                    <select class="form-select" id="filterVendor" onchange="applyFilters()">
-                                        <option value="">All Vendors</option>
+                                    <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                    <select class="form-select" id="filterPIC" onchange="applyFilters()">
+                                        <option value="">All PIC</option>
                                         <!-- Options will be populated dynamically -->
                                     </select>
                                 </div>
@@ -629,8 +624,11 @@
                                             <small class="text-muted" id="searchResultText"></small>
                                         </div>
                                         <div>
-                                            <button class="btn btn-primary btn-sm" onclick="exportToCSV()">
-                                                <i class="fas fa-download me-1"></i> Export VSWR Data
+                                            <button class="btn btn-primary btn-sm" onclick="showDetailedTable()">
+                                                <i class="fas fa-table me-1"></i> Show Details
+                                            </button>
+                                            <button class="btn btn-outline-success btn-sm ms-2" onclick="exportToCSV()">
+                                                <i class="fas fa-download me-1"></i> Export
                                             </button>
                                         </div>
                                     </div>
@@ -701,7 +699,7 @@
         <!-- Summary Tables -->
         <div class="row mb-4">
             <!-- Top Sites with VSWR Issues -->
-            <div class="col-lg-6 mb-4">
+            <div class="col-lg-4 mb-4">
                 <div class="chart-container">
                     <h6 class="chart-title"><i class="fas fa-building"></i>Top Sites with VSWR Issues</h6>
                     <div class="table-responsive" style="max-height: 300px;">
@@ -709,14 +707,13 @@
                             <thead>
                                 <tr>
                                     <th>Site ID</th>
-                                    <th class="text-end">Total VSWR</th>
+                                    <th class="text-end">Issues</th>
                                     <th class="text-end">Open</th>
                                     <th class="text-end">P1</th>
-                                    <th class="text-end">Max Aging</th>
                                 </tr>
                             </thead>
                             <tbody id="topSitesBody">
-                                <tr><td colspan="5" class="text-center py-3">Loading VSWR data...</td></tr>
+                                <tr><td colspan="4" class="text-center py-3">Loading VSWR data...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -724,7 +721,7 @@
             </div>
             
             <!-- Aging Analysis for VSWR -->
-            <div class="col-lg-6 mb-4">
+            <div class="col-lg-4 mb-4">
                 <div class="chart-container">
                     <h6 class="chart-title"><i class="fas fa-calendar-alt"></i>Oldest Open VSWR Issues</h6>
                     <div class="table-responsive" style="max-height: 300px;">
@@ -732,41 +729,35 @@
                             <thead>
                                 <tr>
                                     <th>Site ID</th>
-                                    <th>Priority</th>
-                                    <th>PIC</th>
+                                    <th>Issue</th>
                                     <th class="text-end">Aging</th>
-                                    <th>Circle</th>
+                                    <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody id="agingIssuesBody">
-                                <tr><td colspan="5" class="text-center py-3">Loading VSWR data...</td></tr>
+                                <tr><td colspan="4" class="text-center py-3">Loading VSWR data...</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Vendor Performance for VSWR -->
-        <div class="row mb-4">
-            <div class="col-12">
+            
+            <!-- Vendor Performance for VSWR -->
+            <div class="col-lg-4 mb-4">
                 <div class="chart-container">
-                    <h6 class="chart-title"><i class="fas fa-industry"></i>Vendor Performance for VSWR Issues</h6>
-                    <div class="table-responsive">
+                    <h6 class="chart-title"><i class="fas fa-industry"></i>Vendor Performance</h6>
+                    <div class="table-responsive" style="max-height: 300px;">
                         <table class="table table-sm table-hover">
                             <thead>
                                 <tr>
                                     <th>Vendor</th>
-                                    <th class="text-end">Total VSWR</th>
-                                    <th class="text-end">Open VSWR</th>
-                                    <th class="text-end">P1 VSWR</th>
+                                    <th class="text-end">Issues</th>
+                                    <th class="text-end">Open</th>
                                     <th class="text-end">Avg Aging</th>
-                                    <th class="text-end">Unique Sites</th>
-                                    <th class="text-end">Closed Rate</th>
                                 </tr>
                             </thead>
                             <tbody id="vendorPerformanceBody">
-                                <tr><td colspan="7" class="text-center py-3">Loading VSWR data...</td></tr>
+                                <tr><td colspan="4" class="text-center py-3">Loading VSWR data...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -778,15 +769,15 @@
         <div class="row mb-4">
             <div class="col-12">
                 <div class="chart-container">
-                    <h6 class="chart-title"><i class="fas fa-map-marked-alt"></i>Circle Performance for VSWR Issues</h6>
+                    <h6 class="chart-title"><i class="fas fa-map-marked-alt"></i>Circle Performance Summary</h6>
                     <div class="table-responsive">
                         <table class="table table-sm table-hover">
                             <thead>
                                 <tr>
                                     <th>Circle</th>
-                                    <th class="text-end">Total VSWR</th>
-                                    <th class="text-end">Open VSWR</th>
-                                    <th class="text-end">P1 VSWR</th>
+                                    <th class="text-end">Total Issues</th>
+                                    <th class="text-end">Open Issues</th>
+                                    <th class="text-end">P1 Issues</th>
                                     <th class="text-end">Avg Aging</th>
                                     <th class="text-end">Unique Sites</th>
                                     <th class="text-end">Closed Rate</th>
@@ -801,18 +792,21 @@
             </div>
         </div>
 
-        <!-- Detailed VSWR Issues Table -->
+        <!-- Detailed VSWR Issues Table (Hidden by default) -->
         <div class="row">
             <div class="col-12">
                 <div class="main-table-container" id="detailedTableContainer">
-                    <div class="card-header d-flex justify-content-between align-items-center p-3">
+                    <div class="card-header d-flex justify-content-between align-items-center">
                         <h6 class="mb-0" style="font-family: var(--font-plus-jakarta); font-weight: 700; font-size: 14px;">
-                            <i class="fas fa-table me-2" style="color: #8b5cf6;"></i>Detailed VSWR Issues
+                            <i class="fas fa-table me-2"></i>Detailed VSWR Issues
                         </h6>
                         <div>
-                            <span class="info-badge me-2" id="tableCountBadge">Showing 0 VSWR issues</span>
-                            <button class="btn btn-outline-success btn-sm" onclick="exportToCSV()">
-                                <i class="fas fa-download me-1"></i> Export VSWR Data
+                            <span class="info-badge me-2" id="tableCountBadge">Showing 0 issues</span>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="hideDetailedTable()">
+                                <i class="fas fa-times me-1"></i> Hide
+                            </button>
+                            <button class="btn btn-outline-success btn-sm ms-2" onclick="exportToCSV()">
+                                <i class="fas fa-download me-1"></i> Export
                             </button>
                         </div>
                     </div>
@@ -823,6 +817,9 @@
                                     <tr>
                                         <th class="cursor-pointer" onclick="sortTable('siteId')">
                                             Site ID <i class="fas fa-sort ms-1"></i>
+                                        </th>
+                                        <th class="cursor-pointer" onclick="sortTable('problemCategory')">
+                                            Problem <i class="fas fa-sort ms-1"></i>
                                         </th>
                                         <th class="cursor-pointer" onclick="sortTable('priority')">
                                             Priority <i class="fas fa-sort ms-1"></i>
@@ -844,7 +841,6 @@
                                         </th>
                                         <th>Circle</th>
                                         <th>Vendor</th>
-                                        <th>Open Date</th>
                                     </tr>
                                 </thead>
                                 <tbody id="detailedIssuesTableBody">
@@ -938,6 +934,10 @@
                     
                     // Update VSWR count badge
                     document.getElementById('vswrCountBadge').textContent = `${allVswrData.length} VSWR Issues`;
+                    
+                    // Hide search result info and detailed table initially
+                    document.getElementById('searchResultInfo').style.display = 'none';
+                    document.getElementById('detailedTableContainer').style.display = 'none';
                 },
                 error: function(error) {
                     console.error('Error fetching CSV:', error);
@@ -951,6 +951,7 @@
         function processVswrData(rawData) {
             allVswrData = [];
             const circles = new Set();
+            const problemCategories = new Set();
             const vendors = new Set();
             const pics = new Set();
             
@@ -982,17 +983,19 @@
                     const cleanPriority = String(priority).trim().toUpperCase();
                     const cleanCircle = String(circle).trim();
                     const cleanVendor = String(vendor).trim();
+                    const cleanCategory = String(problemCategory).trim();
                     const cleanPic = String(pic).trim();
                     
                     // Add to sets for filters
                     if (cleanCircle) circles.add(cleanCircle);
+                    if (cleanCategory) problemCategories.add(cleanCategory);
                     if (cleanVendor) vendors.add(cleanVendor);
                     if (cleanPic) pics.add(cleanPic);
                     
                     const processedRow = {
                         raw: row,
                         siteId: siteId,
-                        problemCategory: VSWR_CATEGORY,
+                        problemCategory: cleanCategory,
                         priority: cleanPriority === 'P1' ? 'P1' : 'P2',
                         status: cleanStatus === 'Closed' ? 'Closed' : 'Open',
                         aging: aging,
@@ -1016,10 +1019,13 @@
             
             console.log(`Filtered to ${allVswrData.length} VSWR issue records`);
             
-            // Update filter options
+            // Update filter options (only VSWR categories)
             updateFilterOptions('filterCircle', Array.from(circles));
+            updateFilterOptions('filterCategory', Array.from(problemCategories)); // Will only show VSWR
             updateFilterOptions('filterPIC', Array.from(pics).sort());
-            updateFilterOptions('filterVendor', Array.from(vendors).sort());
+            
+            // Vendor filter not in original, but we'll keep it simple
+            // If needed, add vendor filter select to HTML
             
             applyFilters();
         }
@@ -1031,8 +1037,8 @@
             // Set placeholder text based on selectId
             let placeholderText = "All";
             if (selectId === 'filterCircle') placeholderText = "All Circles";
+            else if (selectId === 'filterCategory') placeholderText = "All Categories";
             else if (selectId === 'filterPIC') placeholderText = "All PIC";
-            else if (selectId === 'filterVendor') placeholderText = "All Vendors";
             else if (selectId === 'filterStatus') placeholderText = "All Status";
             else if (selectId === 'filterPriority') placeholderText = "All Priority";
             
@@ -1074,8 +1080,8 @@
             const filterStatus = document.getElementById('filterStatus').value;
             const filterPriority = document.getElementById('filterPriority').value;
             const filterCircle = document.getElementById('filterCircle').value;
+            const filterCategory = document.getElementById('filterCategory').value;
             const filterPIC = document.getElementById('filterPIC').value;
-            const filterVendor = document.getElementById('filterVendor').value;
             
             filteredVswrData = allVswrData.filter(issue => {
                 const siteIdMatch = !searchSiteId || 
@@ -1090,19 +1096,18 @@
                 const circleMatch = !filterCircle || 
                     issue.circle === filterCircle;
                 
+                const categoryMatch = !filterCategory || 
+                    issue.problemCategory === filterCategory;
+                
                 const picMatch = !filterPIC || 
                     issue.pic === filterPIC;
                 
-                const vendorMatch = !filterVendor || 
-                    issue.vendor === filterVendor;
-                
-                return siteIdMatch && statusMatch && priorityMatch && circleMatch && picMatch && vendorMatch;
+                return siteIdMatch && statusMatch && priorityMatch && circleMatch && categoryMatch && picMatch;
             });
             
             updateSummaryKPIs();
             updateCharts();
             updateSummaryTables();
-            updateDetailedIssuesTable();
             updateSearchResultInfo();
         }
 
@@ -1115,8 +1120,8 @@
             const filterStatus = document.getElementById('filterStatus').value;
             const filterPriority = document.getElementById('filterPriority').value;
             const filterCircle = document.getElementById('filterCircle').value;
+            const filterCategory = document.getElementById('filterCategory').value;
             const filterPIC = document.getElementById('filterPIC').value;
-            const filterVendor = document.getElementById('filterVendor').value;
             
             // Build search description
             let searchDescription = [];
@@ -1124,13 +1129,16 @@
             if (filterStatus) searchDescription.push(`Status: ${filterStatus}`);
             if (filterPriority) searchDescription.push(`Priority: ${filterPriority}`);
             if (filterCircle) searchDescription.push(`Circle: ${filterCircle}`);
+            if (filterCategory) searchDescription.push(`Category: ${filterCategory}`);
             if (filterPIC) searchDescription.push(`PIC: ${filterPIC}`);
-            if (filterVendor) searchDescription.push(`Vendor: ${filterVendor}`);
             
             if (searchDescription.length > 0) {
                 searchResultTitle.textContent = `VSWR Search Results (${filteredVswrData.length} issues found)`;
                 searchResultText.textContent = `Filters applied: ${searchDescription.join(', ')}`;
                 searchResultInfo.style.display = 'block';
+                
+                // Hide detailed table if showing
+                document.getElementById('detailedTableContainer').style.display = 'none';
             } else {
                 searchResultInfo.style.display = 'none';
             }
@@ -1141,39 +1149,51 @@
             document.getElementById('filterStatus').value = '';
             document.getElementById('filterPriority').value = '';
             document.getElementById('filterCircle').value = '';
+            document.getElementById('filterCategory').value = '';
             document.getElementById('filterPIC').value = '';
-            document.getElementById('filterVendor').value = '';
             
             applyFilters();
+        }
+
+        function showDetailedTable() {
+            document.getElementById('detailedTableContainer').style.display = 'flex';
+            updateDetailedIssuesTable();
+            
+            // Scroll to the table
+            document.getElementById('detailedTableContainer').scrollIntoView({ 
+                behavior: 'smooth' 
+            });
+        }
+
+        function hideDetailedTable() {
+            document.getElementById('detailedTableContainer').style.display = 'none';
         }
 
         // ==================== FUNGSI UPDATE UI ====================
         function updateSummaryKPIs() {
             const totalIssues = allVswrData.length;
+            
+            // Calculate unique sites
+            const uniqueSites = new Set(allVswrData.map(issue => issue.siteId)).size;
+            
             const openIssues = allVswrData.filter(issue => issue.status === 'Open').length;
             const closedIssues = allVswrData.filter(issue => issue.status === 'Closed').length;
             const highPriorityIssues = allVswrData.filter(issue => issue.priority === 'P1').length;
             const agingIssues = allVswrData.filter(issue => issue.aging > 30).length;
             
-            // Calculate average aging for open issues
-            const openAgingIssues = allVswrData.filter(issue => issue.status === 'Open');
-            const avgAging = openAgingIssues.length > 0 
-                ? Math.round(openAgingIssues.reduce((sum, issue) => sum + issue.aging, 0) / openAgingIssues.length)
-                : 0;
-            
             document.getElementById('kpiTotalIssues').textContent = totalIssues.toLocaleString();
+            document.getElementById('kpiUniqueSites').textContent = uniqueSites.toLocaleString();
             document.getElementById('kpiOpenIssues').textContent = openIssues.toLocaleString();
             document.getElementById('kpiClosedIssues').textContent = closedIssues.toLocaleString();
             document.getElementById('kpiHighPriority').textContent = highPriorityIssues.toLocaleString();
             document.getElementById('kpiAgingIssues').textContent = agingIssues.toLocaleString();
-            document.getElementById('kpiAvgAging').textContent = avgAging + ' days';
             
             // Update total records
             document.getElementById('totalRecords').textContent = totalIssues;
         }
 
         function updateCharts() {
-            // Update Status Chart
+            // Update Status Chart - DENGAN DATA LABEL WARNA PUTIH
             const statusCounts = {
                 'Open': filteredVswrData.filter(issue => issue.status === 'Open').length,
                 'Closed': filteredVswrData.filter(issue => issue.status === 'Closed').length
@@ -1206,6 +1226,23 @@
                                         size: 10
                                     }
                                 }
+                            },
+                            datalabels: {
+                                display: true,
+                                color: '#ffffff',
+                                font: {
+                                    family: 'Inter',
+                                    weight: 'bold',
+                                    size: 12
+                                },
+                                formatter: (value, context) => {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return `${percentage}%`;
+                                },
+                                anchor: 'center',
+                                align: 'center',
+                                offset: 0
                             },
                             tooltip: {
                                 callbacks: {
@@ -1292,7 +1329,7 @@
                 });
             }
             
-            // Update Circle Chart
+            // Update Circle Chart - DENGAN DATA LABEL WARNA PUTIH
             const circleCounts = {};
             filteredVswrData.forEach(issue => {
                 const circle = issue.circle || 'Unknown';
@@ -1344,6 +1381,34 @@
                                             });
                                         }
                                         return [];
+                                    }
+                                }
+                            },
+                            datalabels: {
+                                display: true,
+                                color: '#ffffff',
+                                font: {
+                                    family: 'Inter',
+                                    weight: 'bold',
+                                    size: 11
+                                },
+                                formatter: (value, context) => {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return `${percentage}%`;
+                                },
+                                anchor: 'center',
+                                align: 'center',
+                                offset: 0
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.raw || 0;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        return `${label}: ${value} (${percentage}%)`;
                                     }
                                 }
                             }
@@ -1425,7 +1490,7 @@
                 });
             }
             
-            // Update PIC Chart
+            // Update PIC Chart - DENGAN DATA LABEL WARNA PUTIH
             const picCounts = {};
             filteredVswrData.forEach(issue => {
                 const pic = issue.pic || 'Unassigned';
@@ -1452,6 +1517,12 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        layout: {
+                            padding: {
+                                top: 20,
+                                bottom: 20
+                            }
+                        },
                         plugins: {
                             legend: {
                                 position: 'right',
@@ -1477,6 +1548,44 @@
                                             });
                                         }
                                         return [];
+                                    }
+                                }
+                            },
+                            datalabels: {
+                                display: true,
+                                color: '#ffffff',
+                                font: {
+                                    family: 'Inter',
+                                    weight: 'bold',
+                                    size: 11
+                                },
+                                formatter: (value, context) => {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return `${percentage}%`;
+                                },
+                                anchor: function(context) {
+                                    const index = context.dataIndex;
+                                    const anchors = ['end', 'center', 'start', 'center', 'end'];
+                                    return anchors[index % anchors.length] || 'center';
+                                },
+                                align: function(context) {
+                                    const index = context.dataIndex;
+                                    const aligns = ['start', 'center', 'end', 'center', 'start'];
+                                    return aligns[index % aligns.length] || 'center';
+                                },
+                                offset: 8,
+                                clamp: true,
+                                overlap: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.raw || 0;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        return `${label}: ${value} (${percentage}%)`;
                                     }
                                 }
                             }
@@ -1567,7 +1676,7 @@
             const tbody = document.getElementById('topSitesBody');
             
             if (filteredVswrData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-3">No VSWR issues found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-3">No VSWR issues found</td></tr>';
                 return;
             }
             
@@ -1579,17 +1688,13 @@
                         siteId: issue.siteId,
                         total: 0,
                         open: 0,
-                        p1: 0,
-                        maxAging: 0
+                        p1: 0
                     };
                 }
                 
                 siteStats[issue.siteId].total++;
                 if (issue.status === 'Open') siteStats[issue.siteId].open++;
                 if (issue.priority === 'P1') siteStats[issue.siteId].p1++;
-                if (issue.aging > siteStats[issue.siteId].maxAging) {
-                    siteStats[issue.siteId].maxAging = issue.aging;
-                }
             });
             
             // Convert to array and sort by total issues
@@ -1599,6 +1704,11 @@
             
             tbody.innerHTML = '';
             
+            if (sortedSites.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-3">No site data available</td></tr>';
+                return;
+            }
+            
             sortedSites.forEach(site => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -1606,7 +1716,6 @@
                     <td class="text-end fw-semibold">${site.total}</td>
                     <td class="text-end">${site.open}</td>
                     <td class="text-end">${site.p1}</td>
-                    <td class="text-end">${site.maxAging}d</td>
                 `;
                 tbody.appendChild(row);
             });
@@ -1616,7 +1725,7 @@
             const tbody = document.getElementById('agingIssuesBody');
             
             if (filteredVswrData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-3">No VSWR issues found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-3">No VSWR issues found</td></tr>';
                 return;
             }
             
@@ -1629,7 +1738,7 @@
             tbody.innerHTML = '';
             
             if (agingIssues.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-3">No open VSWR issues</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-3">No open VSWR issues</td></tr>';
                 return;
             }
             
@@ -1640,12 +1749,11 @@
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td class="site-id-cell">${issue.siteId}</td>
-                    <td><span class="badge badge-priority-${issue.priority}">${issue.priority}</span></td>
-                    <td>${issue.pic || '-'}</td>
+                    <td class="text-truncate-cell" title="${issue.problemCategory}">${issue.problemCategory}</td>
                     <td class="text-end">
                         <span class="badge ${agingBadgeClass}">${issue.aging} days</span>
                     </td>
-                    <td>${issue.circle || '-'}</td>
+                    <td><span class="badge badge-status-Open">${issue.status}</span></td>
                 `;
                 tbody.appendChild(row);
             });
@@ -1655,7 +1763,7 @@
             const tbody = document.getElementById('vendorPerformanceBody');
             
             if (filteredVswrData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-3">No VSWR issues found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-3">No VSWR issues found</td></tr>';
                 return;
             }
             
@@ -1668,29 +1776,23 @@
                         vendor: vendor,
                         total: 0,
                         open: 0,
-                        p1: 0,
                         totalAging: 0,
-                        openCount: 0,
-                        sites: new Set()
+                        count: 0
                     };
                 }
                 
                 vendorStats[vendor].total++;
+                if (issue.status === 'Open') vendorStats[vendor].open++;
                 if (issue.status === 'Open') {
-                    vendorStats[vendor].open++;
                     vendorStats[vendor].totalAging += issue.aging;
-                    vendorStats[vendor].openCount++;
+                    vendorStats[vendor].count++;
                 }
-                if (issue.priority === 'P1') vendorStats[vendor].p1++;
-                vendorStats[vendor].sites.add(issue.siteId);
             });
             
             // Calculate averages and convert to array
             const vendorArray = Object.values(vendorStats).map(vendor => ({
                 ...vendor,
-                avgAging: vendor.openCount > 0 ? Math.round(vendor.totalAging / vendor.openCount) : 0,
-                uniqueSites: vendor.sites.size,
-                closedRate: vendor.total > 0 ? Math.round(((vendor.total - vendor.open) / vendor.total) * 100) : 0
+                avgAging: vendor.count > 0 ? Math.round(vendor.totalAging / vendor.count) : 0
             })).sort((a, b) => b.total - a.total);
             
             tbody.innerHTML = '';
@@ -1708,10 +1810,7 @@
                     </td>
                     <td class="text-end fw-semibold">${vendor.total}</td>
                     <td class="text-end">${vendor.open}</td>
-                    <td class="text-end">${vendor.p1}</td>
                     <td class="text-end">${vendor.avgAging}d</td>
-                    <td class="text-end">${vendor.uniqueSites}</td>
-                    <td class="text-end">${vendor.closedRate}%</td>
                 `;
                 tbody.appendChild(row);
             });
@@ -1809,7 +1908,7 @@
                         </td>
                     </tr>
                 `;
-                countBadge.textContent = 'Showing 0 VSWR issues';
+                countBadge.textContent = 'Showing 0 issues';
                 return;
             }
             
@@ -1864,6 +1963,7 @@
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td class="site-id-cell">${issue.siteId}</td>
+                    <td title="${issue.problemCategory}">${issue.problemCategory}</td>
                     <td><span class="badge badge-priority-${issue.priority}">${issue.priority}</span></td>
                     <td><span class="badge badge-status-${issue.status}">${issue.status}</span></td>
                     <td>
@@ -1878,7 +1978,6 @@
                         <span class="vendor-logo ${vendorLogoClass}">${vendorInitial}</span>
                         ${issue.vendor || ''}
                     </td>
-                    <td>${issue.openDate || ''}</td>
                 `;
                 tbody.appendChild(row);
             });
@@ -1911,7 +2010,7 @@
                 headers.join(','),
                 ...filteredVswrData.map(issue => [
                     issue.siteId,
-                    issue.problemCategory,
+                    `"${(issue.problemCategory || '').replace(/"/g, '""')}"`,
                     issue.priority,
                     issue.status,
                     issue.aging,
