@@ -609,9 +609,34 @@
                                     </select>
                                 </div>
                             </div>
+                            <div class="col-md-3">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-city"></i></span>
+                                    <select class="form-select" id="filterCity" onchange="applyFilters()">
+                                        <option value="">All Cities</option>
+                                        <!-- Options will be populated dynamically -->
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-industry"></i></span>
+                                    <select class="form-select" id="filterArea" onchange="applyFilters()">
+                                        <option value="">All Areas</option>
+                                        <!-- Options will be populated dynamically -->
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
                             <div class="col-md-6">
                                 <button class="btn btn-outline-secondary w-100" onclick="clearFilters()">
                                     <i class="fas fa-eraser me-1"></i> Clear All Filters
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <button class="btn btn-outline-primary w-100" onclick="fetchCSVData()">
+                                    <i class="fas fa-sync me-1"></i> Refresh Data
                                 </button>
                             </div>
                         </div>
@@ -680,9 +705,9 @@
             </div>
             <div class="col-lg-4 mb-4">
                 <div class="chart-container">
-                    <h6 class="chart-title"><i class="fas fa-user"></i>VSWR by PIC</h6>
+                    <h6 class="chart-title"><i class="fas fa-exclamation-triangle"></i>Root Cause Categories</h6>
                     <div style="height: 250px; position: relative;">
-                        <canvas id="picChart"></canvas>
+                        <canvas id="rootCauseChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -765,7 +790,7 @@
             </div>
         </div>
 
-        <!-- Circle Summary for VSWR -->
+        <!-- Circle Performance Summary -->
         <div class="row mb-4">
             <div class="col-12">
                 <div class="chart-container">
@@ -785,6 +810,34 @@
                             </thead>
                             <tbody id="circleSummaryBody">
                                 <tr><td colspan="7" class="text-center py-3">Loading VSWR data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- City Performance Summary (NEW TABLE) -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="chart-container">
+                    <h6 class="chart-title"><i class="fas fa-city"></i>City Performance Summary</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>City</th>
+                                    <th>Area IOH</th>
+                                    <th class="text-end">Total Issues</th>
+                                    <th class="text-end">Open Issues</th>
+                                    <th class="text-end">P1 Issues</th>
+                                    <th class="text-end">Avg Aging</th>
+                                    <th class="text-end">Unique Sites</th>
+                                    <th class="text-end">Closed Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody id="citySummaryBody">
+                                <tr><td colspan="8" class="text-center py-3">Loading VSWR data...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -841,6 +894,8 @@
                                         </th>
                                         <th>Circle</th>
                                         <th>Vendor</th>
+                                        <th>City</th>
+                                        <th>Area</th>
                                     </tr>
                                 </thead>
                                 <tbody id="detailedIssuesTableBody">
@@ -888,7 +943,7 @@
         let allVswrData = [];
         let filteredVswrData = [];
         let currentSort = { column: 'aging', direction: 'desc' };
-        let statusChart, priorityChart, circleChart, vendorChart, picChart, agingChart;
+        let statusChart, priorityChart, circleChart, vendorChart, rootCauseChart, agingChart;
         let autoRefreshInterval = null;
         let isAutoRefresh = true;
         const AUTO_REFRESH_INTERVAL = 30000; // 30 detik
@@ -954,6 +1009,9 @@
             const problemCategories = new Set();
             const vendors = new Set();
             const pics = new Set();
+            const cities = new Set();
+            const areas = new Set();
+            const rootCauses = new Set();
             
             rawData.forEach(row => {
                 try {
@@ -968,13 +1026,14 @@
                     const status = row['Status(1)'] || row['Status'] || row['status'] || 'Open';
                     const aging = parseInt(row['Aging']) || parseInt(row['aging']) || 0;
                     const pic = row['PIC'] || row['pic'] || '';
-                    const rootCause = row['Root Cause Category'] || row['rootCause'] || '';
+                    const rootCause = row['Root Cause Category'] || row['rootCause'] || 'Unknown';
                     const action = row['Action Performed'] || row['action'] || '';
                     const circle = row['Circle'] || row['circle'] || '';
                     const vendor = row['Vendor'] || row['vendor'] || '';
                     const openDate = row['Open Date'] || '';
                     const closedDate = row['Closed Date'] || '';
-                    const city = row['City'] || '';
+                    const city = row['City'] || 'Unknown';
+                    const area = row['Area IOH'] || row['area'] || 'Unknown';
                     
                     if (!siteId) return;
                     
@@ -985,12 +1044,18 @@
                     const cleanVendor = String(vendor).trim();
                     const cleanCategory = String(problemCategory).trim();
                     const cleanPic = String(pic).trim();
+                    const cleanCity = String(city).trim();
+                    const cleanArea = String(area).trim();
+                    const cleanRootCause = String(rootCause).trim() || 'Unknown';
                     
                     // Add to sets for filters
                     if (cleanCircle) circles.add(cleanCircle);
                     if (cleanCategory) problemCategories.add(cleanCategory);
                     if (cleanVendor) vendors.add(cleanVendor);
                     if (cleanPic) pics.add(cleanPic);
+                    if (cleanCity) cities.add(cleanCity);
+                    if (cleanArea) areas.add(cleanArea);
+                    if (cleanRootCause) rootCauses.add(cleanRootCause);
                     
                     const processedRow = {
                         raw: row,
@@ -1000,13 +1065,14 @@
                         status: cleanStatus === 'Closed' ? 'Closed' : 'Open',
                         aging: aging,
                         pic: cleanPic,
-                        rootCause: rootCause,
+                        rootCause: cleanRootCause,
                         action: action,
                         circle: cleanCircle,
                         vendor: cleanVendor,
                         openDate: openDate,
                         closedDate: closedDate,
-                        city: city,
+                        city: cleanCity,
+                        area: cleanArea,
                         isHighAging: aging > 30,
                         isCritical: aging > 60
                     };
@@ -1019,13 +1085,12 @@
             
             console.log(`Filtered to ${allVswrData.length} VSWR issue records`);
             
-            // Update filter options (only VSWR categories)
+            // Update filter options
             updateFilterOptions('filterCircle', Array.from(circles));
-            updateFilterOptions('filterCategory', Array.from(problemCategories)); // Will only show VSWR
+            updateFilterOptions('filterCategory', Array.from(problemCategories));
             updateFilterOptions('filterPIC', Array.from(pics).sort());
-            
-            // Vendor filter not in original, but we'll keep it simple
-            // If needed, add vendor filter select to HTML
+            updateFilterOptions('filterCity', Array.from(cities).sort());
+            updateFilterOptions('filterArea', Array.from(areas).sort());
             
             applyFilters();
         }
@@ -1041,6 +1106,8 @@
             else if (selectId === 'filterPIC') placeholderText = "All PIC";
             else if (selectId === 'filterStatus') placeholderText = "All Status";
             else if (selectId === 'filterPriority') placeholderText = "All Priority";
+            else if (selectId === 'filterCity') placeholderText = "All Cities";
+            else if (selectId === 'filterArea') placeholderText = "All Areas";
             
             filterSelect.innerHTML = `<option value="">${placeholderText}</option>`;
             
@@ -1070,6 +1137,9 @@
                 console.log('All circles:', [...new Set(allVswrData.map(d => d.circle))]);
                 console.log('All vendors:', [...new Set(allVswrData.map(d => d.vendor))]);
                 console.log('All PICs:', [...new Set(allVswrData.map(d => d.pic))].filter(pic => pic));
+                console.log('All cities:', [...new Set(allVswrData.map(d => d.city))].filter(city => city));
+                console.log('All areas:', [...new Set(allVswrData.map(d => d.area))].filter(area => area));
+                console.log('All root causes:', [...new Set(allVswrData.map(d => d.rootCause))]);
             }
             console.log('=== END VSWR DEBUG ===');
         }
@@ -1082,6 +1152,8 @@
             const filterCircle = document.getElementById('filterCircle').value;
             const filterCategory = document.getElementById('filterCategory').value;
             const filterPIC = document.getElementById('filterPIC').value;
+            const filterCity = document.getElementById('filterCity').value;
+            const filterArea = document.getElementById('filterArea').value;
             
             filteredVswrData = allVswrData.filter(issue => {
                 const siteIdMatch = !searchSiteId || 
@@ -1102,7 +1174,13 @@
                 const picMatch = !filterPIC || 
                     issue.pic === filterPIC;
                 
-                return siteIdMatch && statusMatch && priorityMatch && circleMatch && categoryMatch && picMatch;
+                const cityMatch = !filterCity || 
+                    issue.city === filterCity;
+                
+                const areaMatch = !filterArea || 
+                    issue.area === filterArea;
+                
+                return siteIdMatch && statusMatch && priorityMatch && circleMatch && categoryMatch && picMatch && cityMatch && areaMatch;
             });
             
             updateSummaryKPIs();
@@ -1122,6 +1200,8 @@
             const filterCircle = document.getElementById('filterCircle').value;
             const filterCategory = document.getElementById('filterCategory').value;
             const filterPIC = document.getElementById('filterPIC').value;
+            const filterCity = document.getElementById('filterCity').value;
+            const filterArea = document.getElementById('filterArea').value;
             
             // Build search description
             let searchDescription = [];
@@ -1131,6 +1211,8 @@
             if (filterCircle) searchDescription.push(`Circle: ${filterCircle}`);
             if (filterCategory) searchDescription.push(`Category: ${filterCategory}`);
             if (filterPIC) searchDescription.push(`PIC: ${filterPIC}`);
+            if (filterCity) searchDescription.push(`City: ${filterCity}`);
+            if (filterArea) searchDescription.push(`Area: ${filterArea}`);
             
             if (searchDescription.length > 0) {
                 searchResultTitle.textContent = `VSWR Search Results (${filteredVswrData.length} issues found)`;
@@ -1151,6 +1233,8 @@
             document.getElementById('filterCircle').value = '';
             document.getElementById('filterCategory').value = '';
             document.getElementById('filterPIC').value = '';
+            document.getElementById('filterCity').value = '';
+            document.getElementById('filterArea').value = '';
             
             applyFilters();
         }
@@ -1490,108 +1574,151 @@
                 });
             }
             
-            // Update PIC Chart - DENGAN DATA LABEL WARNA PUTIH
-            const picCounts = {};
+            // Update Root Cause Chart (NEW - menggantikan PIC Chart)
+            const rootCauseCounts = {};
             filteredVswrData.forEach(issue => {
-                const pic = issue.pic || 'Unassigned';
-                picCounts[pic] = (picCounts[pic] || 0) + 1;
+                const rootCause = issue.rootCause || 'Unknown';
+                rootCauseCounts[rootCause] = (rootCauseCounts[rootCause] || 0) + 1;
             });
             
-            const sortedPICs = Object.entries(picCounts)
+            const sortedRootCauses = Object.entries(rootCauseCounts)
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, 5);
             
-            if (picChart) picChart.destroy();
-            const picCtx = document.getElementById('picChart');
-            if (picCtx) {
-                picChart = new Chart(picCtx, {
-                    type: 'pie',
-                    data: {
-                        labels: sortedPICs.map(item => item[0]),
-                        datasets: [{
-                            data: sortedPICs.map(item => item[1]),
-                            backgroundColor: ['#9b59b6', '#3498db', '#e67e22', '#2ecc71', '#e74c3c'],
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        layout: {
-                            padding: {
-                                top: 20,
-                                bottom: 20
-                            }
+            if (rootCauseChart) rootCauseChart.destroy();
+            const rootCauseCtx = document.getElementById('rootCauseChart');
+            if (rootCauseCtx) {
+                if (sortedRootCauses.length === 1) {
+                    rootCauseChart = new Chart(rootCauseCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: [sortedRootCauses[0][0]],
+                            datasets: [{
+                                data: [sortedRootCauses[0][1]],
+                                backgroundColor: ['#3b82f6'],
+                                borderWidth: 1
+                            }]
                         },
-                        plugins: {
-                            legend: {
-                                position: 'right',
-                                labels: {
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            cutout: '65%',
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        font: {
+                                            family: 'Inter',
+                                            size: 11
+                                        }
+                                    }
+                                },
+                                datalabels: {
+                                    display: true,
+                                    color: '#ffffff',
                                     font: {
                                         family: 'Inter',
-                                        size: 9
+                                        weight: 'bold',
+                                        size: 14
                                     },
-                                    generateLabels: function(chart) {
-                                        const data = chart.data;
-                                        if (data.labels.length && data.datasets.length) {
-                                            const dataset = data.datasets[0];
-                                            return data.labels.map((label, i) => {
-                                                const value = dataset.data[i];
-                                                const total = dataset.data.reduce((a, b) => a + b, 0);
-                                                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                                return {
-                                                    text: `${label}: ${value} (${percentage}%)`,
-                                                    fillStyle: dataset.backgroundColor[i],
-                                                    hidden: false,
-                                                    index: i
-                                                };
-                                            });
-                                        }
-                                        return [];
-                                    }
-                                }
-                            },
-                            datalabels: {
-                                display: true,
-                                color: '#ffffff',
-                                font: {
-                                    family: 'Inter',
-                                    weight: 'bold',
-                                    size: 11
-                                },
-                                formatter: (value, context) => {
-                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                    return `${percentage}%`;
-                                },
-                                anchor: function(context) {
-                                    const index = context.dataIndex;
-                                    const anchors = ['end', 'center', 'start', 'center', 'end'];
-                                    return anchors[index % anchors.length] || 'center';
-                                },
-                                align: function(context) {
-                                    const index = context.dataIndex;
-                                    const aligns = ['start', 'center', 'end', 'center', 'start'];
-                                    return aligns[index % aligns.length] || 'center';
-                                },
-                                offset: 8,
-                                clamp: true,
-                                overlap: false
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        const label = context.label || '';
-                                        const value = context.raw || 0;
-                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    formatter: (value, context) => {
+                                        const total = context.dataset.data.reduce((acc, val) => acc + val, 0);
                                         const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                        return `${label}: ${value} (${percentage}%)`;
+                                        return `${value} (${percentage}%)`;
+                                    },
+                                    anchor: 'center',
+                                    align: 'center',
+                                    offset: 0
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const label = context.label || '';
+                                            const value = context.raw || 0;
+                                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                            return `${label}: ${value} (${percentage}%)`;
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                });
+                    });
+                } else if (sortedRootCauses.length > 0) {
+                    rootCauseChart = new Chart(rootCauseCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: sortedRootCauses.map(item => item[0]),
+                            datasets: [{
+                                label: 'Issues',
+                                data: sortedRootCauses.map(item => item[1]),
+                                backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
+                                borderWidth: 0,
+                                borderRadius: 4
+                            }]
+                        },
+                        options: {
+                            indexAxis: 'y',
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                datalabels: {
+                                    display: true,
+                                    color: '#000000',
+                                    font: {
+                                        family: 'Inter',
+                                        weight: 'bold',
+                                        size: 11
+                                    },
+                                    formatter: (value) => {
+                                        return value;
+                                    },
+                                    anchor: 'end',
+                                    align: 'right',
+                                    offset: 4
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const value = context.raw || 0;
+                                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                            return `Count: ${value} (${percentage}%)`;
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    beginAtZero: true,
+                                    grid: {
+                                        display: true
+                                    },
+                                    ticks: {
+                                        font: {
+                                            family: 'Inter',
+                                            size: 10
+                                        }
+                                    }
+                                },
+                                y: {
+                                    grid: {
+                                        display: false
+                                    },
+                                    ticks: {
+                                        font: {
+                                            family: 'Inter',
+                                            size: 10
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    rootCauseCtx.parentElement.innerHTML = '<div class="text-center py-5 text-muted">No root cause data available</div>';
+                }
             }
             
             // Update Aging Distribution Chart
@@ -1670,6 +1797,7 @@
             updateAgingIssuesTable();
             updateVendorPerformanceTable();
             updateCircleSummaryTable();
+            updateCitySummaryTable(); // New table
         }
 
         function updateTopSitesTable() {
@@ -1895,6 +2023,91 @@
             });
         }
 
+        // NEW: City Summary Table
+        function updateCitySummaryTable() {
+            const tbody = document.getElementById('citySummaryBody');
+            
+            if (filteredVswrData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center py-3">No VSWR issues found</td></tr>';
+                return;
+            }
+            
+            // Group by city and area
+            const cityStats = {};
+            filteredVswrData.forEach(issue => {
+                const city = issue.city || 'Unknown';
+                const area = issue.area || 'Unknown';
+                const key = city + '|' + area; // Composite key
+                
+                if (!cityStats[key]) {
+                    cityStats[key] = {
+                        city: city,
+                        area: area,
+                        total: 0,
+                        open: 0,
+                        p1: 0,
+                        totalAging: 0,
+                        openCount: 0,
+                        sites: new Set()
+                    };
+                }
+                
+                cityStats[key].total++;
+                if (issue.status === 'Open') {
+                    cityStats[key].open++;
+                    cityStats[key].totalAging += issue.aging;
+                    cityStats[key].openCount++;
+                }
+                if (issue.priority === 'P1') cityStats[key].p1++;
+                cityStats[key].sites.add(issue.siteId);
+            });
+            
+            // Calculate metrics and convert to array
+            const cityArray = Object.values(cityStats).map(city => ({
+                ...city,
+                avgAging: city.openCount > 0 ? Math.round(city.totalAging / city.openCount) : 0,
+                uniqueSites: city.sites.size,
+                closedRate: city.total > 0 ? Math.round(((city.total - city.open) / city.total) * 100) : 0
+            })).sort((a, b) => b.total - a.total);
+            
+            tbody.innerHTML = '';
+            
+            cityArray.forEach(city => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${city.city}</strong></td>
+                    <td>${city.area}</td>
+                    <td class="text-end">${city.total}</td>
+                    <td class="text-end">
+                        ${city.open}
+                        <span class="stats-badge ${city.open > 0 ? 'stats-badge-danger' : 'stats-badge-success'}">
+                            ${Math.round((city.open / city.total) * 100)}%
+                        </span>
+                    </td>
+                    <td class="text-end">
+                        ${city.p1}
+                        <span class="stats-badge ${city.p1 > 0 ? 'stats-badge-warning' : 'stats-badge-success'}">
+                            ${Math.round((city.p1 / city.total) * 100)}%
+                        </span>
+                    </td>
+                    <td class="text-end">
+                        ${city.avgAging}d
+                        <span class="stats-badge ${city.avgAging > 30 ? 'stats-badge-danger' : city.avgAging > 15 ? 'stats-badge-warning' : 'stats-badge-success'}">
+                            ${city.avgAging > 30 ? 'High' : city.avgAging > 15 ? 'Medium' : 'Low'}
+                        </span>
+                    </td>
+                    <td class="text-end">${city.uniqueSites}</td>
+                    <td class="text-end">
+                        ${city.closedRate}%
+                        <span class="stats-badge ${city.closedRate > 80 ? 'stats-badge-success' : city.closedRate > 50 ? 'stats-badge-warning' : 'stats-badge-danger'}">
+                            ${city.closedRate > 80 ? 'Good' : city.closedRate > 50 ? 'Fair' : 'Poor'}
+                        </span>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
         function updateDetailedIssuesTable() {
             const tbody = document.getElementById('detailedIssuesTableBody');
             const countBadge = document.getElementById('tableCountBadge');
@@ -1902,7 +2115,7 @@
             if (filteredVswrData.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="10" class="text-center py-5">
+                        <td colspan="12" class="text-center py-5">
                             <i class="fas fa-search fa-2x text-muted mb-3"></i><br>
                             No VSWR issues found matching your criteria
                         </td>
@@ -1978,6 +2191,8 @@
                         <span class="vendor-logo ${vendorLogoClass}">${vendorInitial}</span>
                         ${issue.vendor || ''}
                     </td>
+                    <td>${issue.city || ''}</td>
+                    <td>${issue.area || ''}</td>
                 `;
                 tbody.appendChild(row);
             });
@@ -2004,7 +2219,7 @@
             }
             
             const headers = ['SITE ID', 'Problem Category', 'Priority', 'Status', 'Aging', 'PIC', 
-                           'Root Cause Category', 'Action Performed', 'Circle', 'Vendor', 'Open Date', 'Closed Date'];
+                           'Root Cause Category', 'Action Performed', 'Circle', 'Vendor', 'City', 'Area IOH', 'Open Date', 'Closed Date'];
             
             const csvData = [
                 headers.join(','),
@@ -2019,6 +2234,8 @@
                     `"${(issue.action || '').replace(/"/g, '""')}"`,
                     issue.circle || '',
                     issue.vendor || '',
+                    `"${(issue.city || '').replace(/"/g, '""')}"`,
+                    `"${(issue.area || '').replace(/"/g, '""')}"`,
                     issue.openDate || '',
                     issue.closedDate || ''
                 ].join(','))
