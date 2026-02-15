@@ -557,18 +557,27 @@
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
                                     <select class="form-select" id="filterCircle" onchange="applyFilters()">
-                                        <option value="">All Circle</option>
+                                        <option value="">All Circles</option>
                                         <!-- Options will be populated dynamically -->
                                     </select>
                                 </div>
                             </div>
                         </div>
                         <div class="row mt-3">
-                            <div class="col-md-6">
+                            <div class="col-md-3">
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-chart-bar"></i></span>
                                     <select class="form-select" id="filterCategory" onchange="applyFilters()">
                                         <option value="">All Categories</option>
+                                        <!-- Options will be populated dynamically -->
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                    <select class="form-select" id="filterPIC" onchange="applyFilters()">
+                                        <option value="">All PIC</option>
                                         <!-- Options will be populated dynamically -->
                                     </select>
                                 </div>
@@ -604,7 +613,7 @@
             </div>
         </div>
 
-        <!-- Charts Row -->
+        <!-- Charts Row 1 -->
         <div class="row mb-4">
             <div class="col-lg-4 mb-4">
                 <div class="chart-container">
@@ -632,9 +641,9 @@
             </div>
         </div>
 
-        <!-- Additional Charts -->
+        <!-- Charts Row 2 -->
         <div class="row mb-4">
-            <div class="col-lg-6 mb-4">
+            <div class="col-lg-4 mb-4">
                 <div class="chart-container">
                     <h6 class="chart-title"><i class="fas fa-map"></i>Issues by Circle</h6>
                     <div style="height: 250px; position: relative;">
@@ -642,11 +651,19 @@
                     </div>
                 </div>
             </div>
-            <div class="col-lg-6 mb-4">
+            <div class="col-lg-4 mb-4">
                 <div class="chart-container">
                     <h6 class="chart-title"><i class="fas fa-industry"></i>Issues by Vendor</h6>
                     <div style="height: 250px; position: relative;">
                         <canvas id="vendorChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-4">
+                <div class="chart-container">
+                    <h6 class="chart-title"><i class="fas fa-user"></i>Issues by PIC</h6>
+                    <div style="height: 250px; position: relative;">
+                        <canvas id="picChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -843,7 +860,7 @@
         let allIssueData = [];
         let filteredIssueData = [];
         let currentSort = { column: 'aging', direction: 'desc' };
-        let statusChart, priorityChart, categoryChart, circleChart, vendorChart;
+        let statusChart, priorityChart, categoryChart, circleChart, vendorChart, picChart;
         let autoRefreshInterval = null;
         let isAutoRefresh = true;
         const AUTO_REFRESH_INTERVAL = 30000; // 30 detik
@@ -905,6 +922,7 @@
             const circles = new Set();
             const problemCategories = new Set();
             const vendors = new Set();
+            const pics = new Set();
             
             rawData.forEach(row => {
                 try {
@@ -935,11 +953,13 @@
                     const cleanCircle = String(circle).trim();
                     const cleanVendor = String(vendor).trim();
                     const cleanCategory = String(problemCategory).trim();
+                    const cleanPic = String(pic).trim();
                     
                     // Add to sets for filters
                     if (cleanCircle) circles.add(cleanCircle);
                     if (cleanCategory) problemCategories.add(cleanCategory);
                     if (cleanVendor) vendors.add(cleanVendor);
+                    if (cleanPic) pics.add(cleanPic);
                     
                     const processedRow = {
                         raw: row,
@@ -948,7 +968,7 @@
                         priority: cleanPriority === 'P1' ? 'P1' : 'P2',
                         status: cleanStatus === 'Closed' ? 'Closed' : 'Open',
                         aging: aging,
-                        pic: pic,
+                        pic: cleanPic,
                         rootCause: rootCause,
                         action: action,
                         circle: cleanCircle,
@@ -975,6 +995,7 @@
             // Update filter options
             updateFilterOptions('filterCircle', Array.from(circles));
             updateFilterOptions('filterCategory', Array.from(problemCategories));
+            updateFilterOptions('filterPIC', Array.from(pics).sort());
             
             applyFilters();
         }
@@ -983,7 +1004,15 @@
             const filterSelect = document.getElementById(selectId);
             if (!filterSelect) return;
             
-            filterSelect.innerHTML = '<option value="">All</option>';
+            // Set placeholder text based on selectId
+            let placeholderText = "All";
+            if (selectId === 'filterCircle') placeholderText = "All Circles";
+            else if (selectId === 'filterCategory') placeholderText = "All Categories";
+            else if (selectId === 'filterPIC') placeholderText = "All PIC";
+            else if (selectId === 'filterStatus') placeholderText = "All Status";
+            else if (selectId === 'filterPriority') placeholderText = "All Priority";
+            
+            filterSelect.innerHTML = `<option value="">${placeholderText}</option>`;
             
             Array.from(options).sort().forEach(option => {
                 if (option && option.trim()) {
@@ -1005,6 +1034,7 @@
                 console.log('All problem categories:', [...new Set(allIssueData.map(d => d.problemCategory))]);
                 console.log('All circles:', [...new Set(allIssueData.map(d => d.circle))]);
                 console.log('All vendors:', [...new Set(allIssueData.map(d => d.vendor))]);
+                console.log('All PICs:', [...new Set(allIssueData.map(d => d.pic))].filter(pic => pic));
                 console.log('Aging range:', Math.min(...allIssueData.map(d => d.aging)), '-', Math.max(...allIssueData.map(d => d.aging)));
             }
             console.log('=== END DEBUG ===');
@@ -1017,6 +1047,7 @@
             const filterPriority = document.getElementById('filterPriority').value;
             const filterCircle = document.getElementById('filterCircle').value;
             const filterCategory = document.getElementById('filterCategory').value;
+            const filterPIC = document.getElementById('filterPIC').value;
             
             filteredIssueData = allIssueData.filter(issue => {
                 const siteIdMatch = !searchSiteId || 
@@ -1034,7 +1065,10 @@
                 const categoryMatch = !filterCategory || 
                     issue.problemCategory === filterCategory;
                 
-                return siteIdMatch && statusMatch && priorityMatch && circleMatch && categoryMatch;
+                const picMatch = !filterPIC || 
+                    issue.pic === filterPIC;
+                
+                return siteIdMatch && statusMatch && priorityMatch && circleMatch && categoryMatch && picMatch;
             });
             
             updateSummaryKPIs();
@@ -1053,6 +1087,7 @@
             const filterPriority = document.getElementById('filterPriority').value;
             const filterCircle = document.getElementById('filterCircle').value;
             const filterCategory = document.getElementById('filterCategory').value;
+            const filterPIC = document.getElementById('filterPIC').value;
             
             // Build search description
             let searchDescription = [];
@@ -1061,6 +1096,7 @@
             if (filterPriority) searchDescription.push(`Priority: ${filterPriority}`);
             if (filterCircle) searchDescription.push(`Circle: ${filterCircle}`);
             if (filterCategory) searchDescription.push(`Category: ${filterCategory}`);
+            if (filterPIC) searchDescription.push(`PIC: ${filterPIC}`);
             
             if (searchDescription.length > 0) {
                 searchResultTitle.textContent = `Search Results (${filteredIssueData.length} issues found)`;
@@ -1080,6 +1116,7 @@
             document.getElementById('filterPriority').value = '';
             document.getElementById('filterCircle').value = '';
             document.getElementById('filterCategory').value = '';
+            document.getElementById('filterPIC').value = '';
             
             applyFilters();
         }
@@ -1205,7 +1242,7 @@
                             legend: { display: false },
                             datalabels: {
                                 display: true,
-                                color: '#000000', // Hitam pekat
+                                color: '#000000',
                                 font: {
                                     family: 'Inter',
                                     weight: 'bold',
@@ -1232,7 +1269,7 @@
                         scales: {
                             y: {
                                 beginAtZero: true,
-                                max: yAxisMax, // Menyesuaikan max axis
+                                max: yAxisMax,
                                 grid: {
                                     display: true
                                 },
@@ -1241,7 +1278,7 @@
                                         family: 'Inter',
                                         size: 10
                                     },
-                                    stepSize: Math.ceil(maxValue / 5) // Membuat step yang proporsional
+                                    stepSize: Math.ceil(maxValue / 5)
                                 }
                             },
                             x: {
@@ -1271,7 +1308,6 @@
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, 5);
             
-            // Generate different colors for each category
             const categoryColors = [
                 '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', 
                 '#ec4899', '#14b8a6', '#f97316', '#6b7280', '#6366f1'
@@ -1307,7 +1343,7 @@
                                 },
                                 datalabels: {
                                     display: true,
-                                    color: '#000000', // Hitam pekat
+                                    color: '#000000',
                                     font: {
                                         family: 'Inter',
                                         weight: 'bold',
@@ -1357,7 +1393,7 @@
                                 legend: { display: false },
                                 datalabels: {
                                     display: true,
-                                    color: '#000000', // Hitam pekat
+                                    color: '#000000',
                                     font: {
                                         family: 'Inter',
                                         weight: 'bold',
@@ -1447,6 +1483,25 @@
                                     font: {
                                         family: 'Inter',
                                         size: 9
+                                    },
+                                    // Menampilkan nilai dan persentase di legend
+                                    generateLabels: function(chart) {
+                                        const data = chart.data;
+                                        if (data.labels.length && data.datasets.length) {
+                                            const dataset = data.datasets[0];
+                                            return data.labels.map((label, i) => {
+                                                const value = dataset.data[i];
+                                                const total = dataset.data.reduce((a, b) => a + b, 0);
+                                                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                                return {
+                                                    text: `${label}: ${value} (${percentage}%)`,
+                                                    fillStyle: dataset.backgroundColor[i],
+                                                    hidden: false,
+                                                    index: i
+                                                };
+                                            });
+                                        }
+                                        return [];
                                     }
                                 }
                             },
@@ -1502,7 +1557,7 @@
                             legend: { display: false },
                             datalabels: {
                                 display: true,
-                                color: '#000000', // Hitam pekat
+                                color: '#000000',
                                 font: {
                                     family: 'Inter',
                                     weight: 'bold',
@@ -1547,6 +1602,79 @@
                                     font: {
                                         family: 'Inter',
                                         size: 10
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Update PIC Chart - TANPA DATA LABEL (hanya legend)
+            const picCounts = {};
+            filteredIssueData.forEach(issue => {
+                const pic = issue.pic || 'Unassigned';
+                picCounts[pic] = (picCounts[pic] || 0) + 1;
+            });
+            
+            const sortedPICs = Object.entries(picCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5); // Ambil 5 PIC teratas
+            
+            if (picChart) picChart.destroy();
+            const picCtx = document.getElementById('picChart');
+            if (picCtx) {
+                picChart = new Chart(picCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: sortedPICs.map(item => item[0]),
+                        datasets: [{
+                            data: sortedPICs.map(item => item[1]),
+                            backgroundColor: ['#9b59b6', '#3498db', '#e67e22', '#2ecc71', '#e74c3c', '#f1c40f', '#1abc9c', '#34495e'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    font: {
+                                        family: 'Inter',
+                                        size: 9
+                                    },
+                                    // Menampilkan nilai dan persentase di legend
+                                    generateLabels: function(chart) {
+                                        const data = chart.data;
+                                        if (data.labels.length && data.datasets.length) {
+                                            const dataset = data.datasets[0];
+                                            return data.labels.map((label, i) => {
+                                                const value = dataset.data[i];
+                                                const total = dataset.data.reduce((a, b) => a + b, 0);
+                                                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                                return {
+                                                    text: `${label}: ${value} (${percentage}%)`,
+                                                    fillStyle: dataset.backgroundColor[i],
+                                                    hidden: false,
+                                                    index: i
+                                                };
+                                            });
+                                        }
+                                        return [];
+                                    }
+                                }
+                            },
+                            // DATALABELS TIDAK DIGUNAKAN
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.raw || 0;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        return `${label}: ${value} (${percentage}%)`;
                                     }
                                 }
                             }
