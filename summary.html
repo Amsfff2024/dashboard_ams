@@ -639,8 +639,8 @@
             </div>
             <div class="col-lg-4 mb-4">
                 <div class="chart-container">
-                    <h6 class="chart-title"><i class="fas fa-chart-line"></i>Top Problem Categories</h6>
-                    <div style="height: 250px; position: relative;">
+                    <h6 class="chart-title"><i class="fas fa-chart-line"></i>Problem Categories (All)</h6>
+                    <div style="height: 250px; position: relative; overflow-y: auto;">
                         <canvas id="categoryChart"></canvas>
                     </div>
                 </div>
@@ -1318,32 +1318,37 @@
                 });
             }
             
-            // Update Category Chart - dengan warna label hitam
+            // Update Category Chart - MENAMPILKAN SEMUA KATEGORI (tidak hanya top 5)
             const categoryCounts = {};
             filteredIssueData.forEach(issue => {
                 const category = issue.problemCategory || 'Unknown';
                 categoryCounts[category] = (categoryCounts[category] || 0) + 1;
             });
             
-            const sortedCategories = Object.entries(categoryCounts)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 5);
+            // Ambil SEMUA kategori, tidak dibatasi 5
+            const allCategories = Object.entries(categoryCounts)
+                .sort((a, b) => b[1] - a[1]); // Tetap urutkan berdasarkan jumlah
             
             const categoryColors = [
                 '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', 
-                '#ec4899', '#14b8a6', '#f97316', '#6b7280', '#6366f1'
+                '#ec4899', '#14b8a6', '#f97316', '#6b7280', '#6366f1',
+                '#a855f7', '#d946ef', '#22c55e', '#eab308', '#84cc16',
+                '#06b6d4', '#0ea5e9', '#f43f5e', '#fb7185', '#fbbf24'
             ];
             
             if (categoryChart) categoryChart.destroy();
             const categoryCtx = document.getElementById('categoryChart');
             if (categoryCtx) {
-                if (sortedCategories.length === 1) {
+                if (allCategories.length === 0) {
+                    categoryCtx.parentElement.innerHTML = '<div class="text-center py-5 text-muted">No category data available</div>';
+                } else if (allCategories.length === 1) {
+                    // Jika hanya 1 kategori, gunakan doughnut chart
                     categoryChart = new Chart(categoryCtx, {
                         type: 'doughnut',
                         data: {
-                            labels: [sortedCategories[0][0]],
+                            labels: [allCategories[0][0]],
                             datasets: [{
-                                data: [sortedCategories[0][1]],
+                                data: [allCategories[0][1]],
                                 backgroundColor: [categoryColors[0]],
                                 borderWidth: 1
                             }]
@@ -1364,7 +1369,7 @@
                                 },
                                 datalabels: {
                                     display: true,
-                                    color: '#000000',
+                                    color: '#ffffff',
                                     font: {
                                         family: 'Inter',
                                         weight: 'bold',
@@ -1393,15 +1398,16 @@
                             }
                         }
                     });
-                } else if (sortedCategories.length > 0) {
+                } else {
+                    // Jika lebih dari 1 kategori, gunakan horizontal bar chart
                     categoryChart = new Chart(categoryCtx, {
                         type: 'bar',
                         data: {
-                            labels: sortedCategories.map(item => item[0]),
+                            labels: allCategories.map(item => item[0]),
                             datasets: [{
                                 label: 'Count',
-                                data: sortedCategories.map(item => item[1]),
-                                backgroundColor: sortedCategories.map((_, index) => categoryColors[index % categoryColors.length]),
+                                data: allCategories.map(item => item[1]),
+                                backgroundColor: allCategories.map((_, index) => categoryColors[index % categoryColors.length]),
                                 borderWidth: 0,
                                 borderRadius: 4
                             }]
@@ -1459,14 +1465,23 @@
                                         font: {
                                             family: 'Inter',
                                             size: 10
-                                        }
+                                        },
+                                        autoSkip: false, // Jangan skip label
+                                        maxRotation: 0, // Jangan rotasi label
+                                        minRotation: 0
                                     }
+                                }
+                            },
+                            layout: {
+                                padding: {
+                                    left: 0,
+                                    right: 25, // Ruang untuk datalabels
+                                    top: 10,
+                                    bottom: 10
                                 }
                             }
                         }
                     });
-                } else {
-                    categoryCtx.parentElement.innerHTML = '<div class="text-center py-5 text-muted">No category data available</div>';
                 }
             }
             
