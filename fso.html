@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FSO PIC Dashboard</title>
+    <title>FSO Dashboard - Regional Ranking</title>
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
@@ -28,6 +28,7 @@
             --normal-green: #28a745;
             --info-blue: #17a2b8;
             --vip-gold: #ffc107;
+            --fso-purple: #8b5cf6;
         }
         
         body {
@@ -59,9 +60,59 @@
             opacity: 0.9;
         }
         
+        /* TABS STYLING */
+        .dashboard-tabs {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            padding: 0;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+        
+        .nav-tabs {
+            border-bottom: 2px solid #e9ecef;
+            padding: 0 20px;
+            background: #f8fafc;
+        }
+        
+        .nav-tabs .nav-link {
+            font-family: var(--font-plus-jakarta);
+            font-weight: 600;
+            font-size: 14px;
+            color: #64748b;
+            border: none;
+            padding: 16px 24px;
+            margin-right: 8px;
+            border-radius: 0;
+            transition: all 0.2s ease;
+        }
+        
+        .nav-tabs .nav-link:hover {
+            color: #3b82f6;
+            background: transparent;
+            border-bottom: 3px solid #94a3b8;
+        }
+        
+        .nav-tabs .nav-link.active {
+            color: #3b82f6;
+            background: transparent;
+            border-bottom: 3px solid #3b82f6;
+            font-weight: 700;
+        }
+        
+        .nav-tabs .nav-link i {
+            margin-right: 8px;
+        }
+        
+        .tab-content {
+            padding: 24px;
+            background: white;
+        }
+        
         /* FILTER INDICATOR */
         .filter-indicator {
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
             color: white;
             border-radius: 8px;
             padding: 8px 16px;
@@ -141,16 +192,81 @@
             top: 0;
             z-index: 10;
             border: none;
-            padding: 8px 6px;
+            padding: 10px 8px;
+            white-space: nowrap;
         }
         
         .table tbody td {
             font-family: var(--font-inter);
             font-weight: 400;
-            font-size: 11px;
-            padding: 6px 4px;
+            font-size: 12px;
+            padding: 8px 6px;
             border-bottom: 1px solid #f1f5f9;
             vertical-align: middle;
+        }
+        
+        /* MATRIX TABLE STYLING */
+        .matrix-table-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            padding: 20px;
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+        
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        
+        .matrix-table th {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white;
+            font-family: var(--font-plus-jakarta);
+            font-weight: 600;
+            font-size: 12px;
+            padding: 12px 8px;
+            text-align: center;
+            border: 1px solid #334155;
+        }
+        
+        .matrix-table th:first-child {
+            text-align: left;
+        }
+        
+        .matrix-table td {
+            padding: 10px 8px;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+            font-family: var(--font-inter);
+        }
+        
+        .matrix-table td:first-child {
+            font-weight: 600;
+            background-color: #f8fafc;
+            text-align: left;
+        }
+        
+        .matrix-table tbody tr:hover td {
+            background-color: #f1f5f9;
+        }
+        
+        .matrix-table tfoot {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            font-weight: 700;
+        }
+        
+        .matrix-table tfoot td {
+            font-weight: 700;
+            background-color: #e2e8f0;
+            border-top: 2px solid #94a3b8;
+        }
+        
+        .total-column {
+            background-color: #fef9c3;
+            font-weight: 700;
         }
         
         /* BADGES */
@@ -200,109 +316,6 @@
             color: white;
         }
         
-        /* CHARTS CONTAINER */
-        .chart-container {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-            padding: 1rem;
-            height: 100%;
-        }
-        
-        /* MAIN TABLE CONTAINER */
-        .main-table-container {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-            border: none;
-            overflow: hidden;
-            flex: 1;
-            height: 600px;
-            display: flex;
-            flex-direction: column;
-            display: none; /* Hidden by default */
-        }
-        
-        .main-table-wrapper {
-            overflow: auto;
-            flex: 1;
-        }
-        
-        /* SITE ID CELL */
-        .site-id-cell {
-            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
-            font-weight: 600;
-            color: #1e40af;
-            font-size: 11px;
-        }
-        
-        /* LOADING */
-        #loadingSpinner {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 60px;
-            font-size: 18px;
-            color: #64748b;
-            font-family: var(--font-inter);
-        }
-        
-        /* SEARCH HIGHLIGHT */
-        .search-highlight {
-            background-color: #fff3cd;
-            font-weight: 600;
-        }
-        
-        /* PROGRESS BARS */
-        .progress {
-            height: 6px;
-            border-radius: 4px;
-        }
-        
-        /* RESPONSIVE */
-        @media (max-width: 768px) {
-            .executive-header {
-                padding: 12px 16px;
-                text-align: center;
-            }
-            
-            .executive-header h1 {
-                font-size: 1.2rem !important;
-            }
-            
-            .kpi-value {
-                font-size: 1.5rem;
-            }
-        }
-        
-        /* CUSTOM SCROLLBAR */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 3px;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-        
-        /* FORM CONTROLS */
-        .form-control, .form-select {
-            font-family: var(--font-inter);
-            font-size: 12px;
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
-        }
-        
         /* INFO BADGES */
         .info-badge {
             font-family: var(--font-inter);
@@ -311,59 +324,6 @@
             border-radius: 10px;
             background: #e2e8f0;
             color: #475569;
-        }
-        
-        /* TRUNCATE TEXT */
-        .text-truncate-cell {
-            max-width: 150px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        
-        /* AGING INDICATOR */
-        .aging-indicator {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 5px;
-        }
-        
-        .aging-critical { background-color: #dc3545; }
-        .aging-warning { background-color: #fd7e14; }
-        .aging-normal { background-color: #28a745; }
-        
-        /* TOOLTIP */
-        .tooltip-cell {
-            cursor: help;
-            border-bottom: 1px dotted #666;
-        }
-        
-        /* SUMMARY SECTIONS */
-        .summary-section {
-            margin-bottom: 1.5rem;
-        }
-        
-        .summary-section h6 {
-            color: #1e293b;
-            border-bottom: 2px solid #e2e8f0;
-            padding-bottom: 0.5rem;
-            margin-bottom: 1rem;
-        }
-        
-        /* HIDDEN DETAILS */
-        .hidden-details {
-            display: none;
-        }
-        
-        /* SEARCH RESULT INFO */
-        .search-result-info {
-            background: #f1f5f9;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            border-left: 4px solid #3b82f6;
         }
         
         /* STATS BADGE */
@@ -396,29 +356,100 @@
         .vendor-huawei { background: #d4001a; color: white; }
         .vendor-other { background: #6b7280; color: white; }
         
-        /* CHART TITLE */
-        .chart-title {
-            font-family: var(--font-plus-jakarta);
+        /* SITE ID CELL */
+        .site-id-cell {
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
             font-weight: 600;
-            font-size: 14px !important;
-            margin-bottom: 16px;
-            color: #1e293b;
+            color: #1e40af;
+            font-size: 11px;
         }
         
-        .chart-title i {
-            margin-right: 8px;
-            color: #3b82f6;
+        /* LOADING */
+        #loadingSpinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 60px;
+            font-size: 18px;
+            color: #64748b;
+            font-family: var(--font-inter);
         }
         
-        /* DASHBOARD TITLE */
-        .dashboard-title {
-            font-family: var(--font-plus-jakarta);
-            font-weight: 700;
-            font-size: 24px;
-            color: #1e293b;
-            margin-bottom: 20px;
-            padding-left: 12px;
+        /* SEARCH RESULT INFO */
+        .search-result-info {
+            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
             border-left: 4px solid #3b82f6;
+        }
+        
+        /* TRUNCATE TEXT */
+        .text-truncate-cell {
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        /* AGING INDICATOR */
+        .aging-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        
+        .aging-critical { background-color: #dc3545; }
+        .aging-warning { background-color: #fd7e14; }
+        .aging-normal { background-color: #28a745; }
+        
+        /* TOOLTIP */
+        .tooltip-cell {
+            cursor: help;
+            border-bottom: 1px dotted #666;
+        }
+        
+        /* CUSTOM SCROLLBAR */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .executive-header {
+                padding: 12px 16px;
+                text-align: center;
+            }
+            
+            .executive-header h1 {
+                font-size: 1.2rem !important;
+            }
+            
+            .kpi-value {
+                font-size: 1.5rem;
+            }
+            
+            .nav-tabs .nav-link {
+                padding: 12px 16px;
+                font-size: 13px;
+            }
         }
     </style>
 </head>
@@ -428,13 +459,13 @@
         <div class="container-fluid">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h1 class="mb-1"><i class="fas fa-tasks me-2"></i>FSO PIC Dashboard</h1>
-                    <p class="small mb-0 opacity-75">Issues Handled by FSO Team</p>
+                    <h1 class="mb-1"><i class="fas fa-tasks me-2"></i>FSO Performance Dashboard</h1>
+                    <p class="small mb-0 opacity-75">Regional Ranking by Area IOH & Issue Monitoring</p>
                 </div>
                 <div class="text-end">
                     <div class="small mb-1"><i class="fas fa-clock me-1"></i> <span id="currentTime">Loading...</span></div>
                     <span class="badge bg-danger" id="dashboardStatus">
-                        <i class="fas fa-circle me-1"></i> Loading FSO Data...
+                        <i class="fas fa-circle me-1"></i> Loading Data...
                     </span>
                 </div>
             </div>
@@ -445,460 +476,576 @@
     <div class="container-fluid py-4">
         <!-- Filter Indicator -->
         <div class="filter-indicator">
-            <i class="fas fa-filter"></i> Active Filter: <strong>PIC = FSO</strong>
+            <i class="fas fa-filter"></i> Active Filter: <strong>PIC = FSO | Status = Open/New Open/Re-Open</strong>
             <span class="ms-3 badge bg-white text-dark" id="fsoCountBadge">Loading...</span>
         </div>
         
-        <!-- Dashboard Title -->
-        <div class="dashboard-title">
-            <i class="fas fa-chart-line me-2"></i>FSO Issues Overview
-        </div>
-        
-        <!-- KPI Summary Row -->
-        <div class="row mb-4">
-            <!-- TOTAL FSO ISSUES -->
-            <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
-                <div class="card kpi-card p-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title">TOTAL FSO</h6>
-                            <div class="kpi-value text-primary" id="kpiTotalIssues">0</div>
+        <!-- Tabs Navigation -->
+        <div class="dashboard-tabs">
+            <ul class="nav nav-tabs" id="dashboardTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab" aria-controls="overview" aria-selected="true">
+                        <i class="fas fa-chart-pie"></i> Overview Dashboard
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="regional-tab" data-bs-toggle="tab" data-bs-target="#regional" type="button" role="tab" aria-controls="regional" aria-selected="false">
+                        <i class="fas fa-map-marked-alt"></i> Regional Ranking (by Area IOH)
+                    </button>
+                </li>
+            </ul>
+            
+            <div class="tab-content" id="dashboardTabsContent">
+                <!-- TAB 1: OVERVIEW DASHBOARD (FSO Dashboard) -->
+                <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
+                    <!-- Dashboard Title -->
+                    <div class="dashboard-title">
+                        <i class="fas fa-chart-line me-2"></i>FSO Issues Overview
+                    </div>
+                    
+                    <!-- KPI Summary Row -->
+                    <div class="row mb-4">
+                        <!-- TOTAL FSO ISSUES -->
+                        <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+                            <div class="card kpi-card p-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-title">TOTAL FSO</h6>
+                                        <div class="kpi-value text-primary" id="kpiTotalIssues">0</div>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-tasks fa-2x text-primary opacity-50"></i>
+                                    </div>
+                                </div>
+                                <div class="small text-muted mt-2">All FSO issues</div>
+                            </div>
                         </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-tasks fa-2x text-primary opacity-50"></i>
+                        <!-- UNIQUE SITES -->
+                        <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+                            <div class="card kpi-card p-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-title">UNIQUE SITES</h6>
+                                        <div class="kpi-value text-secondary" id="kpiUniqueSites">0</div>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-map-marker-alt fa-2x text-secondary opacity-50"></i>
+                                    </div>
+                                </div>
+                                <div class="small text-muted mt-2">Distinct site locations</div>
+                            </div>
+                        </div>
+                        <!-- OPEN FSO -->
+                        <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+                            <div class="card kpi-card p-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-title">OPEN FSO</h6>
+                                        <div class="kpi-value text-danger" id="kpiOpenIssues">0</div>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-exclamation-circle fa-2x text-danger opacity-50"></i>
+                                    </div>
+                                </div>
+                                <div class="small text-muted mt-2">FSO issues pending</div>
+                            </div>
+                        </div>
+                        <!-- CLOSED FSO -->
+                        <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+                            <div class="card kpi-card p-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-title">CLOSED FSO</h6>
+                                        <div class="kpi-value text-success" id="kpiClosedIssues">0</div>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-check-circle fa-2x text-success opacity-50"></i>
+                                    </div>
+                                </div>
+                                <div class="small text-muted mt-2">Resolved FSO issues</div>
+                            </div>
+                        </div>
+                        <!-- HIGH PRIORITY -->
+                        <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+                            <div class="card kpi-card p-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-title">HIGH PRIORITY</h6>
+                                        <div class="kpi-value text-warning" id="kpiHighPriority">0</div>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-flag fa-2x text-warning opacity-50"></i>
+                                    </div>
+                                </div>
+                                <div class="small text-muted mt-2">P1 FSO issues</div>
+                            </div>
+                        </div>
+                        <!-- AGING > 1 MONTH -->
+                        <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+                            <div class="card kpi-card p-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-title">AGING > 1 MONTH</h6>
+                                        <div class="kpi-value text-info" id="kpiAgingIssues">0</div>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-calendar-times fa-2x text-info opacity-50"></i>
+                                    </div>
+                                </div>
+                                <div class="small text-muted mt-2">FSO >30 days old</div>
+                            </div>
                         </div>
                     </div>
-                    <div class="small text-muted mt-2">All FSO issues</div>
-                </div>
-            </div>
-            <!-- UNIQUE SITES -->
-            <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
-                <div class="card kpi-card p-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title">UNIQUE SITES</h6>
-                            <div class="kpi-value text-secondary" id="kpiUniqueSites">0</div>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-map-marker-alt fa-2x text-secondary opacity-50"></i>
-                        </div>
-                    </div>
-                    <div class="small text-muted mt-2">Distinct site locations</div>
-                </div>
-            </div>
-            <!-- OPEN FSO -->
-            <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
-                <div class="card kpi-card p-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title">OPEN FSO</h6>
-                            <div class="kpi-value text-danger" id="kpiOpenIssues">0</div>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-exclamation-circle fa-2x text-danger opacity-50"></i>
-                        </div>
-                    </div>
-                    <div class="small text-muted mt-2">FSO issues pending</div>
-                </div>
-            </div>
-            <!-- CLOSED FSO -->
-            <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
-                <div class="card kpi-card p-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title">CLOSED FSO</h6>
-                            <div class="kpi-value text-success" id="kpiClosedIssues">0</div>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-check-circle fa-2x text-success opacity-50"></i>
-                        </div>
-                    </div>
-                    <div class="small text-muted mt-2">Resolved FSO issues</div>
-                </div>
-            </div>
-            <!-- HIGH PRIORITY -->
-            <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
-                <div class="card kpi-card p-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title">HIGH PRIORITY</h6>
-                            <div class="kpi-value text-warning" id="kpiHighPriority">0</div>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-flag fa-2x text-warning opacity-50"></i>
-                        </div>
-                    </div>
-                    <div class="small text-muted mt-2">P1 FSO issues</div>
-                </div>
-            </div>
-            <!-- AGING > 1 MONTH -->
-            <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
-                <div class="card kpi-card p-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-title">AGING > 1 MONTH</h6>
-                            <div class="kpi-value text-info" id="kpiAgingIssues">0</div>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-calendar-times fa-2x text-info opacity-50"></i>
-                        </div>
-                    </div>
-                    <div class="small text-muted mt-2">FSO >30 days old</div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Filter and Search Row -->
-        <div class="row mb-4">
-            <div class="col-lg-12">
-                <div class="card filter-card">
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-3">
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-id-badge"></i></span>
-                                    <input type="text" class="form-control" id="searchSiteId" placeholder="Search Site ID" onkeyup="applyFilters()">
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-exclamation-circle"></i></span>
-                                    <select class="form-select" id="filterStatus" onchange="applyFilters()">
-                                        <option value="">All Status</option>
-                                        <option value="Open">Open</option>
-                                        <option value="Closed">Closed</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-flag"></i></span>
-                                    <select class="form-select" id="filterPriority" onchange="applyFilters()">
-                                        <option value="">All Priority</option>
-                                        <option value="P1">P1</option>
-                                        <option value="P2">P2</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
-                                    <select class="form-select" id="filterCircle" onchange="applyFilters()">
-                                        <option value="">All Circles</option>
-                                        <!-- Options will be populated dynamically -->
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row mt-3">
-                            <div class="col-md-3">
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-chart-bar"></i></span>
-                                    <select class="form-select" id="filterCategory" onchange="applyFilters()">
-                                        <option value="">All Categories</option>
-                                        <!-- Options will be populated dynamically -->
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-city"></i></span>
-                                    <select class="form-select" id="filterCity" onchange="applyFilters()">
-                                        <option value="">All Cities</option>
-                                        <!-- Options will be populated dynamically -->
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-industry"></i></span>
-                                    <select class="form-select" id="filterArea" onchange="applyFilters()">
-                                        <option value="">All Areas</option>
-                                        <!-- Options will be populated dynamically -->
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-tag"></i></span>
-                                    <select class="form-select" id="filterVendor" onchange="applyFilters()">
-                                        <option value="">All Vendors</option>
-                                        <!-- Options will be populated dynamically -->
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row mt-3">
-                            <div class="col-md-6">
-                                <button class="btn btn-outline-secondary w-100" onclick="clearFilters()">
-                                    <i class="fas fa-eraser me-1"></i> Clear All Filters
-                                </button>
-                            </div>
-                            <div class="col-md-6">
-                                <button class="btn btn-outline-primary w-100" onclick="fetchCSVData()">
-                                    <i class="fas fa-sync me-1"></i> Refresh Data
-                                </button>
-                            </div>
-                        </div>
-                        <div class="row mt-3">
-                            <div class="col-12">
-                                <div class="search-result-info" id="searchResultInfo" style="display: none;">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h6 class="mb-1" id="searchResultTitle">Search Results</h6>
-                                            <small class="text-muted" id="searchResultText"></small>
+                    <!-- Filter and Search Row -->
+                    <div class="row mb-4">
+                        <div class="col-lg-12">
+                            <div class="card filter-card">
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <div class="col-md-3">
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-id-badge"></i></span>
+                                                <input type="text" class="form-control" id="searchSiteId" placeholder="Search Site ID" onkeyup="applyFilters()">
+                                            </div>
                                         </div>
-                                        <div>
-                                            <button class="btn btn-primary btn-sm" onclick="showDetailedTable()">
-                                                <i class="fas fa-table me-1"></i> Show Details
+                                        <div class="col-md-3">
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-exclamation-circle"></i></span>
+                                                <select class="form-select" id="filterStatus" onchange="applyFilters()">
+                                                    <option value="">All Status</option>
+                                                    <option value="Open">Open</option>
+                                                    <option value="Closed">Closed</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-flag"></i></span>
+                                                <select class="form-select" id="filterPriority" onchange="applyFilters()">
+                                                    <option value="">All Priority</option>
+                                                    <option value="P1">P1</option>
+                                                    <option value="P2">P2</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                                                <select class="form-select" id="filterCircle" onchange="applyFilters()">
+                                                    <option value="">All Circles</option>
+                                                    <!-- Options will be populated dynamically -->
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3">
+                                        <div class="col-md-3">
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-chart-bar"></i></span>
+                                                <select class="form-select" id="filterCategory" onchange="applyFilters()">
+                                                    <option value="">All Categories</option>
+                                                    <!-- Options will be populated dynamically -->
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-city"></i></span>
+                                                <select class="form-select" id="filterCity" onchange="applyFilters()">
+                                                    <option value="">All Cities</option>
+                                                    <!-- Options will be populated dynamically -->
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-industry"></i></span>
+                                                <select class="form-select" id="filterArea" onchange="applyFilters()">
+                                                    <option value="">All Areas</option>
+                                                    <!-- Options will be populated dynamically -->
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-tag"></i></span>
+                                                <select class="form-select" id="filterVendor" onchange="applyFilters()">
+                                                    <option value="">All Vendors</option>
+                                                    <!-- Options will be populated dynamically -->
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3">
+                                        <div class="col-md-6">
+                                            <button class="btn btn-outline-secondary w-100" onclick="clearFilters()">
+                                                <i class="fas fa-eraser me-1"></i> Clear All Filters
                                             </button>
-                                            <button class="btn btn-outline-success btn-sm ms-2" onclick="exportToCSV()">
-                                                <i class="fas fa-download me-1"></i> Export
+                                        </div>
+                                        <div class="col-md-6">
+                                            <button class="btn btn-outline-primary w-100" onclick="fetchCSVData()">
+                                                <i class="fas fa-sync me-1"></i> Refresh Data
                                             </button>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3">
+                                        <div class="col-12">
+                                            <div class="search-result-info" id="searchResultInfo" style="display: none;">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <h6 class="mb-1" id="searchResultTitle">Search Results</h6>
+                                                        <small class="text-muted" id="searchResultText"></small>
+                                                    </div>
+                                                    <div>
+                                                        <button class="btn btn-primary btn-sm" onclick="showDetailedTable()">
+                                                            <i class="fas fa-table me-1"></i> Show Details
+                                                        </button>
+                                                        <button class="btn btn-outline-success btn-sm ms-2" onclick="exportToCSV()">
+                                                            <i class="fas fa-download me-1"></i> Export
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Charts Row 1 -->
-        <div class="row mb-4">
-            <div class="col-lg-4 mb-4">
-                <div class="chart-container">
-                    <h6 class="chart-title"><i class="fas fa-chart-pie"></i>FSO Status Distribution</h6>
-                    <div style="height: 250px; position: relative;">
-                        <canvas id="statusChart"></canvas>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4 mb-4">
-                <div class="chart-container">
-                    <h6 class="chart-title"><i class="fas fa-chart-bar"></i>FSO Priority Distribution</h6>
-                    <div style="height: 250px; position: relative;">
-                        <canvas id="priorityChart"></canvas>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4 mb-4">
-                <div class="chart-container">
-                    <h6 class="chart-title"><i class="fas fa-chart-line"></i>FSO by Circle</h6>
-                    <div style="height: 250px; position: relative;">
-                        <canvas id="circleChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Charts Row 2 -->
-        <div class="row mb-4">
-            <div class="col-lg-4 mb-4">
-                <div class="chart-container">
-                    <h6 class="chart-title"><i class="fas fa-industry"></i>FSO by Vendor</h6>
-                    <div style="height: 250px; position: relative;">
-                        <canvas id="vendorChart"></canvas>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4 mb-4">
-                <div class="chart-container">
-                    <h6 class="chart-title"><i class="fas fa-exclamation-triangle"></i>Problem Categories</h6>
-                    <div style="height: 250px; position: relative;">
-                        <canvas id="categoryChart"></canvas>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4 mb-4">
-                <div class="chart-container">
-                    <h6 class="chart-title"><i class="fas fa-calendar-alt"></i>Aging Distribution</h6>
-                    <div style="height: 250px; position: relative;">
-                        <canvas id="agingChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Summary Tables -->
-        <div class="row mb-4">
-            <!-- Top Sites with FSO Issues -->
-            <div class="col-lg-4 mb-4">
-                <div class="chart-container">
-                    <h6 class="chart-title"><i class="fas fa-building"></i>Top Sites with FSO Issues</h6>
-                    <div class="table-responsive" style="max-height: 300px;">
-                        <table class="table table-sm table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Site ID</th>
-                                    <th class="text-end">Issues</th>
-                                    <th class="text-end">Open</th>
-                                    <th class="text-end">P1</th>
-                                </tr>
-                            </thead>
-                            <tbody id="topSitesBody">
-                                <tr><td colspan="4" class="text-center py-3">Loading FSO data...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Aging Analysis for FSO -->
-            <div class="col-lg-4 mb-4">
-                <div class="chart-container">
-                    <h6 class="chart-title"><i class="fas fa-calendar-alt"></i>Oldest Open FSO Issues</h6>
-                    <div class="table-responsive" style="max-height: 300px;">
-                        <table class="table table-sm table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Site ID</th>
-                                    <th>Problem</th>
-                                    <th class="text-end">Aging</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="agingIssuesBody">
-                                <tr><td colspan="4" class="text-center py-3">Loading FSO data...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Top Problem Categories for FSO -->
-            <div class="col-lg-4 mb-4">
-                <div class="chart-container">
-                    <h6 class="chart-title"><i class="fas fa-chart-pie"></i>Top Problem Categories</h6>
-                    <div class="table-responsive" style="max-height: 300px;">
-                        <table class="table table-sm table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Problem Category</th>
-                                    <th class="text-end">Issues</th>
-                                    <th class="text-end">% of Total</th>
-                                </tr>
-                            </thead>
-                            <tbody id="topCategoriesBody">
-                                <tr><td colspan="3" class="text-center py-3">Loading FSO data...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Circle Performance Summary -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="chart-container">
-                    <h6 class="chart-title"><i class="fas fa-map-marked-alt"></i>Circle Performance Summary (FSO)</h6>
-                    <div class="table-responsive">
-                        <table class="table table-sm table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Circle</th>
-                                    <th class="text-end">Total Issues</th>
-                                    <th class="text-end">Open Issues</th>
-                                    <th class="text-end">P1 Issues</th>
-                                    <th class="text-end">Avg Aging</th>
-                                    <th class="text-end">Unique Sites</th>
-                                    <th class="text-end">Closed Rate</th>
-                                </tr>
-                            </thead>
-                            <tbody id="circleSummaryBody">
-                                <tr><td colspan="7" class="text-center py-3">Loading FSO data...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- City Performance Summary -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="chart-container">
-                    <h6 class="chart-title"><i class="fas fa-city"></i>City Performance Summary (FSO)</h6>
-                    <div class="table-responsive">
-                        <table class="table table-sm table-hover">
-                            <thead>
-                                <tr>
-                                    <th>City</th>
-                                    <th>Area IOH</th>
-                                    <th class="text-end">Total Issues</th>
-                                    <th class="text-end">Open Issues</th>
-                                    <th class="text-end">P1 Issues</th>
-                                    <th class="text-end">Avg Aging</th>
-                                    <th class="text-end">Unique Sites</th>
-                                    <th class="text-end">Closed Rate</th>
-                                </tr>
-                            </thead>
-                            <tbody id="citySummaryBody">
-                                <tr><td colspan="8" class="text-center py-3">Loading FSO data...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Detailed FSO Issues Table (Hidden by default) -->
-        <div class="row">
-            <div class="col-12">
-                <div class="main-table-container" id="detailedTableContainer">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h6 class="mb-0" style="font-family: var(--font-plus-jakarta); font-weight: 700; font-size: 14px;">
-                            <i class="fas fa-table me-2"></i>Detailed FSO Issues
-                        </h6>
-                        <div>
-                            <span class="info-badge me-2" id="tableCountBadge">Showing 0 issues</span>
-                            <button class="btn btn-outline-secondary btn-sm" onclick="hideDetailedTable()">
-                                <i class="fas fa-times me-1"></i> Hide
-                            </button>
-                            <button class="btn btn-outline-success btn-sm ms-2" onclick="exportToCSV()">
-                                <i class="fas fa-download me-1"></i> Export
-                            </button>
+                    <!-- Charts Row 1 -->
+                    <div class="row mb-4">
+                        <div class="col-lg-4 mb-4">
+                            <div class="chart-container">
+                                <h6 class="chart-title"><i class="fas fa-chart-pie"></i>FSO Status Distribution</h6>
+                                <div style="height: 250px; position: relative;">
+                                    <canvas id="statusChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 mb-4">
+                            <div class="chart-container">
+                                <h6 class="chart-title"><i class="fas fa-chart-bar"></i>FSO Priority Distribution</h6>
+                                <div style="height: 250px; position: relative;">
+                                    <canvas id="priorityChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 mb-4">
+                            <div class="chart-container">
+                                <h6 class="chart-title"><i class="fas fa-chart-line"></i>FSO by Circle</h6>
+                                <div style="height: 250px; position: relative;">
+                                    <canvas id="circleChart"></canvas>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="main-table-wrapper">
-                        <div class="table-responsive" id="issuesTableContainer">
-                            <table class="table table-striped table-hover table-sm">
+
+                    <!-- Charts Row 2 -->
+                    <div class="row mb-4">
+                        <div class="col-lg-4 mb-4">
+                            <div class="chart-container">
+                                <h6 class="chart-title"><i class="fas fa-industry"></i>FSO by Vendor</h6>
+                                <div style="height: 250px; position: relative;">
+                                    <canvas id="vendorChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 mb-4">
+                            <div class="chart-container">
+                                <h6 class="chart-title"><i class="fas fa-exclamation-triangle"></i>Problem Categories</h6>
+                                <div style="height: 250px; position: relative;">
+                                    <canvas id="categoryChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 mb-4">
+                            <div class="chart-container">
+                                <h6 class="chart-title"><i class="fas fa-calendar-alt"></i>Aging Distribution</h6>
+                                <div style="height: 250px; position: relative;">
+                                    <canvas id="agingChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Summary Tables -->
+                    <div class="row mb-4">
+                        <!-- Top Sites with FSO Issues -->
+                        <div class="col-lg-4 mb-4">
+                            <div class="chart-container">
+                                <h6 class="chart-title"><i class="fas fa-building"></i>Top Sites with FSO Issues</h6>
+                                <div class="table-responsive" style="max-height: 300px;">
+                                    <table class="table table-sm table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Site ID</th>
+                                                <th class="text-end">Issues</th>
+                                                <th class="text-end">Open</th>
+                                                <th class="text-end">P1</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="topSitesBody">
+                                            <tr><td colspan="4" class="text-center py-3">Loading FSO data...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Aging Analysis for FSO -->
+                        <div class="col-lg-4 mb-4">
+                            <div class="chart-container">
+                                <h6 class="chart-title"><i class="fas fa-calendar-alt"></i>Oldest Open FSO Issues</h6>
+                                <div class="table-responsive" style="max-height: 300px;">
+                                    <table class="table table-sm table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Site ID</th>
+                                                <th>Problem</th>
+                                                <th class="text-end">Aging</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="agingIssuesBody">
+                                            <tr><td colspan="4" class="text-center py-3">Loading FSO data...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Top Problem Categories for FSO -->
+                        <div class="col-lg-4 mb-4">
+                            <div class="chart-container">
+                                <h6 class="chart-title"><i class="fas fa-chart-pie"></i>Top Problem Categories</h6>
+                                <div class="table-responsive" style="max-height: 300px;">
+                                    <table class="table table-sm table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Problem Category</th>
+                                                <th class="text-end">Issues</th>
+                                                <th class="text-end">% of Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="topCategoriesBody">
+                                            <tr><td colspan="3" class="text-center py-3">Loading FSO data...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Circle Performance Summary -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="chart-container">
+                                <h6 class="chart-title"><i class="fas fa-map-marked-alt"></i>Circle Performance Summary (FSO)</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Circle</th>
+                                                <th class="text-end">Total Issues</th>
+                                                <th class="text-end">Open Issues</th>
+                                                <th class="text-end">P1 Issues</th>
+                                                <th class="text-end">Avg Aging</th>
+                                                <th class="text-end">Unique Sites</th>
+                                                <th class="text-end">Closed Rate</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="circleSummaryBody">
+                                            <tr><td colspan="7" class="text-center py-3">Loading FSO data...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- City Performance Summary -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="chart-container">
+                                <h6 class="chart-title"><i class="fas fa-city"></i>City Performance Summary (FSO)</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>City</th>
+                                                <th>Area IOH</th>
+                                                <th class="text-end">Total Issues</th>
+                                                <th class="text-end">Open Issues</th>
+                                                <th class="text-end">P1 Issues</th>
+                                                <th class="text-end">Avg Aging</th>
+                                                <th class="text-end">Unique Sites</th>
+                                                <th class="text-end">Closed Rate</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="citySummaryBody">
+                                            <tr><td colspan="8" class="text-center py-3">Loading FSO data...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detailed FSO Issues Table (Hidden by default) -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="main-table-container" id="detailedTableContainer">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0" style="font-family: var(--font-plus-jakarta); font-weight: 700; font-size: 14px;">
+                                        <i class="fas fa-table me-2"></i>Detailed FSO Issues
+                                    </h6>
+                                    <div>
+                                        <span class="info-badge me-2" id="tableCountBadge">Showing 0 issues</span>
+                                        <button class="btn btn-outline-secondary btn-sm" onclick="hideDetailedTable()">
+                                            <i class="fas fa-times me-1"></i> Hide
+                                        </button>
+                                        <button class="btn btn-outline-success btn-sm ms-2" onclick="exportToCSV()">
+                                            <i class="fas fa-download me-1"></i> Export
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="main-table-wrapper">
+                                    <div class="table-responsive" id="issuesTableContainer">
+                                        <table class="table table-striped table-hover table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th class="cursor-pointer" onclick="sortTable('siteId')">
+                                                        Site ID <i class="fas fa-sort ms-1"></i>
+                                                    </th>
+                                                    <th class="cursor-pointer" onclick="sortTable('problemCategory')">
+                                                        Problem <i class="fas fa-sort ms-1"></i>
+                                                    </th>
+                                                    <th class="cursor-pointer" onclick="sortTable('priority')">
+                                                        Priority <i class="fas fa-sort ms-1"></i>
+                                                    </th>
+                                                    <th class="cursor-pointer" onclick="sortTable('status')">
+                                                        Status <i class="fas fa-sort ms-1"></i>
+                                                    </th>
+                                                    <th class="cursor-pointer" onclick="sortTable('aging')">
+                                                        Aging <i class="fas fa-sort ms-1"></i>
+                                                    </th>
+                                                    <th class="cursor-pointer" onclick="sortTable('rootCause')">
+                                                        Root Cause <i class="fas fa-sort ms-1"></i>
+                                                    </th>
+                                                    <th class="cursor-pointer" onclick="sortTable('action')">
+                                                        Action <i class="fas fa-sort ms-1"></i>
+                                                    </th>
+                                                    <th>Circle</th>
+                                                    <th>Vendor</th>
+                                                    <th>City</th>
+                                                    <th>Area</th>
+                                                    <th>Open Date</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="detailedIssuesTableBody">
+                                                <!-- Data akan diisi oleh JavaScript -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- TAB 2: REGIONAL RANKING (by Area IOH) -->
+                <div class="tab-pane fade" id="regional" role="tabpanel" aria-labelledby="regional-tab">
+                    <div class="dashboard-title">
+                        <i class="fas fa-map-marked-alt me-2"></i>Regional Ranking by Area IOH - Open Issues Only
+                    </div>
+                    
+                    <!-- Regional Ranking Info -->
+                    <div class="row mb-4">
+                        <div class="col-lg-12">
+                            <div class="card filter-card">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                                <input type="text" class="form-control" value="PIC = FSO" disabled>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-exclamation-circle"></i></span>
+                                                <input type="text" class="form-control" value="Status = Open / New Open / Re-Open" disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3">
+                                        <div class="col-12">
+                                            <div class="search-result-info" id="regionalInfo" style="background: #e0f2fe; border-left-color: #0284c7;">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <h6 class="mb-1"><i class="fas fa-info-circle me-1"></i>Regional Ranking Info</h6>
+                                                        <small class="text-muted" id="regionalInfoText">Menampilkan distinct count Site ID per Area IOH dan Problem Category (Status: Open/New Open/Re-Open)</small>
+                                                    </div>
+                                                    <div>
+                                                        <span class="badge bg-primary" id="regionalTotalSites">0</span> Total Sites
+                                                        <button class="btn btn-sm btn-outline-primary ms-3" onclick="exportRegionalToCSV()">
+                                                            <i class="fas fa-download me-1"></i> Export
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Regional Ranking Matrix Table by Area IOH -->
+                    <div class="matrix-table-container">
+                        <div class="table-responsive">
+                            <table class="matrix-table" id="regionalRankingTable">
                                 <thead>
                                     <tr>
-                                        <th class="cursor-pointer" onclick="sortTable('siteId')">
-                                            Site ID <i class="fas fa-sort ms-1"></i>
-                                        </th>
-                                        <th class="cursor-pointer" onclick="sortTable('problemCategory')">
-                                            Problem <i class="fas fa-sort ms-1"></i>
-                                        </th>
-                                        <th class="cursor-pointer" onclick="sortTable('priority')">
-                                            Priority <i class="fas fa-sort ms-1"></i>
-                                        </th>
-                                        <th class="cursor-pointer" onclick="sortTable('status')">
-                                            Status <i class="fas fa-sort ms-1"></i>
-                                        </th>
-                                        <th class="cursor-pointer" onclick="sortTable('aging')">
-                                            Aging <i class="fas fa-sort ms-1"></i>
-                                        </th>
-                                        <th class="cursor-pointer" onclick="sortTable('rootCause')">
-                                            Root Cause <i class="fas fa-sort ms-1"></i>
-                                        </th>
-                                        <th class="cursor-pointer" onclick="sortTable('action')">
-                                            Action <i class="fas fa-sort ms-1"></i>
-                                        </th>
-                                        <th>Circle</th>
-                                        <th>Vendor</th>
-                                        <th>City</th>
-                                        <th>Area</th>
-                                        <th>Open Date</th>
+                                        <th>Area IOH</th>
+                                        <th>ASM</th>
+                                        <th>QPSK</th>
+                                        <th>RANK2</th>
+                                        <th>RTWP</th>
+                                        <th>SIA</th>
+                                        <th>Sleeping Cell</th>
+                                        <th>VSWR</th>
+                                        <th class="total-column">Grand Total</th>
                                     </tr>
                                 </thead>
-                                <tbody id="detailedIssuesTableBody">
-                                    <!-- Data akan diisi oleh JavaScript -->
+                                <tbody id="regionalRankingBody">
+                                    <tr>
+                                        <td colspan="8" class="text-center py-4">Loading regional ranking data...</td>
+                                    </tr>
                                 </tbody>
+                                <tfoot id="regionalRankingFooter">
+                                    <!-- Will be populated dynamically -->
+                                </tfoot>
                             </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Regional Ranking Notes -->
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="alert alert-info d-flex align-items-center" role="alert">
+                                <i class="fas fa-lightbulb me-2 fa-lg"></i>
+                                <div>
+                                    <strong>Notes:</strong> 
+                                    <ul class="mb-0">
+                                        <li>Hanya menampilkan issue dengan status <strong>Open, New Open, dan Re-Open</strong></li>
+                                        <li>Values menunjukkan jumlah <strong>Site ID unik (distinct count)</strong> per Area IOH untuk setiap Problem Category</li>
+                                        <li>Satu Site ID bisa memiliki multiple issue, tapi hanya dihitung sekali per kategori</li>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -911,13 +1058,13 @@
                 <div class="text-center small text-muted">
                     <p class="mb-1" style="font-family: var(--font-inter);">
                         <i class="fas fa-database me-1"></i> Data Source: Google Sheets | 
-                        <i class="fas fa-filter me-1 ms-3"></i> Filter: PIC = FSO |
+                        <i class="fas fa-filter me-1 ms-3"></i> Filter: PIC = FSO | Status = Open/New Open/Re-Open |
                         <i class="fas fa-clock me-1 ms-3"></i> Last Updated: <span id="lastUpdatedTime">-</span> |
                         <i class="fas fa-info-circle me-1 ms-3"></i> Total FSO Records: <span id="totalRecords">0</span>
                     </p>
                     <p class="mb-0" style="font-family: var(--font-inter);">
                         <button class="btn btn-link btn-sm text-decoration-none" onclick="fetchCSVData()">
-                            <i class="fas fa-redo me-1"></i> Refresh FSO Data
+                            <i class="fas fa-redo me-1"></i> Refresh Data
                         </button>
                         <button class="btn btn-link btn-sm text-decoration-none" onclick="toggleAutoRefresh()" id="autoRefreshToggle">
                             <i class="fas fa-sync me-1"></i> Auto-Refresh: <span id="autoRefreshStatus">ON</span>
@@ -945,10 +1092,24 @@
         let isAutoRefresh = true;
         const AUTO_REFRESH_INTERVAL = 30000; // 30 detik
         const FSO_PIC = "FSO";
+        
+        // Daftar problem categories untuk regional ranking
+        const PROBLEM_CATEGORIES = [
+            'ASM',
+            'QPSK',
+            'RANK2',
+            'RTWP',
+            'SIA',
+            'Sleeping Cell',
+            'VSWR'
+        ];
+
+        // Status Open yang termasuk (Open, New Open, Re-Open)
+        const OPEN_STATUSES = ['Open', 'New Open', 'Re-Open'];
 
         // ==================== FUNGSI INISIALISASI ====================
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('FSO PIC Dashboard initializing...');
+            console.log('FSO Dashboard initializing...');
             updateCurrentTime();
             setInterval(updateCurrentTime, 1000);
             
@@ -957,6 +1118,16 @@
             
             // Load data
             fetchCSVData();
+            
+            // Initialize Bootstrap tabs
+            var triggerTabList = [].slice.call(document.querySelectorAll('#dashboardTabs button'))
+            triggerTabList.forEach(function (triggerEl) {
+                var tabTrigger = new bootstrap.Tab(triggerEl)
+                triggerEl.addEventListener('click', function (event) {
+                    event.preventDefault()
+                    tabTrigger.show()
+                })
+            })
         });
 
         // ==================== FUNGSI DATA ====================
@@ -990,6 +1161,9 @@
                     // Hide search result info and detailed table initially
                     document.getElementById('searchResultInfo').style.display = 'none';
                     document.getElementById('detailedTableContainer').style.display = 'none';
+                    
+                    // Update regional ranking
+                    updateRegionalRanking();
                 },
                 error: function(error) {
                     console.error('Error fetching CSV:', error);
@@ -1056,7 +1230,7 @@
                         siteId: siteId,
                         problemCategory: cleanCategory,
                         priority: cleanPriority === 'P1' ? 'P1' : 'P2',
-                        status: cleanStatus === 'Closed' ? 'Closed' : 'Open',
+                        status: cleanStatus,
                         aging: aging,
                         pic: FSO_PIC,
                         rootCause: cleanRootCause,
@@ -1121,7 +1295,7 @@
             if (allFsoData.length > 0) {
                 console.log('Sample FSO records (first 3):', allFsoData.slice(0, 3));
                 console.log('Status distribution:', {
-                    Open: allFsoData.filter(d => d.status === 'Open').length,
+                    Open: allFsoData.filter(d => OPEN_STATUSES.includes(d.status)).length,
                     Closed: allFsoData.filter(d => d.status === 'Closed').length
                 });
                 console.log('Priority distribution:', {
@@ -1131,13 +1305,148 @@
                 console.log('All circles:', [...new Set(allFsoData.map(d => d.circle))]);
                 console.log('All vendors:', [...new Set(allFsoData.map(d => d.vendor))]);
                 console.log('All categories:', [...new Set(allFsoData.map(d => d.problemCategory))]);
-                console.log('All cities:', [...new Set(allFsoData.map(d => d.city))].filter(city => city));
                 console.log('All areas:', [...new Set(allFsoData.map(d => d.area))].filter(area => area));
             }
             console.log('=== END FSO DEBUG ===');
         }
 
-        // ==================== FUNGSI FILTER & PENCARIAN ====================
+        // ==================== FUNGSI REGIONAL RANKING (by Area IOH) ====================
+        function updateRegionalRanking() {
+            // Filter data: PIC = FSO dan Status = Open/New Open/Re-Open
+            let regionalData = allFsoData.filter(issue => 
+                issue.pic === 'FSO' && OPEN_STATUSES.includes(issue.status)
+            );
+            
+            // Group by Area IOH dan Problem Category untuk distinct Site ID
+            const areaStats = {};
+            const allAreas = new Set();
+            
+            regionalData.forEach(issue => {
+                const area = issue.area || 'Unknown';
+                const category = issue.problemCategory;
+                const siteId = issue.siteId;
+                
+                allAreas.add(area);
+                
+                if (!areaStats[area]) {
+                    areaStats[area] = {
+                        area: area,
+                        sites: new Set(),
+                        categories: {}
+                    };
+                    
+                    // Initialize categories
+                    PROBLEM_CATEGORIES.forEach(cat => {
+                        areaStats[area].categories[cat] = new Set();
+                    });
+                }
+                
+                // Add site to area's total sites
+                areaStats[area].sites.add(siteId);
+                
+                // Add site to specific category if it matches one of our defined categories
+                if (PROBLEM_CATEGORIES.includes(category)) {
+                    areaStats[area].categories[category].add(siteId);
+                }
+            });
+            
+            // Convert to array and sort alphabetically
+            const sortedAreas = Array.from(allAreas).filter(area => area !== 'Unknown').sort();
+            
+            // Build table HTML
+            let tbodyHtml = '';
+            let grandTotal = 0;
+            const categoryTotals = {};
+            PROBLEM_CATEGORIES.forEach(cat => categoryTotals[cat] = 0);
+            
+            sortedAreas.forEach(area => {
+                const stats = areaStats[area] || { categories: {}, sites: new Set() };
+                let rowHtml = `<tr>`;
+                rowHtml += `<td><strong>${area}</strong></td>`;
+                
+                let rowTotal = 0;
+                
+                PROBLEM_CATEGORIES.forEach(cat => {
+                    const siteSet = stats.categories[cat] || new Set();
+                    const count = siteSet.size;
+                    categoryTotals[cat] += count;
+                    rowTotal += count;
+                    rowHtml += `<td>${count || ''}</td>`;
+                });
+                
+                grandTotal += rowTotal;
+                rowHtml += `<td class="total-column"><strong>${rowTotal}</strong></td>`;
+                rowHtml += `</tr>`;
+                
+                tbodyHtml += rowHtml;
+            });
+            
+            // Add footer row
+            let footerHtml = `<tr>`;
+            footerHtml += `<td><strong>Grand Total</strong></td>`;
+            
+            PROBLEM_CATEGORIES.forEach(cat => {
+                footerHtml += `<td><strong>${categoryTotals[cat]}</strong></td>`;
+            });
+            
+            footerHtml += `<td class="total-column"><strong>${grandTotal}</strong></td>`;
+            footerHtml += `</tr>`;
+            
+            // Update table
+            if (tbodyHtml) {
+                document.getElementById('regionalRankingBody').innerHTML = tbodyHtml;
+                document.getElementById('regionalRankingFooter').innerHTML = footerHtml;
+            } else {
+                document.getElementById('regionalRankingBody').innerHTML = '<tr><td colspan="8" class="text-center py-4">No open issues found for FSO</td></tr>';
+                document.getElementById('regionalRankingFooter').innerHTML = '';
+            }
+            
+            document.getElementById('regionalTotalSites').textContent = grandTotal;
+        }
+
+        function exportRegionalToCSV() {
+            const table = document.getElementById('regionalRankingTable');
+            const rows = table.querySelectorAll('tr');
+            
+            let csv = [];
+            
+            // Get headers (row 0)
+            const headers = [];
+            rows[0].querySelectorAll('th').forEach(th => {
+                headers.push(th.innerText);
+            });
+            csv.push(headers.join(','));
+            
+            // Get data rows (skip header row)
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                const rowData = [];
+                row.querySelectorAll('td').forEach(td => {
+                    rowData.push(td.innerText.replace(/,/g, ''));
+                });
+                if (rowData.length > 0) {
+                    csv.push(rowData.join(','));
+                }
+            }
+            
+            const blob = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            const dateStr = new Date().toISOString().slice(0,10);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `regional_ranking_by_area_fso_open_${dateStr}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert('Regional ranking by Area IOH exported to CSV');
+        }
+
+        // ==================== FUNGSI FILTER & PENCARIAN (untuk tab Overview) ====================
         function applyFilters() {
             const searchSiteId = document.getElementById('searchSiteId').value.toLowerCase().trim();
             const filterStatus = document.getElementById('filterStatus').value;
@@ -1246,14 +1555,14 @@
             document.getElementById('detailedTableContainer').style.display = 'none';
         }
 
-        // ==================== FUNGSI UPDATE UI ====================
+        // ==================== FUNGSI UPDATE UI (untuk tab Overview) ====================
         function updateSummaryKPIs() {
             const totalIssues = allFsoData.length;
             
             // Calculate unique sites
             const uniqueSites = new Set(allFsoData.map(issue => issue.siteId)).size;
             
-            const openIssues = allFsoData.filter(issue => issue.status === 'Open').length;
+            const openIssues = allFsoData.filter(issue => OPEN_STATUSES.includes(issue.status)).length;
             const closedIssues = allFsoData.filter(issue => issue.status === 'Closed').length;
             const highPriorityIssues = allFsoData.filter(issue => issue.priority === 'P1').length;
             const agingIssues = allFsoData.filter(issue => issue.aging > 30).length;
@@ -1272,7 +1581,7 @@
         function updateCharts() {
             // Update Status Chart
             const statusCounts = {
-                'Open': filteredFsoData.filter(issue => issue.status === 'Open').length,
+                'Open': filteredFsoData.filter(issue => OPEN_STATUSES.includes(issue.status)).length,
                 'Closed': filteredFsoData.filter(issue => issue.status === 'Closed').length
             };
             
@@ -1567,22 +1876,20 @@
                 });
             }
             
-            // Update Category Chart - MENAMPILKAN SEMUA KATEGORI DENGAN LABEL HORIZONTAL
+            // Update Category Chart - MENAMPILKAN SEMUA KATEGORI
             const categoryCounts = {};
             filteredFsoData.forEach(issue => {
                 const category = issue.problemCategory || 'Unknown';
                 categoryCounts[category] = (categoryCounts[category] || 0) + 1;
             });
 
-            // Ambil semua kategori (tidak hanya top 5)
             const allCategories = Object.entries(categoryCounts)
-                .sort((a, b) => b[1] - a[1]); // Tetap urutkan berdasarkan jumlah (descending)
+                .sort((a, b) => b[1] - a[1]);
 
             if (categoryChart) categoryChart.destroy();
             const categoryCtx = document.getElementById('categoryChart');
             if (categoryCtx) {
                 if (allCategories.length === 1) {
-                    // Jika hanya 1 kategori, tampilkan sebagai doughnut chart
                     categoryChart = new Chart(categoryCtx, {
                         type: 'doughnut',
                         data: {
@@ -1639,9 +1946,8 @@
                         }
                     });
                 } else if (allCategories.length > 0) {
-                    // Hitung nilai maksimum untuk menentukan skala axis
                     const maxValue = Math.max(...allCategories.map(item => item[1]));
-                    const xAxisMax = Math.ceil(maxValue * 1.2); // Memberi ruang 20% di atas nilai tertinggi
+                    const xAxisMax = Math.ceil(maxValue * 1.2);
                     
                     categoryChart = new Chart(categoryCtx, {
                         type: 'bar',
@@ -1651,12 +1957,10 @@
                                 label: 'Issues',
                                 data: allCategories.map(item => item[1]),
                                 backgroundColor: allCategories.map((_, index) => {
-                                    // Generate warna yang bervariasi untuk setiap kategori
                                     const colors = [
                                         '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
                                         '#ec4899', '#14b8a6', '#f97316', '#6b7280', '#6366f1',
-                                        '#84cc16', '#06b6d4', '#d946ef', '#64748b', '#0ea5e9',
-                                        '#a855f7', '#eab308', '#22c55e', '#ef4444', '#3b82f6'
+                                        '#84cc16', '#06b6d4', '#d946ef', '#64748b', '#0ea5e9'
                                     ];
                                     return colors[index % colors.length];
                                 }),
@@ -1665,7 +1969,7 @@
                             }]
                         },
                         options: {
-                            indexAxis: 'y', // Horizontal bar chart (kategori di sumbu y, nilai di sumbu x)
+                            indexAxis: 'y',
                             responsive: true,
                             maintainAspectRatio: false,
                             layout: {
@@ -1719,10 +2023,7 @@
                                             size: 10,
                                             weight: 'normal'
                                         },
-                                        stepSize: Math.ceil(maxValue / 5),
-                                        callback: function(value) {
-                                            return value;
-                                        }
+                                        stepSize: Math.ceil(maxValue / 5)
                                     },
                                     title: {
                                         display: true,
@@ -1745,7 +2046,6 @@
                                             size: 11,
                                             weight: 'normal'
                                         },
-                                        // Label kategori ditampilkan secara horizontal (tidak miring)
                                         maxRotation: 0,
                                         minRotation: 0
                                     },
@@ -1768,7 +2068,7 @@
                 }
             }
             
-            // Update Aging Distribution Chart (dengan label horizontal)
+            // Update Aging Distribution Chart
             const agingRanges = {
                 '0-7 days': filteredFsoData.filter(issue => issue.aging <= 7).length,
                 '8-14 days': filteredFsoData.filter(issue => issue.aging > 7 && issue.aging <= 14).length,
@@ -1864,7 +2164,6 @@
                                         size: 11,
                                         weight: 'normal'
                                     },
-                                    // Label horizontal (tidak miring)
                                     maxRotation: 0,
                                     minRotation: 0
                                 },
@@ -1914,7 +2213,7 @@
                 }
                 
                 siteStats[issue.siteId].total++;
-                if (issue.status === 'Open') siteStats[issue.siteId].open++;
+                if (OPEN_STATUSES.includes(issue.status)) siteStats[issue.siteId].open++;
                 if (issue.priority === 'P1') siteStats[issue.siteId].p1++;
             });
             
@@ -1952,7 +2251,7 @@
             
             // Filter open issues and sort by aging (descending)
             const agingIssues = filteredFsoData
-                .filter(issue => issue.status === 'Open')
+                .filter(issue => OPEN_STATUSES.includes(issue.status))
                 .sort((a, b) => b.aging - a.aging)
                 .slice(0, 10);
             
@@ -2049,7 +2348,7 @@
                 }
                 
                 circleStats[circle].total++;
-                if (issue.status === 'Open') {
+                if (OPEN_STATUSES.includes(issue.status)) {
                     circleStats[circle].open++;
                     circleStats[circle].totalAging += issue.aging;
                     circleStats[circle].openCount++;
@@ -2132,7 +2431,7 @@
                 }
                 
                 cityStats[key].total++;
-                if (issue.status === 'Open') {
+                if (OPEN_STATUSES.includes(issue.status)) {
                     cityStats[key].open++;
                     cityStats[key].totalAging += issue.aging;
                     cityStats[key].openCount++;
@@ -2252,12 +2551,15 @@
                                       issue.vendor.toLowerCase().includes('huawei') ? 'vendor-huawei' : 'vendor-other';
                 const vendorInitial = issue.vendor ? issue.vendor.charAt(0).toUpperCase() : '?';
                 
+                // Determine status badge class
+                const statusClass = OPEN_STATUSES.includes(issue.status) ? 'badge-status-Open' : 'badge-status-Closed';
+                
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td class="site-id-cell">${issue.siteId}</td>
                     <td title="${issue.problemCategory}">${issue.problemCategory}</td>
                     <td><span class="badge badge-priority-${issue.priority}">${issue.priority}</span></td>
-                    <td><span class="badge badge-status-${issue.status}">${issue.status}</span></td>
+                    <td><span class="badge ${statusClass}">${issue.status}</span></td>
                     <td>
                         ${agingIndicator}
                         <span class="badge ${agingBadgeClass}">${issue.aging}d</span>
