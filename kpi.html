@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Trend: TOTAL vs ACHIEVEMENT (W1 2025 - W05 2026)</title>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js Data Labels Plugin untuk menampilkan nilai -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <!-- PapaParse untuk parsing CSV -->
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .chart-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .chart-header {
+            background: linear-gradient(135deg, #1e1e2f, #2d2d44);
+            color: white;
+            padding: 25px 35px;
+        }
+        
+        .chart-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .chart-header h1 i {
+            color: #ffd700;
+            font-size: 2.2rem;
+        }
+        
+        .chart-header .subtitle {
+            display: flex;
+            gap: 30px;
+            color: #a0a0c0;
+            font-size: 1rem;
+        }
+        
+        .chart-header .subtitle span {
+            color: white;
+            font-weight: 600;
+            margin-left: 8px;
+            background: rgba(255,255,255,0.1);
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+        
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px 35px;
+            background: #f8faff;
+            border-bottom: 1px solid #e0e7ff;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: 0.85rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        
+        .stat-value small {
+            font-size: 0.9rem;
+            font-weight: 400;
+            color: #64748b;
+        }
+        
+        .chart-wrapper {
+            position: relative;
+            height: 600px;
+            padding: 20px 35px 35px 35px;
+            background: white;
+        }
+        
+        #comboChart {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #64748b;
+            background: rgba(255,255,255,0.9);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .loading i {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 20px;
+            margin: 20px 35px;
+            border-radius: 15px;
+            border-left: 5px solid #dc2626;
+        }
+        
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 35px 25px 35px;
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 0.9rem;
+        }
+        
+        .badge {
+            background: #3b82f6;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-refresh {
+            background: white;
+            border: 1px solid #cbd5e1;
+            padding: 8px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-refresh:hover {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+        
+        .trend-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .trend-up { background: #dcfce7; color: #166534; }
+        .trend-down { background: #fee2e2; color: #991b1b; }
+        
+        @media (max-width: 768px) {
+            .chart-wrapper { height: 450px; padding: 10px; }
+            .chart-header h1 { font-size: 1.5rem; }
+            .stats-bar { flex-wrap: wrap; gap: 15px; }
+        }
+    </style>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="chart-container">
+        <div class="chart-header">
+            <h1>
+                <i class="fas fa-chart-line"></i>
+                Weekly Performance Trend 2025-2026
+            </h1>
+            <div class="subtitle">
+                <div>Data Period: <span id="periodRange">W1 2025 - W05 2026</span></div>
+                <div>Total Weeks: <span id="totalWeeks">57</span></div>
+                <div>Last Update: <span id="lastUpdate">Loading...</span></div>
+            </div>
+        </div>
+
+        <div class="stats-bar" id="statsBar">
+            <!-- Akan diisi oleh JavaScript -->
+        </div>
+
+        <div id="errorContainer" class="error-message" style="display: none;">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span id="errorText"></span>
+        </div>
+
+        <div class="chart-wrapper">
+            <div id="loadingStatus" class="loading">
+                <i class="fas fa-chart-pie fa-spin"></i>
+                <h3>Loading Chart Data...</h3>
+                <p>Mengambil data 57 week period</p>
+            </div>
+            <canvas id="comboChart"></canvas>
+        </div>
+
+        <div class="footer">
+            <div>
+                <i class="fas fa-database me-2"></i>
+                Source: Google Sheets - SUMMARY Tab
+            </div>
+            <div>
+                <span class="badge">
+                    <i class="fas fa-chart-bar"></i> Bar: TOTAL
+                </span>
+                <span class="badge" style="background: #ef4444; margin-left: 10px;">
+                    <i class="fas fa-chart-line"></i> Line: ACHIEVEMENT %
+                </span>
+            </div>
+            <button class="btn-refresh" onclick="refreshData()">
+                <i class="fas fa-sync-alt me-2"></i>Refresh Data
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Register plugin datalabels
+        Chart.register(ChartDataLabels);
+        
+        // Data statis berdasarkan tabel yang diberikan (57 weeks)
+        const STATIC_DATA = {
+            weeks: [
+                'W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8', 'W9', 'W10', 
+                'W11', 'W12', 'W13', 'W14', 'W15', 'W16', 'W17', 'W18', 'W19', 'W20', 
+                'W21', 'W22', 'W23', 'W24', 'W25', 'W26', 'W27', 'W28', 'W29', 'W30', 
+                'W31', 'W32', 'W33', 'W34', 'W35', 'W36', 'W37', 'W38', 'W39', 'W40', 
+                'W41', 'W42', 'W43', 'W44', 'W45', 'W46', 'W47', 'W48', 'W49', 'W50', 
+                'W51', 'W52', 'W01_2026', 'W02', 'W03', 'W04', 'W05'
+            ],
+            totals: [
+                5993, 6009, 6439, 6580, 6750, 6679, 6493, 6377, 6426, 6119,
+                6173, 6274, 6358, 4213, 4085, 4014, 3968, 3809, 3922, 4682,
+                4832, 4996, 4855, 4367, 4581, 4631, 4481, 4573, 4424, 4410,
+                4261, 4180, 4124, 3794, 3675, 3622, 3519, 3404, 3349, 3309,
+                3271, 3240, 3200, 3157, 3105, 3089, 3042, 2976, 2944, 2928,
+                2927, 2893, 2875, 2868, 2901, 2679, 2628
+            ],
+            achievements: [
+                0.00, 2.53, -4.44, -6.73, -9.49, -8.34, -5.32, -3.44, -4.23, 0.75,
+                -0.13, -1.77, -3.13, 31.66, 33.74, 34.89, 35.64, 38.22, 36.38, 24.06,
+                21.62, 18.96, 21.25, 29.16, 25.69, 24.88, 27.32, 25.82, 28.24, 28.47,
+                30.88, 32.20, 33.11, 38.46, 40.39, 41.25, 42.92, 44.79, 45.68, 46.33,
+                46.94, 47.45, 48.09, 48.79, 49.64, 49.89, 50.66, 51.73, 52.25, 52.51,
+                52.52, 53.07, 53.37, 53.48, 52.94, 56.55, 57.37
+            ]
+        };
+
+        let myChart = null;
+
+        function formatNumber(num) {
+            return num.toLocaleString('id-ID');
+        }
+
+        function calculateTrend(data) {
+            if (data.length < 2) return { value: 0, isUp: true };
+            const first = data[0];
+            const last = data[data.length - 1];
+            const change = ((last - first) / first * 100).toFixed(1);
+            return {
+                value: Math.abs(change),
+                isUp: change > 0,
+                direction: change > 0 ? '▲' : '▼'
+            };
+        }
+
+        function updateStats() {
+            const total = STATIC_DATA.totals;
+            const achievements = STATIC_DATA.achievements;
+            
+            const avgTotal = total.reduce((a, b) => a + b, 0) / total.length;
+            const maxTotal = Math.max(...total);
+            const minTotal = Math.min(...total);
+            const avgAch = achievements.reduce((a, b) => a + b, 0) / achievements.length;
+            
+            const totalTrend = calculateTrend(total);
+            const achTrend = calculateTrend(achievements);
+            
+            document.getElementById('statsBar').innerHTML = `
+                <div class="stat-item">
+                    <div class="stat-label">Avg TOTAL per Week</div>
+                    <div class="stat-value">${formatNumber(Math.round(avgTotal))}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Peak TOTAL (W5)</div>
+                    <div class="stat-value">${formatNumber(maxTotal)}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Lowest TOTAL (W05 2026)</div>
+                    <div class="stat-value">${formatNumber(minTotal)}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Avg Achievement</div>
+                    <div class="stat-value">${avgAch.toFixed(2)}%</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Trend TOTAL</div>
+                    <div class="trend-indicator ${totalTrend.isUp ? 'trend-up' : 'trend-down'}">
+                        ${totalTrend.direction} ${totalTrend.value}%
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Trend Achievement</div>
+                    <div class="trend-indicator ${achTrend.isUp ? 'trend-up' : 'trend-down'}">
+                        ${achTrend.direction} ${achTrend.value}%
+                    </div>
+                </div>
+            `;
+        }
+
+        function createComboChart() {
+            const ctx = document.getElementById('comboChart').getContext('2d');
+            
+            // Hitung min dan max untuk TOTAL
+            const maxTotal = Math.max(...STATIC_DATA.totals);
+            const minTotal = Math.min(...STATIC_DATA.totals);
+            const padding = (maxTotal - minTotal) * 0.1;
+            
+            if (myChart) {
+                myChart.destroy();
+            }
+
+            // Siapkan gradient untuk bar
+            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, '#3b82f6');
+            gradient.addColorStop(1, '#2563eb');
+
+            myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: STATIC_DATA.weeks,
+                    datasets: [
+                        {
+                            label: 'TOTAL',
+                            data: STATIC_DATA.totals,
+                            type: 'bar',
+                            backgroundColor: gradient,
+                            borderColor: '#1e40af',
+                            borderWidth: 0,
+                            borderRadius: 6,
+                            barPercentage: 0.6,
+                            categoryPercentage: 0.7,
+                            yAxisID: 'y',
+                            order: 2,
+                        },
+                        {
+                            label: 'ACHIEVEMENT (%)',
+                            data: STATIC_DATA.achievements,
+                            type: 'line',
+                            borderColor: '#ef4444',
+                            backgroundColor: 'transparent',
+                            borderWidth: 4,
+                            pointBackgroundColor: '#ef4444',
+                            pointBorderColor: 'white',
+                            pointBorderWidth: 3,
+                            pointRadius: 4,
+                            pointHoverRadius: 8,
+                            pointStyle: 'circle',
+                            tension: 0.4,
+                            fill: false,
+                            yAxisID: 'y1',
+                            order: 1,
+                            borderDash: [],
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            top: 20,
+                            bottom: 20,
+                            left: 10,
+                            right: 30
+                        }
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            align: 'center',
+                            labels: {
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                boxWidth: 10,
+                                boxHeight: 10,
+                                padding: 20,
+                                font: { size: 13, weight: '600' }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#1e293b',
+                            titleColor: '#f1f5f9',
+                            bodyColor: '#e2e8f0',
+                            borderColor: '#475569',
+                            borderWidth: 1,
+                            padding: 12,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    let value = context.raw;
+                                    if (context.dataset.label.includes('ACHIEVEMENT')) {
+                                        return ` ${label}: ${value.toFixed(2)}%`;
+                                    }
+                                    return ` ${label}: ${formatNumber(value)}`;
+                                }
+                            }
+                        },
+                        datalabels: {
+                            display: false, // Nonaktifkan datalabels di chart agar tidak penuh
+                        }
+                    },
+                    scales: {
+                        y: {
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'TOTAL VALUE',
+                                color: '#3b82f6',
+                                font: { size: 13, weight: '700' }
+                            },
+                            grid: {
+                                color: 'rgba(0,0,0,0.05)',
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return formatNumber(value);
+                                },
+                                font: { size: 11 }
+                            },
+                            min: minTotal - padding,
+                            max: maxTotal + padding,
+                        },
+                        y1: {
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'ACHIEVEMENT PERCENTAGE',
+                                color: '#ef4444',
+                                font: { size: 13, weight: '700' }
+                            },
+                            grid: {
+                                drawOnChartArea: false,
+                            },
+                            min: -20,
+                            max: 80,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                },
+                                stepSize: 10,
+                                font: { size: 11 }
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45,
+                                font: { size: 10 },
+                                autoSkip: true,
+                                maxTicksLimit: 20,
+                            },
+                            title: {
+                                display: true,
+                                text: 'Week Period (W1 2025 - W05 2026)',
+                                color: '#475569',
+                                font: { size: 12, weight: '600' },
+                                padding: { top: 15 }
+                            }
+                        }
+                    },
+                    // Tambahan garis referensi
+                    annotation: {
+                        annotations: {
+                            line0: {
+                                type: 'line',
+                                yMin: 0,
+                                yMax: 0,
+                                borderColor: '#94a3b8',
+                                borderWidth: 1,
+                                borderDash: [5, 5],
+                                label: {
+                                    content: '0% Baseline',
+                                    enabled: true,
+                                    position: 'end'
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Update UI
+            document.getElementById('loadingStatus').style.display = 'none';
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleString('id-ID');
+            updateStats();
+        }
+
+        function refreshData() {
+            document.getElementById('loadingStatus').style.display = 'block';
+            document.getElementById('errorContainer').style.display = 'none';
+            
+            // Simulasi refresh dengan data statis
+            setTimeout(() => {
+                createComboChart();
+            }, 500);
+        }
+
+        // Inisialisasi chart
+        window.addEventListener('DOMContentLoaded', () => {
+            // Set period range
+            const weeks = STATIC_DATA.weeks;
+            document.getElementById('periodRange').innerHTML = `${weeks[0]} 2025 - ${weeks[weeks.length-1]} 2026`;
+            document.getElementById('totalWeeks').textContent = weeks.length;
+            
+            // Create chart
+            createComboChart();
+        });
+    </script>
+</body>
+</html>
