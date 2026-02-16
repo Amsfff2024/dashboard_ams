@@ -454,7 +454,7 @@
             <i class="fas fa-chart-line me-2"></i>FSO Issues Overview
         </div>
         
-        <!-- KPI Summary Row (dengan UNIQUE SITES menggantikan AVG AGING) -->
+        <!-- KPI Summary Row -->
         <div class="row mb-4">
             <!-- TOTAL FSO ISSUES -->
             <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
@@ -548,7 +548,7 @@
             </div>
         </div>
 
-        <!-- Filter and Search Row (PIC filter dihilangkan karena sudah tetap FSO) -->
+        <!-- Filter and Search Row -->
         <div class="row mb-4">
             <div class="col-lg-12">
                 <div class="card filter-card">
@@ -1567,111 +1567,208 @@
                 });
             }
             
-            // Update Category Chart
+            // Update Category Chart - MENAMPILKAN SEMUA KATEGORI DENGAN LABEL HORIZONTAL
             const categoryCounts = {};
             filteredFsoData.forEach(issue => {
                 const category = issue.problemCategory || 'Unknown';
                 categoryCounts[category] = (categoryCounts[category] || 0) + 1;
             });
-            
-            const sortedCategories = Object.entries(categoryCounts)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 5);
-            
+
+            // Ambil semua kategori (tidak hanya top 5)
+            const allCategories = Object.entries(categoryCounts)
+                .sort((a, b) => b[1] - a[1]); // Tetap urutkan berdasarkan jumlah (descending)
+
             if (categoryChart) categoryChart.destroy();
             const categoryCtx = document.getElementById('categoryChart');
             if (categoryCtx) {
-                const maxValue = Math.max(...sortedCategories.map(item => item[1]));
-                const xAxisMax = Math.ceil(maxValue * 1.2);
-                
-                categoryChart = new Chart(categoryCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: sortedCategories.map(item => item[0]),
-                        datasets: [{
-                            label: 'Issues',
-                            data: sortedCategories.map(item => item[1]),
-                            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
-                            borderWidth: 0,
-                            borderRadius: 4
-                        }]
-                    },
-                    options: {
-                        indexAxis: 'y',
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false },
-                            datalabels: {
-                                display: true,
-                                color: '#000000',
-                                font: {
-                                    family: 'Inter',
-                                    weight: 'bold',
-                                    size: 11
-                                },
-                                formatter: (value) => {
-                                    return value;
-                                },
-                                anchor: 'end',
-                                align: 'right',
-                                offset: 4,
-                                clamp: true
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        const value = context.raw || 0;
-                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                        return `Count: ${value} (${percentage}%)`;
-                                    }
-                                }
-                            }
+                if (allCategories.length === 1) {
+                    // Jika hanya 1 kategori, tampilkan sebagai doughnut chart
+                    categoryChart = new Chart(categoryCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: [allCategories[0][0]],
+                            datasets: [{
+                                data: [allCategories[0][1]],
+                                backgroundColor: ['#3b82f6'],
+                                borderWidth: 1
+                            }]
                         },
-                        scales: {
-                            x: {
-                                beginAtZero: true,
-                                max: xAxisMax,
-                                grid: {
-                                    display: true
-                                },
-                                ticks: {
-                                    font: {
-                                        family: 'Inter',
-                                        size: 10
-                                    },
-                                    stepSize: Math.ceil(maxValue / 5)
-                                },
-                                title: {
-                                    display: true,
-                                    text: 'Jumlah Issues',
-                                    font: {
-                                        family: 'Inter',
-                                        size: 10,
-                                        weight: 'bold'
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            cutout: '65%',
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        font: {
+                                            family: 'Inter',
+                                            size: 11
+                                        }
                                     }
-                                }
-                            },
-                            y: {
-                                grid: {
-                                    display: false
                                 },
-                                ticks: {
+                                datalabels: {
+                                    display: true,
+                                    color: '#ffffff',
                                     font: {
                                         family: 'Inter',
-                                        size: 10
+                                        weight: 'bold',
+                                        size: 14
                                     },
-                                    maxRotation: 45,
-                                    minRotation: 45
+                                    formatter: (value, context) => {
+                                        const total = context.dataset.data.reduce((acc, val) => acc + val, 0);
+                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        return `${value} (${percentage}%)`;
+                                    },
+                                    anchor: 'center',
+                                    align: 'center',
+                                    offset: 0
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const label = context.label || '';
+                                            const value = context.raw || 0;
+                                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                            return `${label}: ${value} (${percentage}%)`;
+                                        }
+                                    }
                                 }
                             }
                         }
-                    }
-                });
+                    });
+                } else if (allCategories.length > 0) {
+                    // Hitung nilai maksimum untuk menentukan skala axis
+                    const maxValue = Math.max(...allCategories.map(item => item[1]));
+                    const xAxisMax = Math.ceil(maxValue * 1.2); // Memberi ruang 20% di atas nilai tertinggi
+                    
+                    categoryChart = new Chart(categoryCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: allCategories.map(item => item[0]),
+                            datasets: [{
+                                label: 'Issues',
+                                data: allCategories.map(item => item[1]),
+                                backgroundColor: allCategories.map((_, index) => {
+                                    // Generate warna yang bervariasi untuk setiap kategori
+                                    const colors = [
+                                        '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
+                                        '#ec4899', '#14b8a6', '#f97316', '#6b7280', '#6366f1',
+                                        '#84cc16', '#06b6d4', '#d946ef', '#64748b', '#0ea5e9',
+                                        '#a855f7', '#eab308', '#22c55e', '#ef4444', '#3b82f6'
+                                    ];
+                                    return colors[index % colors.length];
+                                }),
+                                borderWidth: 0,
+                                borderRadius: 4
+                            }]
+                        },
+                        options: {
+                            indexAxis: 'y', // Horizontal bar chart (kategori di sumbu y, nilai di sumbu x)
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            layout: {
+                                padding: {
+                                    left: 10,
+                                    right: 25,
+                                    top: 10,
+                                    bottom: 10
+                                }
+                            },
+                            plugins: {
+                                legend: { display: false },
+                                datalabels: {
+                                    display: true,
+                                    color: '#000000',
+                                    font: {
+                                        family: 'Inter',
+                                        weight: 'bold',
+                                        size: 11
+                                    },
+                                    formatter: (value) => {
+                                        return value;
+                                    },
+                                    anchor: 'end',
+                                    align: 'right',
+                                    offset: 4,
+                                    clamp: true
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const value = context.raw || 0;
+                                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                            return `Count: ${value} (${percentage}%)`;
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    beginAtZero: true,
+                                    max: xAxisMax,
+                                    grid: {
+                                        display: true,
+                                        color: '#e5e7eb'
+                                    },
+                                    ticks: {
+                                        font: {
+                                            family: 'Inter',
+                                            size: 10,
+                                            weight: 'normal'
+                                        },
+                                        stepSize: Math.ceil(maxValue / 5),
+                                        callback: function(value) {
+                                            return value;
+                                        }
+                                    },
+                                    title: {
+                                        display: true,
+                                        text: 'Jumlah Issues',
+                                        font: {
+                                            family: 'Inter',
+                                            size: 11,
+                                            weight: 'bold'
+                                        },
+                                        color: '#4b5563'
+                                    }
+                                },
+                                y: {
+                                    grid: {
+                                        display: false
+                                    },
+                                    ticks: {
+                                        font: {
+                                            family: 'Inter',
+                                            size: 11,
+                                            weight: 'normal'
+                                        },
+                                        // Label kategori ditampilkan secara horizontal (tidak miring)
+                                        maxRotation: 0,
+                                        minRotation: 0
+                                    },
+                                    title: {
+                                        display: true,
+                                        text: 'Problem Category',
+                                        font: {
+                                            family: 'Inter',
+                                            size: 11,
+                                            weight: 'bold'
+                                        },
+                                        color: '#4b5563'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    categoryCtx.parentElement.innerHTML = '<div class="text-center py-5 text-muted">No category data available</div>';
+                }
             }
             
-            // Update Aging Distribution Chart
+            // Update Aging Distribution Chart (dengan label horizontal)
             const agingRanges = {
                 '0-7 days': filteredFsoData.filter(issue => issue.aging <= 7).length,
                 '8-14 days': filteredFsoData.filter(issue => issue.aging > 7 && issue.aging <= 14).length,
@@ -1736,7 +1833,8 @@
                                 beginAtZero: true,
                                 max: yAxisMaxAging,
                                 grid: {
-                                    display: true
+                                    display: true,
+                                    color: '#e5e7eb'
                                 },
                                 ticks: {
                                     font: {
@@ -1750,9 +1848,10 @@
                                     text: 'Jumlah Issues',
                                     font: {
                                         family: 'Inter',
-                                        size: 10,
+                                        size: 11,
                                         weight: 'bold'
-                                    }
+                                    },
+                                    color: '#4b5563'
                                 }
                             },
                             x: {
@@ -1762,19 +1861,22 @@
                                 ticks: {
                                     font: {
                                         family: 'Inter',
-                                        size: 9,
-                                        maxRotation: 45,
-                                        minRotation: 45
-                                    }
+                                        size: 11,
+                                        weight: 'normal'
+                                    },
+                                    // Label horizontal (tidak miring)
+                                    maxRotation: 0,
+                                    minRotation: 0
                                 },
                                 title: {
                                     display: true,
                                     text: 'Rentang Aging',
                                     font: {
                                         family: 'Inter',
-                                        size: 10,
+                                        size: 11,
                                         weight: 'bold'
-                                    }
+                                    },
+                                    color: '#4b5563'
                                 }
                             }
                         }
