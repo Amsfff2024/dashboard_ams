@@ -3,15 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premium Weekly Analytics: TOTAL vs ACHIEVEMENT (W1 2025 - W05 2026)</title>
+    <title>Weekly Trend: TOTAL vs ACHIEVEMENT (W1 2025 - W05 2026)</title>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Chart.js Data Labels Plugin -->
+    <!-- Chart.js Data Labels Plugin untuk menampilkan nilai -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.min.js"></script>
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts - Plus Jakarta Sans -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- PapaParse untuk parsing CSV -->
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -20,259 +18,100 @@
         }
         
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 30px;
-            position: relative;
-            overflow-x: hidden;
+            padding: 20px;
         }
         
-        /* Background Pattern */
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMzAgMzBtMzAgMCIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDUpIiBmaWxsPSJub25lIiBzdHJva2Utd2lkdGg9IjEiLz48L3N2Zz4=');
-            opacity: 0.5;
-            pointer-events: none;
-        }
-        
-        .dashboard-container {
-            max-width: 1800px;
+        .chart-container {
+            max-width: 1600px;
             margin: 0 auto;
-            position: relative;
-            z-index: 1;
-        }
-        
-        /* Glassmorphism Card */
-        .premium-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 40px;
-            box-shadow: 
-                0 25px 50px -12px rgba(0, 0, 0, 0.5),
-                inset 0 1px 2px rgba(255, 255, 255, 0.3);
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        /* Header dengan Gradient Premium */
-        .premium-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #6b8cff 100%);
-            padding: 30px 40px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .premium-header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            animation: rotate 20s linear infinite;
-        }
-        
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: relative;
-            z-index: 2;
-        }
-        
-        .title-section h1 {
-            color: white;
-            font-size: 2.5rem;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            margin-bottom: 8px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-        }
-        
-        .title-section .subtitle {
-            color: rgba(255,255,255,0.9);
-            font-size: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-        
-        .title-section .subtitle span {
-            background: rgba(255,255,255,0.15);
-            padding: 5px 15px;
+            background: white;
             border-radius: 30px;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-        
-        .live-badge {
-            background: linear-gradient(135deg, #ff6b6b, #feca57);
-            padding: 8px 20px;
-            border-radius: 40px;
-            color: white;
-            font-weight: 600;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(255,107,107,0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(255,107,107,0); }
-            100% { box-shadow: 0 0 0 0 rgba(255,107,107,0); }
-        }
-        
-        /* KPI Cards Grid */
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 20px;
-            padding: 30px 40px;
-            background: #f8faff;
-        }
-        
-        .kpi-item {
-            background: white;
-            border-radius: 24px;
-            padding: 20px 15px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.03);
-            transition: all 0.3s ease;
-            border: 1px solid rgba(0,0,0,0.03);
-            position: relative;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.3);
             overflow: hidden;
-        }
-        
-        .kpi-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 30px rgba(102, 126, 234, 0.1);
-            border-color: #667eea;
-        }
-        
-        .kpi-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-        }
-        
-        .kpi-label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #64748b;
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-        
-        .kpi-value {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: #1e293b;
-            line-height: 1.2;
-            margin-bottom: 5px;
-        }
-        
-        .kpi-trend {
-            font-size: 0.75rem;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            padding: 3px 8px;
-            border-radius: 20px;
-            width: fit-content;
-        }
-        
-        .trend-up {
-            background: #dcfce7;
-            color: #166534;
-        }
-        
-        .trend-down {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-        
-        /* Chart Container */
-        .chart-section {
-            padding: 30px 40px;
-            background: white;
         }
         
         .chart-header {
+            background: linear-gradient(135deg, #1e1e2f, #2d2d44);
+            color: white;
+            padding: 25px 35px;
+        }
+        
+        .chart-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .chart-header h1 i {
+            color: #ffd700;
+            font-size: 2.2rem;
+        }
+        
+        .chart-header .subtitle {
+            display: flex;
+            gap: 30px;
+            color: #a0a0c0;
+            font-size: 1rem;
+        }
+        
+        .chart-header .subtitle span {
+            color: white;
+            font-weight: 600;
+            margin-left: 8px;
+            background: rgba(255,255,255,0.1);
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+        
+        .stats-bar {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
+            padding: 20px 35px;
+            background: #f8faff;
+            border-bottom: 1px solid #e0e7ff;
         }
         
-        .chart-header h3 {
-            font-size: 1.3rem;
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: 0.85rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
             font-weight: 700;
             color: #1e293b;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
         
-        .chart-header h3 i {
-            color: #667eea;
-            font-size: 1.5rem;
-        }
-        
-        .legend-custom {
-            display: flex;
-            gap: 25px;
-        }
-        
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .stat-value small {
             font-size: 0.9rem;
-            font-weight: 500;
-        }
-        
-        .legend-color {
-            width: 20px;
-            height: 20px;
-            border-radius: 6px;
-        }
-        
-        .legend-color.bar { 
-            background: linear-gradient(135deg, #667eea, #6b8cff);
-            box-shadow: 0 4px 10px rgba(102,126,234,0.3);
-        }
-        .legend-color.line { 
-            background: linear-gradient(135deg, #ff6b6b, #feca57);
-            box-shadow: 0 4px 10px rgba(255,107,107,0.3);
+            font-weight: 400;
+            color: #64748b;
         }
         
         .chart-wrapper {
             position: relative;
             height: 600px;
-            width: 100%;
-            margin-top: 20px;
+            padding: 20px 35px 35px 35px;
+            background: white;
         }
         
-        /* Loading */
+        #comboChart {
+            width: 100%;
+            height: 100%;
+        }
+        
         .loading {
             position: absolute;
             top: 50%;
@@ -284,7 +123,6 @@
             padding: 30px;
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            z-index: 10;
         }
         
         .loading i {
@@ -297,118 +135,21 @@
             background: #fee2e2;
             color: #991b1b;
             padding: 20px;
-            margin: 20px 40px;
+            margin: 20px 35px;
             border-radius: 15px;
             border-left: 5px solid #dc2626;
         }
         
-        /* Insight Cards */
-        .insight-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            padding: 30px 40px;
-            background: #f8faff;
-            border-top: 1px solid rgba(0,0,0,0.05);
-        }
-        
-        .insight-card {
-            background: white;
-            border-radius: 24px;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.02);
-            transition: all 0.3s ease;
-        }
-        
-        .insight-card:hover {
-            transform: scale(1.02);
-            box-shadow: 0 15px 30px rgba(102,126,234,0.1);
-        }
-        
-        .insight-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 16px;
-            background: linear-gradient(135deg, #667eea15, #764ba215);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            color: #667eea;
-        }
-        
-        .insight-content h4 {
-            font-size: 0.85rem;
-            color: #64748b;
-            font-weight: 500;
-            margin-bottom: 5px;
-        }
-        
-        .insight-content p {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #1e293b;
-        }
-        
-        .insight-tag {
-            font-size: 0.7rem;
-            padding: 3px 10px;
-            border-radius: 30px;
-            background: #e2e8f0;
-            color: #475569;
-            margin-left: 10px;
-        }
-        
-        /* Footer */
-        .premium-footer {
-            padding: 20px 40px;
-            background: rgba(255,255,255,0.95);
-            border-top: 1px solid rgba(0,0,0,0.05);
+        .footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.85rem;
-            color: #64748b;
-        }
-        
-        .footer-left {
-            display: flex;
-            gap: 30px;
-        }
-        
-        .footer-left span i {
-            color: #667eea;
-            margin-right: 5px;
-        }
-        
-        .footer-right {
-            display: flex;
-            gap: 15px;
-        }
-        
-        .social-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
+            padding: 15px 35px 25px 35px;
             background: #f1f5f9;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             color: #475569;
-            text-decoration: none;
-            transition: all 0.3s ease;
+            font-size: 0.9rem;
         }
         
-        .social-icon:hover {
-            background: #667eea;
-            color: white;
-            transform: translateY(-3px);
-        }
-        
-        /* Badge */
         .badge {
             background: #3b82f6;
             color: white;
@@ -436,111 +177,78 @@
             border-color: #3b82f6;
         }
         
-        /* Responsive Design */
-        @media (max-width: 1400px) {
-            .kpi-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            .insight-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+        .trend-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
         }
         
+        .trend-up { background: #dcfce7; color: #166534; }
+        .trend-down { background: #fee2e2; color: #991b1b; }
+        
         @media (max-width: 768px) {
-            body { padding: 15px; }
-            .kpi-grid, .insight-grid {
-                grid-template-columns: 1fr;
-            }
-            .header-content {
-                flex-direction: column;
-                gap: 15px;
-            }
-            .chart-wrapper {
-                height: 450px;
-            }
+            .chart-wrapper { height: 450px; padding: 10px; }
+            .chart-header h1 { font-size: 1.5rem; }
+            .stats-bar { flex-wrap: wrap; gap: 15px; }
         }
     </style>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="dashboard-container">
-        <!-- Premium Header -->
-        <div class="premium-card">
-            <div class="premium-header">
-                <div class="header-content">
-                    <div class="title-section">
-                        <h1><i class="fas fa-chart-line"></i> WEEKLY PERFORMANCE TREND 2025-2026</h1>
-                        <div class="subtitle">
-                            <span><i class="far fa-calendar-alt"></i> Period: <span id="periodRange">W1 2025 - W05 2026</span></span>
-                            <span><i class="far fa-clock"></i> Total Weeks: <span id="totalWeeks">57</span></span>
-                            <span><i class="fas fa-sync-alt"></i> Last Update: <span id="lastUpdate">Loading...</span></span>
-                        </div>
-                    </div>
-                    <div class="live-badge">
-                        <span class="live-dot">●</span>
-                        LIVE PREVIEW 2026
-                    </div>
-                </div>
+    <div class="chart-container">
+        <div class="chart-header">
+            <h1>
+                <i class="fas fa-chart-line"></i>
+                Weekly Performance Trend 2025-2026
+            </h1>
+            <div class="subtitle">
+                <div>Data Period: <span id="periodRange">W1 2025 - W05 2026</span></div>
+                <div>Total Weeks: <span id="totalWeeks">57</span></div>
+                <div>Last Update: <span id="lastUpdate">Loading...</span></div>
             </div>
+        </div>
 
-            <!-- KPI Metrics Grid (akan diisi JS) -->
-            <div class="kpi-grid" id="kpiGrid"></div>
+        <div class="stats-bar" id="statsBar">
+            <!-- Akan diisi oleh JavaScript -->
+        </div>
 
-            <!-- Error Container -->
-            <div id="errorContainer" class="error-message" style="display: none;">
-                <i class="fas fa-exclamation-circle me-2"></i>
-                <span id="errorText"></span>
+        <div id="errorContainer" class="error-message" style="display: none;">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span id="errorText"></span>
+        </div>
+
+        <div class="chart-wrapper">
+            <div id="loadingStatus" class="loading">
+                <i class="fas fa-chart-pie fa-spin"></i>
+                <h3>Loading Chart Data...</h3>
+                <p>Mengambil data 57 week period</p>
             </div>
+            <canvas id="comboChart"></canvas>
+        </div>
 
-            <!-- Chart Section -->
-            <div class="chart-section">
-                <div class="chart-header">
-                    <h3>
-                        <i class="fas fa-chart-bar"></i>
-                        Weekly Performance Analysis (W1 2025 - W05 2026)
-                    </h3>
-                    <div class="legend-custom">
-                        <div class="legend-item">
-                            <div class="legend-color bar"></div>
-                            <span>TOTAL - Bar Chart</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color line"></div>
-                            <span>ACHIEVEMENT % - Line</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="chart-wrapper">
-                    <div id="loadingStatus" class="loading">
-                        <i class="fas fa-chart-pie fa-spin"></i>
-                        <h3>Loading Chart Data...</h3>
-                        <p>Mengambil data 57 week period</p>
-                    </div>
-                    <canvas id="comboChart"></canvas>
-                </div>
+        <div class="footer">
+            <div>
+                <i class="fas fa-database me-2"></i>
+                Source: Google Sheets - SUMMARY Tab
             </div>
-
-            <!-- Insight Cards (akan diisi JS) -->
-            <div class="insight-grid" id="insightGrid"></div>
-
-            <!-- Premium Footer -->
-            <div class="premium-footer">
-                <div class="footer-left">
-                    <span><i class="fas fa-database"></i> Source: Google Sheets - SUMMARY Tab</span>
-                    <span><i class="fas fa-sync-alt"></i> Auto-refresh every 5 minutes</span>
-                    <span><i class="fas fa-lock"></i> Secure Enterprise Dashboard</span>
-                </div>
-                <div class="footer-right">
-                    <span class="badge">
-                        <i class="fas fa-chart-bar"></i> Bar: TOTAL
-                    </span>
-                    <span class="badge" style="background: #ef4444;">
-                        <i class="fas fa-chart-line"></i> Line: ACHIEVEMENT %
-                    </span>
-                    <button class="btn-refresh" onclick="refreshData()">
-                        <i class="fas fa-sync-alt"></i> Refresh
-                    </button>
-                </div>
+            <div>
+                <span class="badge">
+                    <i class="fas fa-chart-bar"></i> Bar: TOTAL
+                </span>
+                <span class="badge" style="background: #ef4444; margin-left: 10px;">
+                    <i class="fas fa-chart-line"></i> Line: ACHIEVEMENT %
+                </span>
             </div>
+            <button class="btn-refresh" onclick="refreshData()">
+                <i class="fas fa-sync-alt me-2"></i>Refresh Data
+            </button>
         </div>
     </div>
 
@@ -594,103 +302,45 @@
             };
         }
 
-        function updateKPIAndInsight() {
+        function updateStats() {
             const total = STATIC_DATA.totals;
             const achievements = STATIC_DATA.achievements;
             
-            // Calculate metrics
             const avgTotal = total.reduce((a, b) => a + b, 0) / total.length;
             const maxTotal = Math.max(...total);
-            const maxTotalIndex = total.indexOf(maxTotal);
             const minTotal = Math.min(...total);
-            const minTotalIndex = total.indexOf(minTotal);
             const avgAch = achievements.reduce((a, b) => a + b, 0) / achievements.length;
-            const maxAch = Math.max(...achievements);
-            const maxAchIndex = achievements.indexOf(maxAch);
-            const minAch = Math.min(...achievements);
             
             const totalTrend = calculateTrend(total);
             const achTrend = calculateTrend(achievements);
             
-            // Calculate YoY-like growth (first 5 weeks of 2025 vs 2026)
-            const first5Weeks2025 = total.slice(0, 5);
-            const first5Weeks2026 = total.slice(-5);
-            const avg2025 = first5Weeks2025.reduce((a, b) => a + b, 0) / 5;
-            const avg2026 = first5Weeks2026.reduce((a, b) => a + b, 0) / 5;
-            const yoyGrowth = ((avg2026 - avg2025) / avg2025 * 100).toFixed(1);
-
-            // Update KPI Grid
-            document.getElementById('kpiGrid').innerHTML = `
-                <div class="kpi-item">
-                    <div class="kpi-label">📊 AVG TOTAL/WEEK</div>
-                    <div class="kpi-value">${formatNumber(Math.round(avgTotal))}</div>
-                    <div class="kpi-trend trend-up">▲ +12.3% vs 2025</div>
+            document.getElementById('statsBar').innerHTML = `
+                <div class="stat-item">
+                    <div class="stat-label">Avg TOTAL per Week</div>
+                    <div class="stat-value">${formatNumber(Math.round(avgTotal))}</div>
                 </div>
-                
-                <div class="kpi-item">
-                    <div class="kpi-label">🎯 AVG ACHIEVEMENT</div>
-                    <div class="kpi-value">${avgAch.toFixed(1)}%</div>
-                    <div class="kpi-trend ${achTrend.isUp ? 'trend-up' : 'trend-down'}">
-                        ${achTrend.direction} ${achTrend.value}% trend
+                <div class="stat-item">
+                    <div class="stat-label">Peak TOTAL (W5)</div>
+                    <div class="stat-value">${formatNumber(maxTotal)}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Lowest TOTAL (W05 2026)</div>
+                    <div class="stat-value">${formatNumber(minTotal)}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Avg Achievement</div>
+                    <div class="stat-value">${avgAch.toFixed(2)}%</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Trend TOTAL</div>
+                    <div class="trend-indicator ${totalTrend.isUp ? 'trend-up' : 'trend-down'}">
+                        ${totalTrend.direction} ${totalTrend.value}%
                     </div>
                 </div>
-                
-                <div class="kpi-item">
-                    <div class="kpi-label">📈 YoY GROWTH</div>
-                    <div class="kpi-value">${yoyGrowth}%</div>
-                    <div class="kpi-trend trend-up">▲ W1-W5 2026</div>
-                </div>
-                
-                <div class="kpi-item">
-                    <div class="kpi-label">🏆 PEAK TOTAL</div>
-                    <div class="kpi-value">${formatNumber(maxTotal)}</div>
-                    <div class="kpi-trend trend-up">▲ ${STATIC_DATA.weeks[maxTotalIndex]}</div>
-                </div>
-                
-                <div class="kpi-item">
-                    <div class="kpi-label">📉 LOWEST TOTAL</div>
-                    <div class="kpi-value">${formatNumber(minTotal)}</div>
-                    <div class="kpi-trend trend-down">▼ ${STATIC_DATA.weeks[minTotalIndex]}</div>
-                </div>
-                
-                <div class="kpi-item">
-                    <div class="kpi-label">⭐ BEST ACHIEVEMENT</div>
-                    <div class="kpi-value">${maxAch.toFixed(1)}%</div>
-                    <div class="kpi-trend trend-up">▲ ${STATIC_DATA.weeks[maxAchIndex]}</div>
-                </div>
-            `;
-
-            // Update Insight Grid
-            document.getElementById('insightGrid').innerHTML = `
-                <div class="insight-card">
-                    <div class="insight-icon"><i class="fas fa-chart-line"></i></div>
-                    <div class="insight-content">
-                        <h4>ACHIEVEMENT RANGE</h4>
-                        <p>${minAch.toFixed(1)}% - ${maxAch.toFixed(1)}%</p>
-                    </div>
-                </div>
-                
-                <div class="insight-card">
-                    <div class="insight-icon"><i class="fas fa-arrow-up"></i></div>
-                    <div class="insight-content">
-                        <h4>POSITIVE WEEKS</h4>
-                        <p>${achievements.filter(a => a > 0).length} weeks</p>
-                    </div>
-                </div>
-                
-                <div class="insight-card">
-                    <div class="insight-icon"><i class="fas fa-arrow-down"></i></div>
-                    <div class="insight-content">
-                        <h4>NEGATIVE WEEKS</h4>
-                        <p>${achievements.filter(a => a < 0).length} weeks</p>
-                    </div>
-                </div>
-                
-                <div class="insight-card">
-                    <div class="insight-icon"><i class="fas fa-calendar-check"></i></div>
-                    <div class="insight-content">
-                        <h4>PROJECTION W06 2026</h4>
-                        <p>2,550 <span class="insight-tag">-3%</span></p>
+                <div class="stat-item">
+                    <div class="stat-label">Trend Achievement</div>
+                    <div class="trend-indicator ${achTrend.isUp ? 'trend-up' : 'trend-down'}">
+                        ${achTrend.direction} ${achTrend.value}%
                     </div>
                 </div>
             `;
@@ -709,9 +359,9 @@
             }
 
             // Siapkan gradient untuk bar
-            const gradient = ctx.createLinearGradient(0, 0, 0, 600);
-            gradient.addColorStop(0, '#667eea');
-            gradient.addColorStop(1, '#764ba2');
+            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, '#3b82f6');
+            gradient.addColorStop(1, '#2563eb');
 
             myChart = new Chart(ctx, {
                 type: 'bar',
@@ -723,9 +373,9 @@
                             data: STATIC_DATA.totals,
                             type: 'bar',
                             backgroundColor: gradient,
-                            borderColor: '#4c51bf',
+                            borderColor: '#1e40af',
                             borderWidth: 0,
-                            borderRadius: 8,
+                            borderRadius: 6,
                             barPercentage: 0.6,
                             categoryPercentage: 0.7,
                             yAxisID: 'y',
@@ -735,10 +385,10 @@
                             label: 'ACHIEVEMENT (%)',
                             data: STATIC_DATA.achievements,
                             type: 'line',
-                            borderColor: '#ff6b6b',
+                            borderColor: '#ef4444',
                             backgroundColor: 'transparent',
                             borderWidth: 4,
-                            pointBackgroundColor: '#feca57',
+                            pointBackgroundColor: '#ef4444',
                             pointBorderColor: 'white',
                             pointBorderWidth: 3,
                             pointRadius: 4,
@@ -769,13 +419,22 @@
                     },
                     plugins: {
                         legend: {
-                            display: false // Using custom legend
+                            position: 'top',
+                            align: 'center',
+                            labels: {
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                boxWidth: 10,
+                                boxHeight: 10,
+                                padding: 20,
+                                font: { size: 13, weight: '600' }
+                            }
                         },
                         tooltip: {
-                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                            backgroundColor: '#1e293b',
                             titleColor: '#f1f5f9',
                             bodyColor: '#e2e8f0',
-                            borderColor: 'rgba(255,255,255,0.1)',
+                            borderColor: '#475569',
                             borderWidth: 1,
                             padding: 12,
                             cornerRadius: 8,
@@ -791,7 +450,7 @@
                             }
                         },
                         datalabels: {
-                            display: false
+                            display: false, // Nonaktifkan datalabels di chart agar tidak penuh
                         }
                     },
                     scales: {
@@ -800,7 +459,7 @@
                             title: {
                                 display: true,
                                 text: 'TOTAL VALUE',
-                                color: '#667eea',
+                                color: '#3b82f6',
                                 font: { size: 13, weight: '700' }
                             },
                             grid: {
@@ -820,7 +479,7 @@
                             title: {
                                 display: true,
                                 text: 'ACHIEVEMENT PERCENTAGE',
-                                color: '#ff6b6b',
+                                color: '#ef4444',
                                 font: { size: 13, weight: '700' }
                             },
                             grid: {
@@ -843,7 +502,7 @@
                                 minRotation: 45,
                                 font: { size: 10 },
                                 autoSkip: true,
-                                maxTicksLimit: 25,
+                                maxTicksLimit: 20,
                             },
                             title: {
                                 display: true,
@@ -853,35 +512,32 @@
                                 padding: { top: 15 }
                             }
                         }
+                    },
+                    // Tambahan garis referensi
+                    annotation: {
+                        annotations: {
+                            line0: {
+                                type: 'line',
+                                yMin: 0,
+                                yMax: 0,
+                                borderColor: '#94a3b8',
+                                borderWidth: 1,
+                                borderDash: [5, 5],
+                                label: {
+                                    content: '0% Baseline',
+                                    enabled: true,
+                                    position: 'end'
+                                }
+                            }
+                        }
                     }
                 }
             });
 
             // Update UI
             document.getElementById('loadingStatus').style.display = 'none';
-            document.getElementById('lastUpdate').textContent = new Date().toLocaleString('id-ID', { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric', 
-                hour: '2-digit', 
-                minute: '2-digit',
-                timeZoneName: 'short' 
-            });
-            
-            updateKPIAndInsight();
-
-            // Animasi masuk untuk KPI items
-            setTimeout(() => {
-                document.querySelectorAll('.kpi-item').forEach((item, index) => {
-                    item.style.opacity = '0';
-                    item.style.transform = 'translateY(20px)';
-                    setTimeout(() => {
-                        item.style.transition = 'all 0.5s ease';
-                        item.style.opacity = '1';
-                        item.style.transform = 'translateY(0)';
-                    }, 100 * index);
-                });
-            }, 100);
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleString('id-ID');
+            updateStats();
         }
 
         function refreshData() {
