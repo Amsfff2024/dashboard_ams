@@ -105,7 +105,7 @@ body {
 }
 
 .sidebar.collapsed .title span,
-.sidebar.collapsed a span,
+.sidebar.collapsed .sidebar-nav span,
 .sidebar.collapsed .footer {
   display: none;
 }
@@ -115,7 +115,7 @@ body {
   padding: 18px 0;
 }
 
-.sidebar.collapsed a {
+.sidebar.collapsed .sidebar-nav a {
   justify-content: center;
   padding: 15px 0;
   margin: 4px 12px;
@@ -123,6 +123,18 @@ body {
 
 .sidebar.collapsed .sidebar-nav {
   padding: 16px 0;
+}
+
+.sidebar.collapsed .category-group .submenu {
+  display: none; /* Hide submenu when sidebar is collapsed */
+}
+
+.sidebar.collapsed .category-button span:not(.category-icon) {
+  display: none;
+}
+
+.sidebar.collapsed .chevron-icon {
+  display: none;
 }
 
 .sidebar .title {
@@ -173,7 +185,7 @@ body {
   background: rgba(0, 0, 0, 0.1);
 }
 
-.sidebar a {
+.sidebar-nav a {
   padding: 16px 20px;
   color: rgba(255, 255, 255, 0.85);
   text-decoration: none;
@@ -192,7 +204,7 @@ body {
   overflow: hidden;
 }
 
-.sidebar a::before {
+.sidebar-nav a::before {
   content: '';
   position: absolute;
   top: 0;
@@ -204,17 +216,17 @@ body {
   transition: opacity 0.3s;
 }
 
-.sidebar a:hover {
+.sidebar-nav a:hover {
   background: rgba(255, 255, 255, 0.08);
   color: #fff;
   transform: translateX(4px);
 }
 
-.sidebar a:hover::before {
+.sidebar-nav a:hover::before {
   opacity: 1;
 }
 
-.sidebar a.active {
+.sidebar-nav a.active {
   background: linear-gradient(90deg, rgba(26, 115, 232, 0.15) 0%, rgba(26, 115, 232, 0.05) 100%);
   color: #fff;
   box-shadow: 0 4px 15px rgba(26, 115, 232, 0.2);
@@ -222,7 +234,7 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.sidebar a.active::after {
+.sidebar-nav a.active::after {
   content: '';
   position: absolute;
   left: 0;
@@ -233,32 +245,152 @@ body {
   border-radius: 0 4px 4px 0;
 }
 
-.sidebar a i {
+.sidebar-nav a i {
   font-size: 1.25rem;
   min-width: 26px;
   text-align: center;
   transition: transform 0.3s;
 }
 
-.sidebar a:hover i {
+.sidebar-nav a:hover i {
   transform: scale(1.1);
 }
 
-.sidebar a.active i {
+.sidebar-nav a.active i {
   color: var(--accent-color);
   filter: drop-shadow(0 0 8px rgba(0, 201, 167, 0.4));
 }
 
-.sidebar .footer {
-  margin-top: auto;
-  padding: 18px;
-  font-size: 0.8rem;
-  text-align: center;
-  color: rgba(255, 255, 255, 0.5);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  font-weight: 300;
-  letter-spacing: 0.02em;
+/* ===== CATEGORY GROUP STYLES ===== */
+.category-group {
+  margin: 8px 12px;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+.category-button {
+  width: 100%;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.95rem;
+  font-weight: 500;
   font-family: var(--font-body);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: var(--border-radius);
+  letter-spacing: -0.01em;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.category-button:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  transform: translateX(4px);
+}
+
+.category-button.active {
+  background: linear-gradient(90deg, rgba(26, 115, 232, 0.15) 0%, rgba(26, 115, 232, 0.05) 100%);
+  color: #fff;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.category-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.category-icon {
+  font-size: 1.25rem;
+  min-width: 26px;
+  text-align: center;
+  color: var(--accent-color);
+}
+
+.category-button.active .category-icon {
+  filter: drop-shadow(0 0 8px rgba(0, 201, 167, 0.4));
+}
+
+.chevron-icon {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.5);
+  transition: transform 0.3s ease;
+}
+
+.category-button.active .chevron-icon {
+  color: var(--accent-color);
+  transform: rotate(180deg);
+}
+
+/* Submenu Styles */
+.submenu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background: rgba(0, 0, 0, 0.2);
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+  border-bottom-left-radius: var(--border-radius);
+  border-bottom-right-radius: var(--border-radius);
+}
+
+.submenu.show {
+  max-height: 300px;
+  transition: max-height 0.4s ease-in;
+}
+
+.submenu-item {
+  padding: 12px 20px 12px 54px;
+  color: rgba(255, 255, 255, 0.75);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+  font-weight: 400;
+  border-left: 3px solid transparent;
+  position: relative;
+}
+
+.submenu-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  border-left-color: var(--accent-color);
+  padding-left: 57px;
+}
+
+.submenu-item.active {
+  background: linear-gradient(90deg, rgba(26, 115, 232, 0.1) 0%, transparent 100%);
+  color: #fff;
+  border-left-color: var(--accent-color);
+  font-weight: 500;
+}
+
+.submenu-item i {
+  font-size: 1.1rem;
+  min-width: 20px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.submenu-item:hover i,
+.submenu-item.active i {
+  color: var(--accent-color);
+}
+
+/* Category Divider */
+.category-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  margin: 16px 12px 8px;
 }
 
 /* ===== CONTENT ===== */
@@ -569,45 +701,54 @@ input:checked + .slider:before {
         <span>SUMMARY</span>
       </a>
 
-      <!-- Ikon untuk VSWR: bi-bar-chart-line (grafik yang merefleksikan gelombang) -->
-      <a onclick="loadPage(this,'vswr.html')">
-        <i class="bi bi-bar-chart-line-fill"></i>
-        <span>VSWR</span>
-      </a>
+      <!-- CATEGORY ISSUE GROUP -->
+      <div class="category-group">
+        <button class="category-button" id="categoryToggle">
+          <span class="category-left">
+            <span class="category-icon"><i class="bi bi-exclamation-triangle-fill"></i></span>
+            <span>Category Issue</span>
+          </span>
+          <span class="chevron-icon"><i class="bi bi-chevron-down"></i></span>
+        </button>
+        
+        <!-- Submenu items (VSWR, RTWP, SLEEPING CELL, QPSK, RANK2) -->
+        <ul class="submenu" id="issueSubmenu">
+          <li class="submenu-item" onclick="loadPage(this,'vswr.html')" data-url="vswr.html">
+            <i class="bi bi-bar-chart-line-fill"></i>
+            <span>VSWR</span>
+          </li>
+          <li class="submenu-item" onclick="loadPage(this,'rtwp.html')" data-url="rtwp.html">
+            <i class="bi bi-soundwave"></i>
+            <span>RTWP</span>
+          </li>
+          <li class="submenu-item" onclick="loadPage(this,'sleepingcell.html')" data-url="sleepingcell.html">
+            <i class="bi bi-moon-stars-fill"></i>
+            <span>SLEEPING CELL</span>
+          </li>
+          <li class="submenu-item" onclick="loadPage(this,'qpsk.html')" data-url="qpsk.html">
+            <i class="bi bi-broadcast-pin"></i>
+            <span>QPSK</span>
+          </li>
+          <li class="submenu-item" onclick="loadPage(this,'rank2.html')" data-url="rank2.html">
+            <i class="bi bi-layers-half"></i>
+            <span>RANK2</span>
+          </li>
+        </ul>
+      </div>
 
-      <!-- Ikon untuk RTWP: bi-soundwave (gelombang suara / frekuensi) -->
-      <a onclick="loadPage(this,'rtwp.html')">
-        <i class="bi bi-soundwave"></i>
-        <span>RTWP</span>
-      </a>
-
-      <!-- Ikon untuk SLEEPING CELL: bi-moon-stars (bulan & bintang - sel tertidur) -->
-      <a onclick="loadPage(this,'sleepingcell.html')">
-        <i class="bi bi-moon-stars-fill"></i>
-        <span>SLEEPING CELL</span>
-      </a>
-
-      <!-- Ikon untuk QPSK: bi-broadcast (sinyal / modulasi) -->
-      <a onclick="loadPage(this,'qpsk.html')">
-        <i class="bi bi-broadcast-pin"></i>
-        <span>QPSK</span>
-      </a>
-
-      <!-- Ikon untuk RANK2: bi-layers-half (dua lapisan - rank 2) -->
-      <a onclick="loadPage(this,'rank2.html')">
-        <i class="bi bi-layers-half"></i>
-        <span>RANK2</span>
-      </a>
-
-       <a onclick="loadPage(this,'fso.html')">
+      <!-- Menu items di luar category issue -->
+      <a onclick="loadPage(this,'fso.html')">
         <i class="bi bi-speedometer2"></i>
         <span>FSO</span>
       </a>
 
-             <a onclick="loadPage(this,'kpi.html')">
+      <a onclick="loadPage(this,'kpi.html')">
         <i class="bi bi-graph-up-arrow"></i>
         <span>KPI</span>
       </a>
+      
+      <!-- Category Divider (optional) -->
+      <div class="category-divider"></div>
       
     </div>
     
@@ -661,6 +802,8 @@ const sidebar = document.getElementById('sidebar');
 const sidebarToggle = document.getElementById('sidebarToggle');
 const themeToggle = document.getElementById('themeToggle');
 const themeCheckbox = document.getElementById('checkbox');
+const categoryButton = document.getElementById('categoryToggle');
+const submenu = document.getElementById('issueSubmenu');
 
 // Toggle sidebar
 sidebarToggle.addEventListener('click', function() {
@@ -671,16 +814,19 @@ sidebarToggle.addEventListener('click', function() {
     icon.classList.remove('bi-list');
     icon.classList.add('bi-layout-sidebar-inset');
     this.title = "Expand Sidebar";
-    // Add animation class
-    this.style.transform = 'rotate(180deg)';
+    // Close submenu when sidebar is collapsed
+    if (submenu && submenu.classList.contains('show')) {
+      submenu.classList.remove('show');
+      if (categoryButton) categoryButton.classList.remove('active');
+    }
   } else {
     icon.classList.remove('bi-layout-sidebar-inset');
     icon.classList.add('bi-list');
     this.title = "Collapse Sidebar";
-    this.style.transform = 'rotate(0deg)';
   }
   
-  // Reset animation
+  // Add animation
+  this.style.transform = 'rotate(180deg)';
   setTimeout(() => {
     this.style.transform = '';
   }, 300);
@@ -729,17 +875,44 @@ themeCheckbox.addEventListener('change', function() {
   setTheme(newTheme);
 });
 
+// Category Issue toggle functionality
+if (categoryButton && submenu) {
+  categoryButton.addEventListener('click', function(e) {
+    e.stopPropagation();
+    
+    // Don't toggle if sidebar is collapsed
+    if (sidebar.classList.contains('collapsed')) {
+      return;
+    }
+    
+    // Toggle submenu visibility
+    submenu.classList.toggle('show');
+    this.classList.toggle('active');
+  });
+}
+
 // Load page into iframe
 function loadPage(el, url) {
-  // Remove active class from all sidebar links
-  document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+  // Handle both anchor tags and submenu items
+  let targetElement = el;
+  let pageUrl = url;
   
-  // Add active class to clicked link
-  el.classList.add('active');
+  // If it's a submenu item, get URL from data attribute
+  if (el.classList.contains('submenu-item')) {
+    pageUrl = el.getAttribute('data-url');
+  }
+  
+  // Remove active class from all sidebar links and submenu items
+  document.querySelectorAll('.sidebar-nav a, .submenu-item').forEach(item => {
+    item.classList.remove('active');
+  });
+  
+  // Add active class to clicked element
+  targetElement.classList.add('active');
   
   // Update page title
-  const pageTitle = el.querySelector('span') ? el.querySelector('span').innerText : el.innerText;
-  document.getElementById('pageTitle').innerText = pageTitle;
+  const pageTitle = targetElement.querySelector('span') ? targetElement.querySelector('span').innerText : targetElement.innerText;
+  document.getElementById('pageTitle').innerText = 'RAN HYGIENE ' + pageTitle;
   
   // Add loading effect to iframe
   const iframe = document.getElementById('mainFrame');
@@ -747,7 +920,7 @@ function loadPage(el, url) {
   iframe.style.opacity = '0.7';
   
   setTimeout(() => {
-    iframe.src = url;
+    iframe.src = pageUrl;
     setTimeout(() => {
       iframe.classList.remove('iframe-loading');
       iframe.style.opacity = '1';
@@ -760,6 +933,12 @@ function loadPage(el, url) {
     sidebarToggle.querySelector('i').classList.remove('bi-list');
     sidebarToggle.querySelector('i').classList.add('bi-layout-sidebar-inset');
   }
+  
+  // Optional: Close submenu after selection on mobile
+  if (window.innerWidth < 768 && submenu && categoryButton) {
+    submenu.classList.remove('show');
+    categoryButton.classList.remove('active');
+  }
 }
 
 // Handle responsive behavior
@@ -768,6 +947,12 @@ window.addEventListener('resize', function() {
     sidebar.classList.add('collapsed');
     sidebarToggle.querySelector('i').classList.remove('bi-list');
     sidebarToggle.querySelector('i').classList.add('bi-layout-sidebar-inset');
+  }
+  
+  // Close submenu on mobile when sidebar is collapsed
+  if (window.innerWidth < 1024 && sidebar.classList.contains('collapsed') && submenu && submenu.classList.contains('show')) {
+    submenu.classList.remove('show');
+    if (categoryButton) categoryButton.classList.remove('active');
   }
 });
 
@@ -797,6 +982,27 @@ function updateTime() {
 // Update time every minute
 updateTime();
 setInterval(updateTime, 60000);
+
+// Set active menu based on current iframe src (optional)
+function setActiveMenuFromUrl() {
+  const currentSrc = document.getElementById('mainFrame').src;
+  const fileName = currentSrc.split('/').pop();
+  
+  // Check if any menu item matches the current file
+  document.querySelectorAll('.sidebar-nav a, .submenu-item').forEach(item => {
+    const itemUrl = item.getAttribute('onclick') ? 
+                   item.getAttribute('onclick').match(/'([^']+)'/)?.[1] : 
+                   item.getAttribute('data-url');
+    
+    if (itemUrl && itemUrl === fileName) {
+      item.classList.add('active');
+      document.getElementById('pageTitle').innerText = 'RAN HYGIENE ' + item.querySelector('span').innerText;
+    }
+  });
+}
+
+// Call this function if needed
+// setActiveMenuFromUrl();
 </script>
 
 </body>
